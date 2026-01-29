@@ -5,6 +5,6 @@ export default interface FilmData {
     title: string;
     images: Images;
     supertype: string;
-    types: string[]; */
+    types: string[];
 }
 // Här bestämmer vi vad för data som ska hämtas
