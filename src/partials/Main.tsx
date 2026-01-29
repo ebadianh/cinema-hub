@@ -2,6 +2,6 @@ import { Outlet } from 'react-router-dom';
 
 export default function Main() {
   return <main>
-    <Outlet />
+    <h1>Hej</h1>
   </main>;
 }

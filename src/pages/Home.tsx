@@ -4,8 +4,7 @@ import type FilmData from "../interfaces/FilmData";
 
 
 export default function Home() {
-  return 
-  <>
-  <div></div>
+  return <>
+  <div><h1>hej</h1></div>
   </>;
 }
