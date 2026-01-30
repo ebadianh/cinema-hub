@@ -3,9 +3,13 @@ import { Link } from "react-router-dom";
 import type FilmData from "../interfaces/FilmData";
 
 
-export default function Home() {
-  return 
-  <>
-  <div></div>
+export default function StartPage() {
+  return <>
+    <Link
+      to="/">
+      <div>
+        <h1>hej</h1>
+      </div>
+    </Link>
   </>;
 }

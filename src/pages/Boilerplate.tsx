@@ -1,4 +1,4 @@
-/*
+
 import { useEffect, useState } from "react";
 import type PokemonCardData from "../interfaces/PokemonCardData.ts";
 
@@ -113,4 +113,3 @@ export default function getAllPokemons() {
     </div>
   </>;
 }
-*/
