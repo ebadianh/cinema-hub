@@ -1,11 +1,8 @@
+import Main from './partials/Main';
 
-function App() {
-  return (
-    <div className="App">
-      <h1>Welcome to our Cinema Hub</h1>
-      <p>Your platform for cinema</p>
-    </div>
-  );
-}
+export default function App() {
 
-export default App;
+  return <>
+    <Main />
+  </>;
+};

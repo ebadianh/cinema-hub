@@ -1,0 +1,212 @@
+[
+  {
+    "title": "Call me by your name",
+    "productionCountries": ["Italien", "USA"],
+    "productionYear": 2017,
+    "length": 132,
+    "genre": "Drama",
+    "distributor": "UIP",
+    "language": "engelska",
+    "subtitles": "svenska",
+    "director": "Luca Guadagnino",
+    "description": "<p>Filmen utspelas i norra Italien sommaren 1983. En ung amerikansk-italienare blir förälskad i en amerikansk student som kommer för att studera och bo hos hans familj.</p><p>Tillsammans upplever de en oförglömlig sommar - full av musik, mat och kärlek - som för evigt kommer att förändra dem.</p>",
+    "actors": ["Armie Hammer", "Timothée Chalamet", "Michael Stuhlbarg"],
+    "images": ["call-me-poster1.jpg", "call-me-poster2.jpg"],
+    "youtubeTrailers": ["Z9AYPxH5NTM"],
+    "reviews": [
+      {
+        "source": "Sydsvenskan",
+        "quote": "ett drama berättat med stor ömhet",
+        "stars": 4,
+        "max": 5
+      },
+      {
+        "source": "Svenska Dagbladet",
+        "quote": "en film att förälska sig i",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "DN",
+        "quote": "en het romans i åttiotalskostym",
+        "stars": 4,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "title": "Parasite",
+    "productionCountries": ["Sydkorea"],
+    "productionYear": 2019,
+    "length": 132,
+    "genre": "Thriller",
+    "distributor": "Scanbox",
+    "language": "koreanska",
+    "subtitles": "svenska",
+    "director": "Bong Joon-ho",
+    "actors": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong", "Choi Woo-shik"],
+    "description": "<p>Familjen Kim lever i en trång källarlägenhet och kämpar för att överleva. När sonen Ki-woo får chansen att bli privatlärare åt en rik familj, ser de sin möjlighet.</p><p>En efter en infiltrerar familjemedlemmarna det lyxiga hushållet - men deras plan får oväntade och mörka konsekvenser.</p>",
+    "images": ["parasite-poster1.jpg", "parasite-poster2.jpg"],
+    "youtubeTrailers": ["5xH0HfJHsaY"],
+    "reviews": [
+      {
+        "source": "Expressen",
+        "quote": "ett mästerverk av social satir",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "Aftonbladet",
+        "quote": "briljant och oförutsägbar",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "GP",
+        "quote": "årets mest överraskande film",
+        "stars": 4,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "title": "Den vita ransen",
+    "productionCountries": ["Sverige", "Norge"],
+    "productionYear": 2022,
+    "length": 98,
+    "genre": "Komedi",
+    "distributor": "Nordisk Film",
+    "language": "svenska",
+    "subtitles": null,
+    "director": "Lisa Andersson",
+    "actors": ["Adam Lundgren", "Vera Vitali", "Henrik Dorsin"],
+    "description": "<p>När 35-åriga Marcus förlorar jobbet och tvingas flytta hem till sin mamma i Småland, verkar livet ha nått botten.</p><p>Men ett oväntat möte med sin gamla skolkärlek och ett gäng excentriska bybor ger honom en andra chans - om han bara vågar ta den.</p>",
+    "images": ["vita-ransen-poster1.jpg", "vita-ransen-poster2.jpg"],
+    "youtubeTrailers": ["abc123XYZ"],
+    "reviews": [
+      {
+        "source": "Sydsvenskan",
+        "quote": "hjärtevärmande och rolig",
+        "stars": 4,
+        "max": 5
+      },
+      {
+        "source": "Svenska Dagbladet",
+        "quote": "svenska komedins comeback",
+        "stars": 3,
+        "max": 5
+      },
+      {
+        "source": "Moviezine",
+        "quote": "charmigt och lagom galet",
+        "stars": 4,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "title": "Blade Runner 2049",
+    "productionCountries": ["USA", "Storbritannien", "Kanada"],
+    "productionYear": 2017,
+    "length": 164,
+    "genre": "Science Fiction",
+    "distributor": "SF Studios",
+    "language": "engelska",
+    "subtitles": "svenska",
+    "director": "Denis Villeneuve",
+    "actors": ["Ryan Gosling", "Harrison Ford", "Ana de Armas", "Jared Leto"],
+    "description": "<p>I ett dystopiskt Los Angeles år 2049 arbetar Officer K som blade runner - en jägare av gamla replikanter. När han upptäcker en hemlighet begravd i decennier, inser han att den kan förändra allt.</p><p>Hans sökande efter sanningen leder honom till Rick Deckard, en före detta blade runner som försvunnit i 30 år.</p>",
+    "images": ["blade-runner-poster1.jpg", "blade-runner-poster2.jpg"],
+    "youtubeTrailers": ["gCcx85zbxz4"],
+    "reviews": [
+      {
+        "source": "DN",
+        "quote": "visuellt överväldigande och djupt fascinerande",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "Expressen",
+        "quote": "en värdig uppföljare till klassikern",
+        "stars": 4,
+        "max": 5
+      },
+      {
+        "source": "Aftonbladet",
+        "quote": "långsam men hypnotisk",
+        "stars": 4,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "title": "Portrait de la jeune fille en feu",
+    "productionCountries": ["Frankrike"],
+    "productionYear": 2019,
+    "length": 121,
+    "genre": "Drama",
+    "distributor": "TriArt",
+    "language": "franska",
+    "subtitles": "svenska",
+    "director": "Céline Sciamma",
+    "actors": ["Noémie Merlant", "Adèle Haenel", "Luàna Bajrami"],
+    "description": "<p>Frankrike, 1770. Konstnären Marianne anlitas för att i hemlighet måla ett bröllopsporträtt av Héloïse, en ung kvinna som precis lämnat klostret.</p><p>Under dagarna på den isolerade ön utvecklas en förbjuden passion mellan konstnär och modell - en kärlek fångad i blickar, beröring och penseldrag.</p>",
+    "images": ["portrait-poster1.jpg", "portrait-poster2.jpg"],
+    "youtubeTrailers": ["R-fQPTwma9o"],
+    "reviews": [
+      {
+        "source": "Svenska Dagbladet",
+        "quote": "en av decenniets vackraste filmer",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "GP",
+        "quote": "stillsamt och intensivt på samma gång",
+        "stars": 5,
+        "max": 5
+      },
+      {
+        "source": "Sydsvenskan",
+        "quote": "konst i ordets sanna bemärkelse",
+        "stars": 4,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "title": "Nattdjuren",
+    "productionCountries": ["Sverige", "Danmark"],
+    "productionYear": 2023,
+    "length": 108,
+    "genre": "Skräck",
+    "distributor": "Nordisk Film",
+    "language": "svenska",
+    "subtitles": null,
+    "director": "Erik Bergström",
+    "actors": ["Noomi Rapace", "Gustaf Skarsgård", "Alba August"],
+    "description": "<p>Efter sin mans mystiska försvinnande flyttar Sara med sina två barn till en avlägsen gård i Norrland för att börja om.</p><p>Men något i de mörka skogarna vaknar till liv när solen går ner - och snart inser Sara att de inte är ensamma.</p>",
+    "images": ["nattdjuren-poster1.jpg", "nattdjuren-poster2.jpg"],
+    "youtubeTrailers": ["xyz789ABC"],
+    "reviews": [
+      {
+        "source": "Aftonbladet",
+        "quote": "svensk skräck när den är som bäst",
+        "stars": 4,
+        "max": 5
+      },
+      {
+        "source": "Expressen",
+        "quote": "genuint kuslig och atmosfärisk",
+        "stars": 4,
+        "max": 5
+      },
+      {
+        "source": "DN",
+        "quote": "Rapace i toppform",
+        "stars": 3,
+        "max": 5
+      }
+    ]
+  }
+]
