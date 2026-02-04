@@ -1,7 +1,9 @@
-import { Outlet } from 'react-router-dom';
+import Cards from "./Cards";
+import Navbar from "./Navbar";
 
 export default function Main() {
-  return <main>
-    <h1>Hej</h1>
-  </main>;
+  return <>  
+    <Navbar/>;
+    <Cards />;
+    </>;
 }
