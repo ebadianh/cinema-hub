@@ -2,6 +2,7 @@ namespace WebApp;
 
 public static class DbQuery
 {
+
     // Setup the database connection from config
     private static string connectionString;
 
@@ -26,6 +27,9 @@ public static class DbQuery
         var db = new MySqlConnection(connectionString);
         db.Open();
 
+        // drop db
+        db_reset_to_default(db);
+
         // Create tables if they don't exist
         if (config.createTablesIfNotExist == true)
         {
@@ -38,14 +42,29 @@ public static class DbQuery
             SeedDataIfEmpty(db);
         }
 
+        // Create stored procedures
+        CreateStoredProcedures(db);
+
         db.Close();
     }
 
-    // Execute a batch of SQL statements separated by ';'
-    // (Works for our schema/seed blocks where we don't have ';' inside string literals)
-    private static void ExecBatch(MySqlConnection db, string sqlBatch)
+    public static void db_reset_to_default (MySqlConnection db)
     {
-        foreach (var sql in sqlBatch.Split(';'))
+        var dropTablesSQL = @"
+        USE cinema_hub;
+        -- Drop tables if they exist (in reverse dependency order)
+        DROP TABLE IF EXISTS BookedSeats;
+        DROP TABLE IF EXISTS Bookings;
+        DROP TABLE IF EXISTS Showings;
+        DROP TABLE IF EXISTS Seats;
+        DROP TABLE IF EXISTS Salongs;
+        DROP TABLE IF EXISTS Films;
+        DROP TABLE IF EXISTS Users;
+        DROP TABLE IF EXISTS Ticket_Type;
+        ";
+
+                // Execute each statement separately
+        foreach (var sql in dropTablesSQL.Split(';'))
         {
             var trimmed = sql.Trim();
             if (!string.IsNullOrEmpty(trimmed))
@@ -56,7 +75,6 @@ public static class DbQuery
             }
         }
     }
-
     private static void CreateTablesIfNotExist(MySqlConnection db)
     {
         // Keep sessions + acl (template uses them), remove products,
@@ -80,130 +98,95 @@ public static class DbQuery
                 UNIQUE KEY unique_acl (userRoles, method, route)
             );
 
-            CREATE TABLE IF NOT EXISTS users (
+
+            -- Users
+            CREATE TABLE Users (
                 id INT PRIMARY KEY AUTO_INCREMENT,
+                created DATETIME DEFAULT CURRENT_TIMESTAMP,
                 email VARCHAR(255) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(20) NOT NULL DEFAULT 'user',
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                firstName VARCHAR(100) NOT NULL,
+                lastName VARCHAR(100) NOT NULL,
+                role VARCHAR(50) NOT NULL,
+                password VARCHAR(255) NOT NULL
             );
 
-            CREATE TABLE IF NOT EXISTS languages (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                code VARCHAR(20) NOT NULL UNIQUE,
-                name VARCHAR(50) NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS subtitles (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                code VARCHAR(20) NOT NULL UNIQUE,
-                name VARCHAR(50) NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS films (
+            -- Films
+            CREATE TABLE Films (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 title VARCHAR(255) NOT NULL,
-                production_year INT NOT NULL,
-                length_minutes INT NOT NULL,
-                genre VARCHAR(100) NOT NULL,
-                distributor VARCHAR(100) NULL,
-                language_id INT NOT NULL,
-                subtitle_id INT NOT NULL,
-                age_limit INT NULL,
-                description TEXT NULL,
-                director VARCHAR(255) NULL,
-                actors TEXT NULL,
-                CONSTRAINT fk_films_language
-                    FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE RESTRICT,
-                CONSTRAINT fk_films_subtitle
-                    FOREIGN KEY (subtitle_id) REFERENCES subtitles(id) ON DELETE RESTRICT
+                description TEXT,
+                duration_minutes INT NOT NULL,
+                age_rating VARCHAR(10)
             );
 
-            CREATE TABLE IF NOT EXISTS reviews (
+            -- Salongs
+            CREATE TABLE Salongs (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                film_id INT NOT NULL,
-                source VARCHAR(100) NOT NULL,
-                quote VARCHAR(255) NOT NULL,
-                stars INT NOT NULL,
-                max_stars INT NOT NULL,
-                CONSTRAINT fk_reviews_films
-                    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
+                name VARCHAR(100) NOT NULL
             );
 
-            CREATE TABLE IF NOT EXISTS images (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                film_id INT NOT NULL,
-                image_url VARCHAR(500) NOT NULL,
-                CONSTRAINT fk_images_films
-                    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
+            -- Seats (composite PK)
+            CREATE TABLE Seats (
+                salong_id INT NOT NULL,
+                row_num INT NOT NULL,
+                seat_number INT NOT NULL,
+                PRIMARY KEY (salong_id, row_num, seat_number),
+                FOREIGN KEY (salong_id) REFERENCES Salongs(id)
             );
 
-            CREATE TABLE IF NOT EXISTS youtube_trailers (
+            -- Ticket_Type
+            CREATE TABLE Ticket_Type (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                film_id INT NOT NULL,
-                youtube_id VARCHAR(30) NOT NULL,
-                CONSTRAINT fk_youtube_trailers_films
-                    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
-            );
-
-            CREATE TABLE IF NOT EXISTS ticket_types (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                code VARCHAR(30) NOT NULL UNIQUE,
                 name VARCHAR(50) NOT NULL,
-                price DECIMAL(10,2) NOT NULL
+                price DECIMAL(10, 2) NOT NULL
             );
 
-            CREATE TABLE IF NOT EXISTS salongs (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                name VARCHAR(100) NOT NULL UNIQUE,
-                seats_per_row TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS showings (
+            -- Showings
+            CREATE TABLE Showings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 film_id INT NOT NULL,
                 salong_id INT NOT NULL,
-                starts_at DATETIME NOT NULL,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (salong_id, starts_at),
-                CONSTRAINT fk_showings_films
-                    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE RESTRICT,
-                CONSTRAINT fk_showings_salongs
-                    FOREIGN KEY (salong_id) REFERENCES salongs(id) ON DELETE RESTRICT
+                start_time DATETIME NOT NULL,
+                FOREIGN KEY (film_id) REFERENCES Films(id),
+                FOREIGN KEY (salong_id) REFERENCES Salongs(id)
             );
 
-            CREATE TABLE IF NOT EXISTS bookings (
+            -- Bookings
+            CREATE TABLE Bookings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                user_id INT NOT NULL,
+                email VARCHAR(255) NOT NULL,
                 showing_id INT NOT NULL,
-                booking_code VARCHAR(36) NOT NULL UNIQUE,
-                status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-                total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                cancelled_at DATETIME NULL,
-                CONSTRAINT fk_bookings_users
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-                CONSTRAINT fk_bookings_showings
-                    FOREIGN KEY (showing_id) REFERENCES showings(id) ON DELETE RESTRICT
+                booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (showing_id) REFERENCES Showings(id)
             );
 
-            CREATE TABLE IF NOT EXISTS seats (
-                id INT PRIMARY KEY AUTO_INCREMENT,
+            -- BookedSeats (junction table)
+            CREATE TABLE BookedSeats (
+                salong_id INT NOT NULL,
+                row_num INT NOT NULL,
+                seat_number INT NOT NULL,
                 showing_id INT NOT NULL,
-                row_no INT NOT NULL,
-                seat_in_row INT NOT NULL,
-                global_number INT NOT NULL,
-                booking_id INT NULL,
-                UNIQUE (showing_id, global_number),
-                UNIQUE (showing_id, row_no, seat_in_row),
-                CONSTRAINT fk_seats_showings
-                    FOREIGN KEY (showing_id) REFERENCES showings(id) ON DELETE CASCADE,
-                CONSTRAINT fk_seats_bookings
-                    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL
-            );
+                booking_id INT NOT NULL,
+                ticket_type_id INT NOT NULL,
+                PRIMARY KEY (salong_id, row_num, seat_number, showing_id),
+                FOREIGN KEY (salong_id, row_num, seat_number) REFERENCES Seats(salong_id, row_num, seat_number),
+                FOREIGN KEY (showing_id) REFERENCES Showings(id),
+                FOREIGN KEY (booking_id) REFERENCES Bookings(id),
+                FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
+);
         ";
 
-        ExecBatch(db, createTablesSql);
+        // Execute each statement separately
+        foreach (var sql in createTablesSql.Split(';'))
+        {
+            var trimmed = sql.Trim();
+            if (!string.IsNullOrEmpty(trimmed))
+            {
+                var command = db.CreateCommand();
+                command.CommandText = trimmed;
+                command.ExecuteNonQuery();
+            }
+        }
     }
 
     private static void SeedDataIfEmpty(MySqlConnection db)
@@ -241,236 +224,84 @@ public static class DbQuery
         command.CommandText = "SELECT COUNT(*) FROM users";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
-            command.CommandText = @"
-                INSERT INTO users (email, password, role) VALUES
-                ('admin@filmvisarna.se', 'admin123', 'admin'),
-                ('alice@example.com', 'password', 'user'),
-                ('bob@example.com', 'password', 'user'),
-                ('carla@example.com', 'password', 'user')
-                ('thomas@nodehill.com', 'Thomas', 'Frank', 'admin', '$2a$13$IahRVtN2pxc1Ne1NzJUPpOQO5JCtDZvXpSF.IF8uW85S6VoZKCwZq');
-            ";
-            command.ExecuteNonQuery();
-        }
+            var seedData = @"
+                INSERT INTO users (created, email, firstName, lastName, role, password) VALUES
+                ('2024-04-02', 'thomas@nodehill.com', 'Thomas', 'Frank', 'admin', '$2a$13$IahRVtN2pxc1Ne1NzJUPpOQO5JCtDZvXpSF.IF8uW85S6VoZKCwZq'),
+                ('2024-04-02', 'olle@nodehill.com', 'Olle', 'Olofsson', 'user', '$2a$13$O2Gs3FME3oA1DAzwE0FkOuMAOOAgRyuvNQq937.cl7D.xq0IjgzN.'),
+                ('2024-04-02', 'maria@nodehill.com', 'Maria', 'Mårtensson', 'user', '$2a$13$p4sqCN3V3C1wQXspq4eN0eYwK51ypw7NPL6b6O4lMAOyATJtKqjHS');
 
-        // -------------------------
-        // Seed languages
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM languages";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
+                -- Films
+                INSERT INTO Films (id, title, description, duration_minutes, age_rating) VALUES
+                (1, 'Inception', 'A thief who steals corporate secrets through dream-sharing technology.', 148, 'PG-13'),
+                (2, 'The Dark Knight', 'Batman faces the Joker in Gotham City.', 152, 'PG-13'),
+                (3, 'Interstellar', 'A team of explorers travel through a wormhole in space.', 169, 'PG-13'),
+                (4, 'Pulp Fiction', 'Various interconnected stories of criminals in Los Angeles.', 154, 'R'),
+                (5, 'The Shawshank Redemption', 'Two imprisoned men bond over a number of years.', 142, 'R'),
+                (6, 'Forrest Gump', 'The life journey of a slow-witted but kind-hearted man.', 142, 'PG-13');
+
+                -- Salongs
+                INSERT INTO Salongs (id, name) VALUES
+                (1, 'Salong 1'),
+                (2, 'Salong 2');
+
+                -- Seats för Salong 1 (5 rader: 8, 8, 10, 10, 10 säten)
+                INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
+                -- Rad 1 (8 säten)
+                (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4), (1, 1, 5), (1, 1, 6), (1, 1, 7), (1, 1, 8),
+                -- Rad 2 (8 säten)
+                (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 2, 4), (1, 2, 5), (1, 2, 6), (1, 2, 7), (1, 2, 8),
+                -- Rad 3 (10 säten)
+                (1, 3, 1), (1, 3, 2), (1, 3, 3), (1, 3, 4), (1, 3, 5), (1, 3, 6), (1, 3, 7), (1, 3, 8), (1, 3, 9), (1, 3, 10),
+                -- Rad 4 (10 säten)
+                (1, 4, 1), (1, 4, 2), (1, 4, 3), (1, 4, 4), (1, 4, 5), (1, 4, 6), (1, 4, 7), (1, 4, 8), (1, 4, 9), (1, 4, 10),
+                -- Rad 5 (10 säten)
+                (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4), (1, 5, 5), (1, 5, 6), (1, 5, 7), (1, 5, 8), (1, 5, 9), (1, 5, 10);
+
+                -- Seats för Salong 2 (4 rader: 6, 6, 8, 8 säten)
+                INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
+                -- Rad 1 (6 säten)
+                (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 1, 4), (2, 1, 5), (2, 1, 6),
+                -- Rad 2 (6 säten)
+                (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 2, 4), (2, 2, 5), (2, 2, 6),
+                -- Rad 3 (8 säten)
+                (2, 3, 1), (2, 3, 2), (2, 3, 3), (2, 3, 4), (2, 3, 5), (2, 3, 6), (2, 3, 7), (2, 3, 8),
+                -- Rad 4 (8 säten)
+                (2, 4, 1), (2, 4, 2), (2, 4, 3), (2, 4, 4), (2, 4, 5), (2, 4, 6), (2, 4, 7), (2, 4, 8);
+
+                -- Ticket_Type
+                INSERT INTO Ticket_Type (id, name, price) VALUES
+                (1, 'Vuxen', 140),
+                (2, 'Barn', 90),
+                (3, 'Student', 110),
+                (4, 'Senior', 100);
+
+                -- Showings (varje film visas i båda salongerna)
+                INSERT INTO Showings (id, film_id, salong_id, start_time) VALUES
+                (1, 1, 1, '2026-02-05 18:00:00'),
+                (2, 1, 2, '2026-02-05 21:00:00'),
+                (3, 2, 1, '2026-02-05 20:30:00'),
+                (4, 2, 2, '2026-02-06 18:00:00'),
+                (5, 3, 1, '2026-02-06 19:00:00'),
+                (6, 3, 2, '2026-02-06 21:30:00'),
+                (7, 4, 1, '2026-02-07 18:00:00'),
+                (8, 4, 2, '2026-02-07 20:00:00'),
+                (9, 5, 1, '2026-02-07 21:00:00'),
+                (10, 5, 2, '2026-02-08 18:00:00'),
+                (11, 6, 1, '2026-02-08 19:30:00'),
+                (12, 6, 2, '2026-02-08 21:00:00');
+            ";
+
+            // Execute each statement separately
+        foreach (var sql in seedData.Split(';'))
         {
-            command.CommandText = @"
-                INSERT INTO languages (code, name) VALUES
-                ('sv', 'svenska'),
-                ('en', 'engelska'),
-                ('ko', 'koreanska'),
-                ('fr', 'franska'),
-                ('ja', 'japanska');
-            ";
-            command.ExecuteNonQuery();
+            var trimmed = sql.Trim();
+            if (!string.IsNullOrEmpty(trimmed))
+            {
+                var command2 = db.CreateCommand();
+                command2.CommandText = trimmed;
+                command2.ExecuteNonQuery();
+            }
         }
-
-        // -------------------------
-        // Seed subtitles
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM subtitles";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO subtitles (code, name) VALUES
-                ('sv', 'svenska'),
-                ('none', 'inga');
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed ticket_types
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM ticket_types";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO ticket_types (code, name, price) VALUES
-                ('adult',  'Vuxen',     140.00),
-                ('senior', 'Pensionär', 120.00),
-                ('child',  'Barn',       80.00);
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed films (only if empty)
-        // Uses SET variables => run as batch
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM films";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            var filmsSeed = @"
-                SET @lang_en := (SELECT id FROM languages WHERE code='en' LIMIT 1);
-                SET @lang_ko := (SELECT id FROM languages WHERE code='ko' LIMIT 1);
-                SET @lang_fr := (SELECT id FROM languages WHERE code='fr' LIMIT 1);
-                SET @lang_ja := (SELECT id FROM languages WHERE code='ja' LIMIT 1);
-                SET @sub_sv  := (SELECT id FROM subtitles WHERE code='sv' LIMIT 1);
-
-                INSERT INTO films
-                  (title, production_year, length_minutes, genre, distributor,
-                   language_id, subtitle_id, age_limit, description, director, actors)
-                VALUES
-                ('Call Me by Your Name', 2017, 132, 'Drama', 'UIP',
-                 @lang_en, @sub_sv, 11,
-                 'En sommar i Italien 1983 där kärlek och identitet ställs på sin spets.',
-                 'Luca Guadagnino',
-                 'Armie Hammer, Timothée Chalamet, Michael Stuhlbarg'),
-
-                ('Parasite', 2019, 132, 'Thriller', 'CJ Entertainment',
-                 @lang_ko, @sub_sv, 15,
-                 'En mörk satir om klass och ambition som spårar ur.',
-                 'Bong Joon-ho',
-                 'Song Kang-ho, Cho Yeo-jeong, Choi Woo-shik'),
-
-                ('The Grand Budapest Hotel', 2014, 100, 'Komedi', 'Fox Searchlight',
-                 @lang_en, @sub_sv, 11,
-                 'En stiliserad berättelse om lojalitet, konst och kaos på ett hotell.',
-                 'Wes Anderson',
-                 'Ralph Fiennes, Saoirse Ronan, Tony Revolori'),
-
-                ('Portrait of a Lady on Fire', 2019, 122, 'Drama', 'Pyramide',
-                 @lang_fr, @sub_sv, 11,
-                 'En intensiv kärlekshistoria där blickar blir löften.',
-                 'Céline Sciamma',
-                 'Noémie Merlant, Adèle Haenel, Luàna Bajrami'),
-
-                ('Spirited Away', 2001, 125, 'Animation', 'Toho',
-                 @lang_ja, @sub_sv, 7,
-                 'En magisk resa genom en andevärld där mod formas i tystnad.',
-                 'Hayao Miyazaki',
-                 'Rumi Hiiragi, Miyu Irino, Mari Natsuki');
-            ";
-            ExecBatch(db, filmsSeed);
-        }
-
-        // -------------------------
-        // Seed reviews
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM reviews";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO reviews (film_id, source, quote, stars, max_stars) VALUES
-                (1, 'Sydsvenskan', 'ett drama berättat med stor ömhet', 4, 5),
-                (1, 'Svenska Dagbladet', 'en film att förälska sig i', 5, 5),
-                (2, 'DN', 'en sylvass satir med hjärta', 5, 5),
-                (3, 'Kino', 'en elegant och varm fars', 4, 5),
-                (5, 'Svenska Dagbladet', 'en tidlös klassiker', 5, 5);
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed images
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM images";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO images (film_id, image_url) VALUES
-                (1, 'callme_poster1.jpg'),
-                (1, 'callme_poster2.jpg'),
-                (2, 'parasite_poster.jpg'),
-                (3, 'gbh_poster.jpg'),
-                (4, 'portrait_poster.jpg'),
-                (5, 'spiritedaway_poster.jpg');
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed youtube_trailers
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM youtube_trailers";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO youtube_trailers (film_id, youtube_id) VALUES
-                (1, 'Z9AYPxH5NTM'),
-                (2, 'SEUXfv87Wpk'),
-                (3, '1Fg5iWmQjwk'),
-                (4, 'R-fQPTwma9o'),
-                (5, 'ByXuk9QqQkk');
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed salongs
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM salongs";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            command.CommandText = @"
-                INSERT INTO salongs (name, seats_per_row) VALUES
-                ('Stora Salongen', '8,9,10,10,10,10,12,12'),
-                ('Lilla Salongen', '6,8,9,10,10,12');
-            ";
-            command.ExecuteNonQuery();
-        }
-
-        // -------------------------
-        // Seed showings + seats (only if showings empty)
-        // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM showings";
-        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
-        {
-            var showingsAndSeatsSeed = @"
-                CREATE TEMPORARY TABLE numbers_28 (d INT NOT NULL PRIMARY KEY);
-                INSERT INTO numbers_28 (d) VALUES
-                (0),(1),(2),(3),(4),(5),(6),(7),(8),(9),
-                (10),(11),(12),(13),(14),(15),(16),(17),(18),(19),
-                (20),(21),(22),(23),(24),(25),(26),(27);
-
-                CREATE TEMPORARY TABLE timeslots_3 (t INT NOT NULL PRIMARY KEY, tm TIME NOT NULL);
-                INSERT INTO timeslots_3 (t, tm) VALUES
-                (1, '18:00:00'),
-                (2, '20:30:00'),
-                (3, '22:45:00');
-
-                INSERT INTO showings (film_id, salong_id, starts_at)
-                SELECT
-                  ((d.d + ts.t) % 5) + 1 AS film_id,
-                  ((d.d + ts.t) % 2) + 1 AS salong_id,
-                  TIMESTAMP(DATE_ADD('2026-02-03', INTERVAL d.d DAY), ts.tm) AS starts_at
-                FROM numbers_28 d
-                JOIN timeslots_3 ts
-                ORDER BY starts_at;
-
-                CREATE TEMPORARY TABLE salong_row_specs (
-                  salong_id INT NOT NULL,
-                  row_no INT NOT NULL,
-                  seats_in_row INT NOT NULL,
-                  PRIMARY KEY (salong_id, row_no)
-                );
-
-                INSERT INTO salong_row_specs (salong_id, row_no, seats_in_row) VALUES
-                (1, 1, 8),(1, 2, 9),(1, 3, 10),(1, 4, 10),(1, 5, 10),(1, 6, 10),(1, 7, 12),(1, 8, 12),
-                (2, 1, 6),(2, 2, 8),(2, 3, 9),(2, 4, 10),(2, 5, 10),(2, 6, 12);
-
-                CREATE TEMPORARY TABLE numbers_12 (n INT NOT NULL PRIMARY KEY);
-                INSERT INTO numbers_12 (n) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12);
-
-                INSERT INTO seats (showing_id, row_no, seat_in_row, global_number, booking_id)
-                SELECT
-                  sh.id AS showing_id,
-                  rs.row_no,
-                  n.n AS seat_in_row,
-                  ROW_NUMBER() OVER (PARTITION BY sh.id ORDER BY rs.row_no, n.n) AS global_number,
-                  NULL AS booking_id
-                FROM showings sh
-                JOIN salong_row_specs rs ON rs.salong_id = sh.salong_id
-                JOIN numbers_12 n ON n.n <= rs.seats_in_row
-                ORDER BY sh.id, rs.row_no, n.n;
-            ";
-
-            ExecBatch(db, showingsAndSeatsSeed);
         }
     }
 

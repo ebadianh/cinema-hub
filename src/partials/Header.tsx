@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Container, Nav, Navbar } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import routes from '../routes.tsx';
 
 export default function Header() {
-/*
+
   // whether the navbar is expanded or not
   // (we use this to close it after a click/selection)
   const [expanded, setExpanded] = useState(false);
@@ -37,7 +38,7 @@ export default function Header() {
                 <Nav.Link
                   as={Link} key={i} to={path}
                   className={isActive(path) ? 'active' : ''}
-                  /* close menu after selection 
+                  /* close menu after selection */
                   onClick={() => setTimeout(() => setExpanded(false), 200)}
                 >{menuLabel}</Nav.Link>
             )}
@@ -46,5 +47,4 @@ export default function Header() {
       </Container>
     </Navbar>
   </header >;
-  */
  }

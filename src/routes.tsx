@@ -1,16 +1,31 @@
 import type Routes from "./interfaces/Routes";
-import CardInfo from "./pages/CardInfo.tsx";
-import Home from "./pages/Home.tsx";
-
+import StartPage from "./pages/Start.tsx";
+import FilmDetails from "./pages/FilmDetails.tsx";
+/*import Films from "./pages/Films.tsx";
+import Bookings from "./pages/Bookings.tsx";
+import BookingDetails from "./pages/BookingDetails.tsx";
+*/
 const routes: Routes[] = [
     { 
-        element: <Home />, 
+        element: <StartPage />, 
         path: "/"
     },
     { 
-        element: <CardInfo />, 
-        path: "/card/:id"
+        element: <FilmDetails />, 
+        path: "/films/:id"
     },
+    /*{ 
+        element: <Films />, 
+        path: "/films"
+    },
+    { 
+        element: <Bookings />, 
+        path: "/bookings"
+    },
+    { 
+        element: <BookingDetails />, 
+        path: "/bookings/:id"
+    },*/
     { 
         element: <h1>Page not found</h1>, 
         path: "*"

@@ -8,3 +8,4 @@ export default interface FilmData {
     types: string[];
 }
 // Här bestämmer vi vad för data som ska hämtas
+// Ska vi ha flera för olika data??

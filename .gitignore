@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Backend database config (secrets)
 backend/db-config.json
 backend/obj/
 backend/bin/

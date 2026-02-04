@@ -1,11 +1,11 @@
+import { useParams } from "react-router-dom"
 /*
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
 import type PokemonCardData from "../interfaces/PokemonCardData"
 */
-export default function CardInfo() {
-/*
+export default function FilmDetails() {
     const { id } = useParams()
+/*
     const [pokemonCards, setPokemonCards] = useState<PokemonCardData[]>([])
     const [card, setCard] = useState<PokemonCardData>()
 
@@ -33,9 +33,9 @@ export default function CardInfo() {
         findCardById(String(id))
     }, [pokemonCards])
 
-    return <>
-        <h2>{card?.name}</h2>
-        <img src={card?.images.small} alt="No image" />
-    </>
     */
+    return <>
+        <h2>hej{id}</h2>
+        
+    </>
 }
