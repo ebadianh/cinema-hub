@@ -6,8 +6,9 @@ public static class DbQuery
     // Setup the database connection from config
     private static string connectionString;
 
-    // JSON columns for _CONTAINS_ validation
-    public static Arr JsonColumns = Arr(new[] { "categories" });
+    // JSON columns for _CONTAINS_ validation (template had categories)
+    // Your cinema schema doesn't use JSON columns right now:
+    public static Arr JsonColumns = Arr(new string[] { });
 
     public static bool IsJsonColumn(string column) => JsonColumns.Includes(column);
 
@@ -76,6 +77,8 @@ public static class DbQuery
     }
     private static void CreateTablesIfNotExist(MySqlConnection db)
     {
+        // Keep sessions + acl (template uses them), remove products,
+        // and create your cinema schema (plural).
         var createTablesSql = @"
             CREATE TABLE IF NOT EXISTS sessions (
                 id VARCHAR(255) PRIMARY KEY NOT NULL,
@@ -188,29 +191,36 @@ public static class DbQuery
 
     private static void SeedDataIfEmpty(MySqlConnection db)
     {
-        // Check if tables are empty and seed if needed
         var command = db.CreateCommand();
 
+        // -------------------------
         // Seed ACL rules
+        // -------------------------
         command.CommandText = "SELECT COUNT(*) FROM acl";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
+            // Basic rules: allow login + registration, allow GET on public api,
+            // admin can do everything under /api
             var aclData = @"
                 INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
-                ('visitor, user', 'GET', 'disallow', '/secret.html', 'true', 'No access to /secret.html for visitors and normal users'),
-                ('visitor,user, admin', 'GET', 'allow', '/api', 'false', 'Allow access to all routes not starting with /api'),
-                ('visitor', 'POST', 'allow', '/api/users', 'true', 'Allow registration as new user for visitors'),
-                ('visitor, user,admin', '*', 'allow', '/api/login', 'true', 'Allow access to all login routes'),
-                ('admin', '*', 'allow', '/api/users', 'true', 'Allow admins to see and edit users'),
-                ('admin', '*', 'allow', '/api/sessions', 'true', 'Allow admins to see and edit sessions'),
-                ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to see and edit acl rules'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/products', 'true', 'Allow all user roles to read products');
+                ('visitor,user,admin', '*', 'allow', '/api/login', 'true', 'Allow login routes'),
+                ('visitor', 'POST', 'allow', '/api/users', 'true', 'Allow registration for visitors'),
+                ('visitor,user,admin', 'GET', 'allow', '/api', 'false', 'Allow GET for non-API routes, deny elsewhere by app logic'),
+                ('visitor,user,admin', 'GET', 'allow', '/api/films', 'true', 'Allow all to read films'),
+                ('visitor,user,admin', 'GET', 'allow', '/api/showings', 'true', 'Allow all to read showings'),
+                ('visitor,user,admin', 'GET', 'allow', '/api/seats', 'true', 'Allow all to read seats'),
+                ('user,admin', '*', 'allow', '/api/bookings', 'true', 'Allow logged-in users to manage bookings'),
+                ('admin', '*', 'allow', '/api', 'true', 'Admins can access all API routes'),
+                ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
+                ('admin', '*', 'allow', '/api/sessions', 'true', 'Allow admins to manage sessions');
             ";
             command.CommandText = aclData;
             command.ExecuteNonQuery();
         }
 
+        // -------------------------
         // Seed users
+        // -------------------------
         command.CommandText = "SELECT COUNT(*) FROM users";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
