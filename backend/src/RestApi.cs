@@ -3,10 +3,15 @@ public static class RestApi
 {
     public static void Start()
     {
+
         App.MapPost("/api/{table}", (
             HttpContext context, string table, JsonElement bodyJson
         ) =>
         {
+            if (table == "bookings")
+            {
+                return PostBooking(context, bodyJson);
+            }
             var body = JSON.Parse(bodyJson.ToString());
             body.Delete("id");
             var parsed = ReqBodyParse(table, body);
@@ -70,5 +75,21 @@ public static class RestApi
                 context
             ))
         );
+    }
+    public static IResult PostBooking(HttpContext context, JsonElement bodyJson)
+    {
+        var body = JSON.Parse(bodyJson.ToString());
+
+        var email = (string)body.email;
+        var showingId = (int)body.showingId;
+        var seatsJson = JSON.Stringify(body.seats);
+
+        var result = SQLQueryOne(
+            "CALL CreateBookingWithSeats(@email, @showingId, @seatsJson)",
+            new { email, showingId, seatsJson },
+            context
+        );
+
+        return RestResult.Parse(context, result);
     }
 }

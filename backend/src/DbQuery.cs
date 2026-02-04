@@ -378,7 +378,7 @@ public static class DbQuery
         var rows = Arr();
         try
         {
-            if (sql.StartsWith("SELECT ", true, null))
+            if (sql.StartsWith("SELECT ", true, null) || sql.StartsWith("CALL ", true, null))
             {
                 var reader = command.ExecuteReader();
                 while (reader.Read())
@@ -409,5 +409,49 @@ public static class DbQuery
     )
     {
         return SQLQuery(sql, parameters, context)[0];
+    }
+    private static void CreateStoredProcedures(MySqlConnection db)
+    {
+        var dropCommand = db.CreateCommand();
+     dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+     dropCommand.ExecuteNonQuery();
+
+     var createCommand = db.CreateCommand();
+     createCommand.CommandText = @"
+        CREATE PROCEDURE CreateBookingWithSeats(
+            IN customer_email VARCHAR(255),
+            IN selected_showing_id INT,
+            IN selected_seats_json JSON
+        )
+        BEGIN
+            DECLARE v_salong_id INT;
+            DECLARE v_booking_id INT;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+            END;
+
+            START TRANSACTION;
+
+            SELECT salong_id INTO v_salong_id FROM Showings WHERE id = selected_showing_id;
+
+            INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
+            SET v_booking_id = LAST_INSERT_ID();
+
+            INSERT INTO BookedSeats (salong_id, row_num, seat_number, showing_id, booking_id, ticket_type_id)
+            SELECT v_salong_id, seats.row_num, seats.seat_number, selected_showing_id, v_booking_id, seats.ticket_type_id
+            FROM JSON_TABLE(selected_seats_json, '$[*]' COLUMNS(
+                row_num INT PATH '$.row',
+                seat_number INT PATH '$.seat',
+                ticket_type_id INT PATH '$.ticketTypeId'
+            )) AS seats;
+
+            COMMIT;
+
+            SELECT v_booking_id AS bookingId;
+        END
+     ";
+     createCommand.ExecuteNonQuery();
     }
 }
