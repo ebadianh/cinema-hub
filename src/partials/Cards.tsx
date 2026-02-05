@@ -4,21 +4,35 @@ type Film = {
   id: number;
   title: string;
   production_year: number;
-  length_minutes: number;
+  duration_minutes: number;
   genre: string;
   distributor: string;
   language_id: number;
   subtitle_id: number;
-  age_limit: number;
+  age_rating: number;
   description: string;
-  director: string;
-  actors: string;
 };
+
+type Director = {
+  id: number;
+  film_id: number;
+  name: string;
+};
+
+type Actor = {
+  id: number;
+  film_id: number;
+  name: string;
+  role_order: number;  // För att sortera huvudroller först
+ };
 
 export default function Cards() {
   const [films, setFilms] = useState<Film[]>([]);
+  const [directors, setDirectors] = useState<Director[]>([]);
+  const [actors, setActors] = useState<Actor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const controller = new AbortController();
@@ -31,13 +45,27 @@ export default function Cards() {
         const res = await fetch("/api/films", { signal: controller.signal });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
-        const data = await res.json();
-        const list: Film[] = Array.isArray(data) ? data : data.films ?? [];
+        const filmsData = await res.json();
+        const filmsList: Film[] = Array.isArray(filmsData) ? filmsData : filmsData.films ?? [];
 
-        setFilms(list);
+        const res2 = await fetch("/api/directors", { signal: controller.signal });       
+        if (!res2.ok) throw new Error(`Directors: ${res2.status} ${res2.statusText}`);
+        const directorsData = await res2.json();
+        const directorsList: Director[] = Array.isArray(directorsData) ? directorsData : directorsData.directors ?? [];
+        
+        const res3 = await fetch("/api/actors", { signal: controller.signal });
+        if (!res3.ok) throw new Error(`Actors: ${res3.status} ${res3.statusText}`);
+        const actorsData = await res3.json();
+        const actorsList: Actor[] = Array.isArray(actorsData) ? actorsData : actorsData.actors ?? [];
+
+        setFilms(filmsList);
+        setDirectors(directorsList);
+        setActors(actorsList);
+
+
       } catch (e: any) {
         if (e.name !== "AbortError") {
-          setError(e.message ?? "Failed to load films");
+          setError(e.message ?? "Failed to load");
         }
       } finally {
         setLoading(false);
@@ -46,6 +74,12 @@ export default function Cards() {
 
     return () => controller.abort();
   }, []);
+
+  const getDirectorsForFilm = (filmId: number) =>
+    directors.filter((d) => d.film_id === filmId);
+  const getActorsForFilm = (filmId: number) =>
+    actors.filter((a) => a.film_id === filmId)
+    .sort((a, b) => (a.role_order ?? 999) - (b.role_order ?? 999));
 
   if (loading) return <div className="container mt-4">Loading films…</div>;
   if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
@@ -65,7 +99,7 @@ export default function Cards() {
                 <h5 className="card-title mb-1">{f.title}</h5>
 
                 <div className="text-muted small mb-2">
-                  {f.production_year} • {f.length_minutes} min • {f.age_limit}+
+                  {f.production_year} • {f.duration_minutes} min • {f.age_rating}+
                 </div>
 
                 <div className="mb-2">
@@ -78,8 +112,14 @@ export default function Cards() {
                 </p>
 
                 <div className="small">
-                  <div><strong>Director:</strong> {f.director}</div>
-                  <div className="text-muted"><strong>Actors:</strong> {f.actors}</div>
+                  <div>
+                    <strong>Director:</strong> {" "}
+                    {getDirectorsForFilm(f.id).map((d) => d.name).join(", ") || "N/A"}
+                  </div>
+                  <div className="text-muted">
+                    <strong>Actors:</strong> {" "}
+                    {getActorsForFilm(f.id).map((a) => a.name).join(", ") || "N/A"}
+                  </div>
                 </div>
 
                 {/* Optional: debug / extra fields */}

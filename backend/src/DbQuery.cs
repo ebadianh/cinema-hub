@@ -53,7 +53,8 @@ public static class DbQuery
         var dropTablesSQL = @"
         USE cinema_hub;
         -- Drop tables if they exist (in reverse dependency order)
-        DROP TABLE IF EXISTS BookedSeats;
+        SET FOREIGN_KEY_CHECKS = 0;
+        DROP TABLE IF EXISTS Booked_Seats;
         DROP TABLE IF EXISTS Bookings;
         DROP TABLE IF EXISTS Showings;
         DROP TABLE IF EXISTS Seats;
@@ -61,6 +62,10 @@ public static class DbQuery
         DROP TABLE IF EXISTS Films;
         DROP TABLE IF EXISTS Users;
         DROP TABLE IF EXISTS Ticket_Type;
+        DROP TABLE IF EXISTS Directors;
+        DROP TABLE IF EXISTS Actors;
+        DROP TABLE IF EXISTS Reviews;
+        SET FOREIGN_KEY_CHECKS = 1; 
         ";
 
                 // Execute each statement separately
@@ -98,7 +103,6 @@ public static class DbQuery
                 UNIQUE KEY unique_acl (userRoles, method, route)
             );
 
-
             -- Users
             CREATE TABLE Users (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -106,7 +110,7 @@ public static class DbQuery
                 email VARCHAR(255) NOT NULL UNIQUE,
                 firstName VARCHAR(100) NOT NULL,
                 lastName VARCHAR(100) NOT NULL,
-                role VARCHAR(50) NOT NULL,
+                role VARCHAR(50) NOT NULL DEFAULT 'user',
                 password VARCHAR(255) NOT NULL
             );
 
@@ -116,7 +120,38 @@ public static class DbQuery
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
                 duration_minutes INT NOT NULL,
-                age_rating VARCHAR(10)
+                age_rating VARCHAR(10),
+                genre VARCHAR(100),
+                images JSON,
+                trailers JSON
+            );
+
+            -- Directors
+            CREATE TABLE Directors (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                film_id INT NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
+            );
+
+            -- Actors
+            CREATE TABLE Actors (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                film_id INT NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                role_order INT NULL,
+                FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
+            );
+
+            -- Reviews
+            CREATE TABLE Reviews (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                film_id INT NOT NULL,
+                source VARCHAR(100) NOT NULL,
+                quote VARCHAR(255) NOT NULL,
+                stars INT NOT NULL,
+                max_stars INT NOT NULL,
+                FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
             );
 
             -- Salongs
@@ -125,7 +160,7 @@ public static class DbQuery
                 name VARCHAR(100) NOT NULL
             );
 
-            -- Seats (composite PK)
+            -- Seats
             CREATE TABLE Seats (
                 salong_id INT NOT NULL,
                 row_num INT NOT NULL,
@@ -147,6 +182,8 @@ public static class DbQuery
                 film_id INT NOT NULL,
                 salong_id INT NOT NULL,
                 start_time DATETIME NOT NULL,
+                language VARCHAR(50),
+                subtitle VARCHAR(50),
                 FOREIGN KEY (film_id) REFERENCES Films(id),
                 FOREIGN KEY (salong_id) REFERENCES Salongs(id)
             );
@@ -160,8 +197,8 @@ public static class DbQuery
                 FOREIGN KEY (showing_id) REFERENCES Showings(id)
             );
 
-            -- BookedSeats (junction table)
-            CREATE TABLE BookedSeats (
+            -- Booked_Seats
+            CREATE TABLE Booked_Seats (
                 salong_id INT NOT NULL,
                 row_num INT NOT NULL,
                 seat_number INT NOT NULL,
@@ -173,7 +210,7 @@ public static class DbQuery
                 FOREIGN KEY (showing_id) REFERENCES Showings(id),
                 FOREIGN KEY (booking_id) REFERENCES Bookings(id),
                 FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
-);
+            );
         ";
 
         // Execute each statement separately
@@ -225,70 +262,97 @@ public static class DbQuery
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
             var seedData = @"
-                INSERT INTO users (created, email, firstName, lastName, role, password) VALUES
-                ('2024-04-02', 'thomas@nodehill.com', 'Thomas', 'Frank', 'admin', '$2a$13$IahRVtN2pxc1Ne1NzJUPpOQO5JCtDZvXpSF.IF8uW85S6VoZKCwZq'),
-                ('2024-04-02', 'olle@nodehill.com', 'Olle', 'Olofsson', 'user', '$2a$13$O2Gs3FME3oA1DAzwE0FkOuMAOOAgRyuvNQq937.cl7D.xq0IjgzN.'),
-                ('2024-04-02', 'maria@nodehill.com', 'Maria', 'Mårtensson', 'user', '$2a$13$p4sqCN3V3C1wQXspq4eN0eYwK51ypw7NPL6b6O4lMAOyATJtKqjHS');
-
-                -- Films
-                INSERT INTO Films (id, title, description, duration_minutes, age_rating) VALUES
-                (1, 'Inception', 'A thief who steals corporate secrets through dream-sharing technology.', 148, 'PG-13'),
-                (2, 'The Dark Knight', 'Batman faces the Joker in Gotham City.', 152, 'PG-13'),
-                (3, 'Interstellar', 'A team of explorers travel through a wormhole in space.', 169, 'PG-13'),
-                (4, 'Pulp Fiction', 'Various interconnected stories of criminals in Los Angeles.', 154, 'R'),
-                (5, 'The Shawshank Redemption', 'Two imprisoned men bond over a number of years.', 142, 'R'),
-                (6, 'Forrest Gump', 'The life journey of a slow-witted but kind-hearted man.', 142, 'PG-13');
+                -- Ticket_Type
+                INSERT INTO Ticket_Type (name, price) VALUES
+                ('Vuxen', 140.00),
+                ('Pensionär', 120.00),
+                ('Barn', 80.00);
 
                 -- Salongs
-                INSERT INTO Salongs (id, name) VALUES
-                (1, 'Salong 1'),
-                (2, 'Salong 2');
+                INSERT INTO Salongs (name) VALUES
+                ('Stora Salongen'),
+                ('Lilla Salongen');
 
-                -- Seats för Salong 1 (5 rader: 8, 8, 10, 10, 10 säten)
+                -- Seats för Stora Salongen (id 1): 7 rader, varierande 6-8 säten
                 INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
-                -- Rad 1 (8 säten)
-                (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4), (1, 1, 5), (1, 1, 6), (1, 1, 7), (1, 1, 8),
-                -- Rad 2 (8 säten)
-                (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 2, 4), (1, 2, 5), (1, 2, 6), (1, 2, 7), (1, 2, 8),
-                -- Rad 3 (10 säten)
-                (1, 3, 1), (1, 3, 2), (1, 3, 3), (1, 3, 4), (1, 3, 5), (1, 3, 6), (1, 3, 7), (1, 3, 8), (1, 3, 9), (1, 3, 10),
-                -- Rad 4 (10 säten)
-                (1, 4, 1), (1, 4, 2), (1, 4, 3), (1, 4, 4), (1, 4, 5), (1, 4, 6), (1, 4, 7), (1, 4, 8), (1, 4, 9), (1, 4, 10),
-                -- Rad 5 (10 säten)
-                (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4), (1, 5, 5), (1, 5, 6), (1, 5, 7), (1, 5, 8), (1, 5, 9), (1, 5, 10);
+                (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4), (1, 1, 5), (1, 1, 6),
+                (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 2, 4), (1, 2, 5), (1, 2, 6), (1, 2, 7),
+                (1, 3, 1), (1, 3, 2), (1, 3, 3), (1, 3, 4), (1, 3, 5), (1, 3, 6), (1, 3, 7), (1, 3, 8),
+                (1, 4, 1), (1, 4, 2), (1, 4, 3), (1, 4, 4), (1, 4, 5), (1, 4, 6), (1, 4, 7), (1, 4, 8),
+                (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4), (1, 5, 5), (1, 5, 6), (1, 5, 7), (1, 5, 8),
+                (1, 6, 1), (1, 6, 2), (1, 6, 3), (1, 6, 4), (1, 6, 5), (1, 6, 6), (1, 6, 7),
+                (1, 7, 1), (1, 7, 2), (1, 7, 3), (1, 7, 4), (1, 7, 5), (1, 7, 6);
 
-                -- Seats för Salong 2 (4 rader: 6, 6, 8, 8 säten)
+                -- Seats för Lilla Salongen (id 2): 4 rader, 5 säten per rad
                 INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
-                -- Rad 1 (6 säten)
-                (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 1, 4), (2, 1, 5), (2, 1, 6),
-                -- Rad 2 (6 säten)
-                (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 2, 4), (2, 2, 5), (2, 2, 6),
-                -- Rad 3 (8 säten)
-                (2, 3, 1), (2, 3, 2), (2, 3, 3), (2, 3, 4), (2, 3, 5), (2, 3, 6), (2, 3, 7), (2, 3, 8),
-                -- Rad 4 (8 säten)
-                (2, 4, 1), (2, 4, 2), (2, 4, 3), (2, 4, 4), (2, 4, 5), (2, 4, 6), (2, 4, 7), (2, 4, 8);
+                (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 1, 4), (2, 1, 5),
+                (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 2, 4), (2, 2, 5),
+                (2, 3, 1), (2, 3, 2), (2, 3, 3), (2, 3, 4), (2, 3, 5),
+                (2, 4, 1), (2, 4, 2), (2, 4, 3), (2, 4, 4), (2, 4, 5);
 
-                -- Ticket_Type
-                INSERT INTO Ticket_Type (id, name, price) VALUES
-                (1, 'Vuxen', 140),
-                (2, 'Barn', 90),
-                (3, 'Student', 110),
-                (4, 'Senior', 100);
+                -- Films
+                INSERT INTO Films (title, description, duration_minutes, age_rating, genre, images, trailers) VALUES
+                ('Inception', 'En tjuv som stjäl företagshemligheter genom drömdelning får en chans att radera sitt förflutna.', 148, '15', 'Sci-Fi', '[""inception1.jpg"", ""inception2.jpg""]', '[""https://youtube.com/inception""]'),
+                ('Parasite', 'En fattig familj infiltrerar en rik familj med oväntade konsekvenser.', 132, '15', 'Thriller', '[""parasite1.jpg""]', '[""https://youtube.com/parasite""]'),
+                ('Toy Story 4', 'Woody och gänget ger sig ut på ett nytt äventyr.', 100, 'Alla', 'Animerat', '[""toystory1.jpg"", ""toystory2.jpg""]', '[""https://youtube.com/toystory4""]'),
+                ('The Godfather', 'En maffiafamiljs patriark överför kontrollen till sin motvillige son.', 175, '15', 'Drama', '[""godfather1.jpg""]', '[""https://youtube.com/godfather""]'),
+                ('Spirited Away', 'En flicka hamnar i en värld av gudar och andar.', 125, '7', 'Animerat', '[""spirited1.jpg"", ""spirited2.jpg""]', '[""https://youtube.com/spiritedaway""]'),
+                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""dune1.jpg""]', '[""https://youtube.com/dune""]');
 
-                -- Showings (varje film visas i båda salongerna)
-                INSERT INTO Showings (id, film_id, salong_id, start_time) VALUES
-                (1, 1, 1, '2026-02-05 18:00:00'),
-                (2, 1, 2, '2026-02-05 21:00:00'),
-                (3, 2, 1, '2026-02-05 20:30:00'),
-                (4, 2, 2, '2026-02-06 18:00:00'),
-                (5, 3, 1, '2026-02-06 19:00:00'),
-                (6, 3, 2, '2026-02-06 21:30:00'),
-                (7, 4, 1, '2026-02-07 18:00:00'),
-                (8, 4, 2, '2026-02-07 20:00:00'),
-                (9, 5, 1, '2026-02-07 21:00:00'),
-                (10, 5, 2, '2026-02-08 18:00:00'),
-                (11, 6, 1, '2026-02-08 19:30:00'),
-                (12, 6, 2, '2026-02-08 21:00:00');
+                -- Directors
+                INSERT INTO Directors (film_id, name) VALUES
+                (1, 'Christopher Nolan'),
+                (2, 'Bong Joon-ho'),
+                (3, 'Josh Cooley'),
+                (4, 'Francis Ford Coppola'),
+                (5, 'Hayao Miyazaki'),
+                (6, 'Denis Villeneuve');
+
+                -- Actors
+                INSERT INTO Actors (film_id, name, role_order) VALUES
+                (1, 'Leonardo DiCaprio', 1),
+                (1, 'Joseph Gordon-Levitt', 2),
+                (1, 'Elliot Page', 3),
+                (2, 'Song Kang-ho', 1),
+                (2, 'Choi Woo-shik', 2),
+                (3, 'Tom Hanks', 1),
+                (3, 'Tim Allen', 2),
+                (4, 'Marlon Brando', 1),
+                (4, 'Al Pacino', 2),
+                (5, 'Rumi Hiiragi', 1),
+                (5, 'Miyu Irino', 2),
+                (6, 'Timothée Chalamet', 1),
+                (6, 'Zendaya', 2);
+
+                -- Reviews (några filmer med 2-3, några med 0)
+                INSERT INTO Reviews (film_id, source, quote, stars, max_stars) VALUES
+                (1, 'IMDb', 'Ett mästerverk av visuell berättarkonst.', 9, 10),
+                (1, 'Rotten Tomatoes', 'Nolan levererar igen.', 4, 5),
+                (1, 'Aftonbladet', 'Hjärnvriden och briljant.', 5, 5),
+                (2, 'IMDb', 'En unik och oförglömlig film.', 9, 10),
+                (2, 'Svenska Dagbladet', 'Samhällskritik när den är som bäst.', 5, 5),
+                (4, 'IMDb', 'En tidlös klassiker.', 10, 10),
+                (4, 'Rotten Tomatoes', 'Filmhistoriens bästa.', 5, 5),
+                (4, 'Expressen', 'Brando i toppform.', 4, 5);
+                -- Film 3, 5 och 6 har inga reviews
+
+                -- Showings
+                INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
+                (1, 1, '2025-02-10 18:00:00', 'Engelska', 'Svenska'),
+                (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
+                (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
+                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska');
+
+
+                -- Bookings
+                INSERT INTO Bookings (email, showing_id) VALUES
+                ('anna.svensson@email.se', 1);
+
+                -- Booked_Seats
+                INSERT INTO Booked_Seats (salong_id, row_num, seat_number, showing_id, booking_id, ticket_type_id) VALUES
+                (1, 3, 4, 1, 1, 1),
+                (1, 3, 5, 1, 1, 1),
+                (1, 3, 6, 1, 1, 3);
             ";
 
             // Execute each statement separately
@@ -378,7 +442,7 @@ public static class DbQuery
         var rows = Arr();
         try
         {
-            if (sql.StartsWith("SELECT ", true, null))
+            if (sql.StartsWith("SELECT ", true, null) || sql.StartsWith("CALL ", true, null))
             {
                 var reader = command.ExecuteReader();
                 while (reader.Read())
@@ -409,5 +473,49 @@ public static class DbQuery
     )
     {
         return SQLQuery(sql, parameters, context)[0];
+    }
+    private static void CreateStoredProcedures(MySqlConnection db)
+    {
+        var dropCommand = db.CreateCommand();
+        dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.ExecuteNonQuery();
+
+     var createCommand = db.CreateCommand();
+        createCommand.CommandText = @"
+        CREATE PROCEDURE CreateBookingWithSeats(
+            IN customer_email VARCHAR(255),
+            IN selected_showing_id INT,
+            IN selected_seats_json JSON
+        )
+        BEGIN
+            DECLARE v_salong_id INT;
+            DECLARE v_booking_id INT;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+            END;
+
+            START TRANSACTION;
+
+            SELECT salong_id INTO v_salong_id FROM Showings WHERE id = selected_showing_id;
+
+            INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
+            SET v_booking_id = LAST_INSERT_ID();
+
+            INSERT INTO Booked_Seats (salong_id, row_num, seat_number, showing_id, booking_id, ticket_type_id)
+            SELECT v_salong_id, seats.row_num, seats.seat_number, selected_showing_id, v_booking_id, seats.ticket_type_id
+            FROM JSON_TABLE(selected_seats_json, '$[*]' COLUMNS(
+                row_num INT PATH '$.row',
+                seat_number INT PATH '$.seat',
+                ticket_type_id INT PATH '$.ticketTypeId'
+            )) AS seats;
+
+            COMMIT;
+
+            SELECT v_booking_id AS bookingId;
+        END
+     ";
+     createCommand.ExecuteNonQuery();
     }
 }
