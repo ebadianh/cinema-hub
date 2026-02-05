@@ -477,11 +477,11 @@ public static class DbQuery
     private static void CreateStoredProcedures(MySqlConnection db)
     {
         var dropCommand = db.CreateCommand();
-     dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
-     dropCommand.ExecuteNonQuery();
+        dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.ExecuteNonQuery();
 
      var createCommand = db.CreateCommand();
-     createCommand.CommandText = @"
+        createCommand.CommandText = @"
         CREATE PROCEDURE CreateBookingWithSeats(
             IN customer_email VARCHAR(255),
             IN selected_showing_id INT,

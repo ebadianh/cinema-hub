@@ -67,14 +67,25 @@ public static class RestApi
         });
 
         App.MapDelete("/api/{table}/{id}", (
-             HttpContext context, string table, string id
-        ) =>
-            RestResult.Parse(context, SQLQueryOne(
-                $"DELETE FROM {table} WHERE id = @id",
-                ReqBodyParse(table, Obj(new { id })).body,
-                context
-            ))
-        );
+            HttpContext context, string table, string id
+        ) => {
+            if (table == "bookings")
+            {
+                RestResult.Parse(context, SQLQueryOne(
+                    "CALL DeleteBooking(@id)",
+                    Obj(new { id }),
+                    context
+                ));
+            }
+            else
+            {
+                RestResult.Parse(context, SQLQueryOne(
+                    $"DELETE FROM {table} WHERE id = @id",
+                    ReqBodyParse(table, Obj(new { id })).body,
+                    context
+                ));
+            }
+        });
     }
     public static IResult PostBooking(HttpContext context, JsonElement bodyJson)
     {
