@@ -1,24 +1,22 @@
-import type Routes from "./interfaces/Routes";
-import StartPage from "./pages/Start.tsx";
-import FilmDetails from "./pages/FilmDetails.tsx";
-/*import Films from "./pages/Films.tsx";
-import Bookings from "./pages/Bookings.tsx";
-import BookingDetails from "./pages/BookingDetails.tsx";
-*/
-const routes: Routes[] = [
-    { 
-        element: <StartPage />, 
-        path: "/"
-    },
-    { 
-        element: <FilmDetails />, 
-        path: "/films/:id"
-    },
-  
-    { 
-        element: <h1>Page not found</h1>, 
-        path: "*"
-    }
-]
+// src/routes.tsx
+import Layout from "./pages/Layout";
+import Main from "./pages/Main";
+import SignIn from "./pages/SignIn";
+import FilmDetails from "./pages/FilmDetails";
+import About from "./pages/About";
+
+const routes = [
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { path: "", element: <Main /> },            // "/"
+      { path: "signin", element: <SignIn /> },     // "/signin"
+      { path: "films/:id", element: <FilmDetails /> }, // "/films/:id"
+      { path: "about", element: <About /> },            // "/"
+      { path: "*", element: <h1>Page not found</h1> },
+    ],
+  },
+];
 
 export default routes;
