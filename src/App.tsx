@@ -1,4 +1,4 @@
-import Main from './partials/Main';
+import Main from './pages/Main';
 
 export default function App() {
 

@@ -14,18 +14,7 @@ const routes: Routes[] = [
         element: <FilmDetails />, 
         path: "/films/:id"
     },
-    /*{ 
-        element: <Films />, 
-        path: "/films"
-    },
-    { 
-        element: <Bookings />, 
-        path: "/bookings"
-    },
-    { 
-        element: <BookingDetails />, 
-        path: "/bookings/:id"
-    },*/
+  
     { 
         element: <h1>Page not found</h1>, 
         path: "*"

@@ -1,3 +1,16 @@
-body {
-    background-color: black;
-}
+/* :root {
+  --bs-body-bg: #0e0e1b;
+  --bs-body-color: #ffffff;
+
+  /* Optional: nice readable text + links */
+/*   --bs-body-color-rgb: 255, 255, 255;
+  --bs-secondary-color: rgba(255, 255, 255, 0.65);
+  --bs-link-color: rgba(255, 255, 255, 0.85);
+  --bs-link-hover-color: #ffffff;
+} */
+
+/* body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+} */
+ 
