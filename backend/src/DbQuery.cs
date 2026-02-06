@@ -27,12 +27,11 @@ public static class DbQuery
         var db = new MySqlConnection(connectionString);
         db.Open();
 
-        // drop db
-        db_reset_to_default(db);
-
         // Create tables if they don't exist
         if (config.createTablesIfNotExist == true)
         {
+            // drop db
+            DropTablesIfExist(db);
             CreateTablesIfNotExist(db);
         }
 
@@ -40,15 +39,14 @@ public static class DbQuery
         if (config.seedDataIfEmpty == true)
         {
             SeedDataIfEmpty(db);
+            // Create stored procedures
+            CreateStoredProcedures(db);
         }
-
-        // Create stored procedures
-        CreateStoredProcedures(db);
 
         db.Close();
     }
 
-    public static void db_reset_to_default (MySqlConnection db)
+    public static void DropTablesIfExist (MySqlConnection db)
     {
         var dropTablesSQL = @"
         USE cinema_hub;
@@ -477,10 +475,12 @@ public static class DbQuery
     private static void CreateStoredProcedures(MySqlConnection db)
     {
         var dropCommand = db.CreateCommand();
-        dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.CommandText = @"DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.ExecuteNonQuery();
+        dropCommand.CommandText = @"DROP PROCEDURE IF EXISTS DeleteBooking";
         dropCommand.ExecuteNonQuery();
 
-     var createCommand = db.CreateCommand();
+        var createCommand = db.CreateCommand();
         createCommand.CommandText = @"
         CREATE PROCEDURE CreateBookingWithSeats(
             IN customer_email VARCHAR(255),
@@ -515,7 +515,30 @@ public static class DbQuery
 
             SELECT v_booking_id AS bookingId;
         END
-     ";
-     createCommand.ExecuteNonQuery();
+        ";
+        createCommand.ExecuteNonQuery();
+     
+        createCommand.CommandText = @"
+        CREATE PROCEDURE DeleteBooking(
+            IN booking_id_param INT
+        )
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+            END;
+
+            START TRANSACTION;
+
+            DELETE FROM Booked_Seats
+            WHERE booking_id = booking_id_param;
+
+            DELETE FROM Bookings
+            WHERE id = booking_id_param;
+
+            COMMIT;
+        END
+        ";
+        createCommand.ExecuteNonQuery();
     }
 }

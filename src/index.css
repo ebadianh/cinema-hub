@@ -1,16 +1,151 @@
-/* :root {
-  --bs-body-bg: #0e0e1b;
-  --bs-body-color: #ffffff;
+/* ===============================
+   CINEMAHUB GLOBAL THEME
+================================ */
 
-  /* Optional: nice readable text + links */
-/*   --bs-body-color-rgb: 255, 255, 255;
-  --bs-secondary-color: rgba(255, 255, 255, 0.65);
-  --bs-link-color: rgba(255, 255, 255, 0.85);
-  --bs-link-hover-color: #ffffff;
-} */
+:root {
+  --ch-bg: #0e0e1b;
+  --ch-surface: rgba(255,255,255,0.04);
+  --ch-surface-strong: rgba(255,255,255,0.08);
+  --ch-border: rgba(255,255,255,0.12);
 
-/* body {
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
-} */
- 
+  --ch-text: #ffffff;
+  --ch-text-muted: rgba(255,255,255,0.65);
+
+  --ch-accent: #2f6fff;
+  --ch-accent-hover: #4d82ff;
+}
+
+/* Global page */
+body {
+  background: var(--ch-bg);
+  color: var(--ch-text);
+}
+
+/* ===============================
+   NAVBAR
+================================ */
+
+.ch-navbar {
+  background: var(--ch-bg);
+  border-bottom: 1px solid var(--ch-border);
+}
+
+.ch-navbar .nav-link {
+  color: var(--ch-text-muted);
+  transition: 0.2s ease;
+}
+
+.ch-navbar .nav-link:hover {
+  color: var(--ch-text);
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+
+.ch-btn-primary {
+  background: var(--ch-accent);
+  border: none;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.ch-btn-primary:hover {
+  background: var(--ch-accent-hover);
+}
+
+.ch-btn-outline {
+  border: 1px solid var(--ch-border);
+  color: var(--ch-text);
+  background: transparent;
+}
+
+.ch-btn-outline:hover {
+  background: var(--ch-surface-strong);
+  border-color: var(--ch-accent);
+}
+
+/* Navbar toggler fix for dark theme */
+
+.custom-hamburger {
+  width: 22px;
+  height: 2px;
+  background: white;
+  display: block;
+  position: relative;
+  border-radius: 2px;
+}
+
+.custom-hamburger::before,
+.custom-hamburger::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: white;
+  left: 0;
+  border-radius: 2px;
+}
+
+.custom-hamburger::before {
+  top: -6px;
+}
+
+.custom-hamburger::after {
+  top: 6px;
+}
+
+
+.collapse {
+  border-radius: 5rm;
+}
+
+.navbar-toggler {
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+
+  background: rgba(255,255,255,0.05);
+  transition: 0.2s ease;
+}
+
+.navbar-toggler:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+
+/* HERO SECTION */
+
+.ch-hero {
+  background-image: url("/hero.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 220px; /* justera efter smak */
+  background-color: #111; /* fallback */
+}
+
+.ch-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.55),
+    rgba(0,0,0,0.65)
+  );
+}
+
+.ch-muted {
+  color: var(--ch-text-muted);
+}
