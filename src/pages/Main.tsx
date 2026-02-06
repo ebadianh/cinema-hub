@@ -1,7 +1,7 @@
-import Cards from "./Cards";
-import Navbar from "./Navbar";
-import Hero from "./Hero";
-import Footer from "./Footer";
+import Cards from "../components/Cards";
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
+import Footer from "../components/Footer";
 
 
 export default function Main() {
