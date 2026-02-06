@@ -475,7 +475,9 @@ public static class DbQuery
     private static void CreateStoredProcedures(MySqlConnection db)
     {
         var dropCommand = db.CreateCommand();
-        dropCommand.CommandText = "DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.CommandText = @"DROP PROCEDURE IF EXISTS CreateBookingWithSeats";
+        dropCommand.ExecuteNonQuery();
+        dropCommand.CommandText = @"DROP PROCEDURE IF EXISTS DeleteBooking";
         dropCommand.ExecuteNonQuery();
 
         var createCommand = db.CreateCommand();
@@ -514,6 +516,29 @@ public static class DbQuery
             SELECT v_booking_id AS bookingId;
         END
         ";
-     createCommand.ExecuteNonQuery();
+        createCommand.ExecuteNonQuery();
+     
+        createCommand.CommandText = @"
+        CREATE PROCEDURE DeleteBooking(
+            IN booking_id_param INT
+        )
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+            END;
+
+            START TRANSACTION;
+
+            DELETE FROM Booked_Seats
+            WHERE booking_id = booking_id_param;
+
+            DELETE FROM Bookings
+            WHERE id = booking_id_param;
+
+            COMMIT;
+        END
+        ";
+        createCommand.ExecuteNonQuery();
     }
 }
