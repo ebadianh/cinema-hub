@@ -33,7 +33,7 @@ export default function Footer() {
               </li>
 
               <li>
-                <Link className="text-decoration-none text-secondary" to="/ai-chat">
+                <Link className="text-decoration-none text-secondary" to="/chat">
                   AI Chat
                 </Link>
               </li>
