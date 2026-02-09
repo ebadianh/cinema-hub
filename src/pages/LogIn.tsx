@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
-export default function SignIn() {
+export default function LogIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
