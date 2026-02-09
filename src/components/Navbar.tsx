@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import type User from "../interfaces/Users";
-import { useEffect } from "react";
 const logo = "/C.png";
 
   interface NavbarProps {
@@ -9,9 +8,6 @@ const logo = "/C.png";
   }
 
 export default function Navbar({ user, setUser }: NavbarProps) {
-
-  useEffect(() => { }, [user]); 
-  
   const logout = async () => {
     try {
       await fetch('/api/login', {

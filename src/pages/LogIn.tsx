@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useOutletContext } from 'react-router-dom';
+import type User from '../interfaces/Users';
+
+interface OutletContextType {
+    setUser: (user: User | null) => void;
+}
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
 export default function LogIn() {
@@ -9,6 +14,7 @@ export default function LogIn() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    const { setUser } = useOutletContext<OutletContextType>();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,6 +38,8 @@ export default function LogIn() {
                 throw new Error(`Inloggning misslyckades (${res.status})`);
             }
 
+            const userData = await res.json();
+            setUser(userData);
             navigate('/');
         } catch (err: any) {
             setError(err.message ?? 'Ett fel uppstod vid inloggning');

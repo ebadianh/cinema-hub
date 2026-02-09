@@ -11,7 +11,7 @@ export default function Layout() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    fetch('api/login', { credentials: 'include' })
+    fetch('/api/login', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (!data.error) {
@@ -25,7 +25,7 @@ export default function Layout() {
 
       <Navbar user={user} setUser={setUser} />
       <main className="flex-grow-1">       {/* Added flex for body */}
-        <Outlet />
+        <Outlet context={{ setUser }} />
       </main>
       <Footer />
     </div>
