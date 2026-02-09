@@ -11,6 +11,7 @@ type Film = {
   subtitle_id: number;
   age_rating: number;
   description: string;
+  images: string[];
 };
 
 type Director = {
@@ -102,8 +103,9 @@ export default function Cards() {
         {films.map((f) => (
           <div key={f.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div className="card h-100 shadow-sm">
-              <img src={`/public/${f.id}.jpg`}
-                className="card-img-top" alt={f.title} />
+              <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
+                className="card-img-top"
+                alt={f.title} />
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title mb-1">{f.title}</h5>
 

@@ -46,7 +46,7 @@ public static class DbQuery
         db.Close();
     }
 
-    public static void DropTablesIfExist (MySqlConnection db)
+    public static void DropTablesIfExist(MySqlConnection db)
     {
         var dropTablesSQL = @"
         USE cinema_hub;
@@ -66,7 +66,7 @@ public static class DbQuery
         SET FOREIGN_KEY_CHECKS = 1; 
         ";
 
-                // Execute each statement separately
+        // Execute each statement separately
         foreach (var sql in dropTablesSQL.Split(';'))
         {
             var trimmed = sql.Trim();
@@ -290,12 +290,12 @@ public static class DbQuery
 
                 -- Films
                 INSERT INTO Films (title, description, duration_minutes, age_rating, genre, images, trailers) VALUES
-                ('Inception', 'En tjuv som stjäl företagshemligheter genom drömdelning får en chans att radera sitt förflutna.', 148, '15', 'Sci-Fi', '[""inception1.jpg"", ""inception2.jpg""]', '[""https://youtube.com/inception""]'),
-                ('Parasite', 'En fattig familj infiltrerar en rik familj med oväntade konsekvenser.', 132, '15', 'Thriller', '[""parasite1.jpg""]', '[""https://youtube.com/parasite""]'),
-                ('Toy Story 4', 'Woody och gänget ger sig ut på ett nytt äventyr.', 100, 'Alla', 'Animerat', '[""toystory1.jpg"", ""toystory2.jpg""]', '[""https://youtube.com/toystory4""]'),
-                ('The Godfather', 'En maffiafamiljs patriark överför kontrollen till sin motvillige son.', 175, '15', 'Drama', '[""godfather1.jpg""]', '[""https://youtube.com/godfather""]'),
-                ('Spirited Away', 'En flicka hamnar i en värld av gudar och andar.', 125, '7', 'Animerat', '[""spirited1.jpg"", ""spirited2.jpg""]', '[""https://youtube.com/spiritedaway""]'),
-                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""dune1.jpg""]', '[""https://youtube.com/dune""]');
+                ('Inception', 'En tjuv som stjäl företagshemligheter genom drömdelning får en chans att radera sitt förflutna.', 148, '15', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg"", ""inception2.jpg""]', '[""https://youtube.com/inception""]'),
+                ('Parasite', 'En fattig familj infiltrerar en rik familj med oväntade konsekvenser.', 132, '15', 'Thriller', '[""https://m.media-amazon.com/images/M/MV5BYjk1Y2U4MjQtY2ZiNS00OWQyLWI3MmYtZWUwNmRjYWRiNWNhXkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/parasite""]'),
+                ('Toy Story 4', 'Woody och gänget ger sig ut på ett nytt äventyr.', 100, 'Alla', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BMTYzMDM4NzkxOV5BMl5BanBnXkFtZTgwNzM1Mzg2NzM@._V1_.jpg"", ""toystory2.jpg""]', '[""https://youtube.com/toystory4""]'),
+                ('The Godfather', 'En maffiafamiljs patriark överför kontrollen till sin motvillige son.', 175, '15', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/godfather""]'),
+                ('Spirited Away', 'En flicka hamnar i en värld av gudar och andar.', 125, '7', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BNTEyNmEwOWUtYzkyOC00ZTQ4LTllZmUtMjk0Y2YwOGUzYjRiXkEyXkFqcGc@._V1_.jpg"", ""spirited2.jpg""]', '[""https://youtube.com/spiritedaway""]'),
+                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BNWIyNmU5MGYtZDZmNi00ZjAwLWJlYjgtZTc0ZGIxMDE4ZGYwXkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/dune""]');
 
                 -- Directors
                 INSERT INTO Directors (film_id, name) VALUES
@@ -354,16 +354,16 @@ public static class DbQuery
             ";
 
             // Execute each statement separately
-        foreach (var sql in seedData.Split(';'))
-        {
-            var trimmed = sql.Trim();
-            if (!string.IsNullOrEmpty(trimmed))
+            foreach (var sql in seedData.Split(';'))
             {
-                var command2 = db.CreateCommand();
-                command2.CommandText = trimmed;
-                command2.ExecuteNonQuery();
+                var trimmed = sql.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
+                {
+                    var command2 = db.CreateCommand();
+                    command2.CommandText = trimmed;
+                    command2.ExecuteNonQuery();
+                }
             }
-        }
         }
     }
 
@@ -517,7 +517,7 @@ public static class DbQuery
         END
         ";
         createCommand.ExecuteNonQuery();
-     
+
         createCommand.CommandText = @"
         CREATE PROCEDURE DeleteBooking(
             IN booking_id_param INT
