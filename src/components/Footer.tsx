@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="col-md-4 mb-4">
             <h5 className="fw-bold">CinemaHub</h5>
             <p className="text-secondary small">
-              Discover films, book tickets, and experience cinema in a modern way.
+              Upptäck nya filmer, boka dina platser och upplev bio som aldrig förr.
             </p>
           </div>
 
