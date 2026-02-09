@@ -1,7 +1,30 @@
 import { Link } from "react-router-dom";
+import type User from "../interfaces/Users";
+import { useEffect } from "react";
 const logo = "/C.png";
 
-export default function Navbar() {
+  interface NavbarProps {
+    user: User | null;
+    setUser: (user: User | null) => void;
+  }
+
+export default function Navbar({ user, setUser }: NavbarProps) {
+
+  useEffect(() => { }, [user]); 
+  
+  const logout = async () => {
+    try {
+      await fetch('/api/login', {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      setUser(null);
+    } catch (error) {
+      console.error("Logout misslyckades:", error);
+    }
+  };
+
+  
   return (
     <nav className="navbar navbar-expand-lg ch-navbar">
       <div className="container py-2">
@@ -32,19 +55,36 @@ export default function Navbar() {
                 Om oss
               </Link>
             </li>
+            {user ? (
+              // INLOGGAD:
+              <>
+              <li className="nav-item mt-2 mt-lg-0">
+                <Link className="btn ch-btn-outline" to="/profile">
+                  Profil ({user.firstName})
+                </Link>
+              </li>
+              <li className="nav-item mt-2 mt-lg-0">
+                <button className="btn ch-btn-primary w-100 w-lg-auto" onClick={logout}>
+                  Logga ut
+                </button>
+              </li>
+              </>
+            ) : (
+                // INTE INLOGGAD:
+              <>
+                <li className="nav-item mt-2 mt-lg-0">
+                  <Link className="btn ch-btn-outline" to="/login">
+                    Logga in
+                  </Link>
+                </li>
+                <li className="nav-item mt-2 mt-lg-0">
+                  <Link className="btn ch-btn-primary" to="/register">
+                    Registrera
+                  </Link>
+                </li>
+              </>
+            )}
 
-            {/* Buttons */}
-            <li className="nav-item mt-2 mt-lg-0">
-              <Link className="btn ch-btn-outline me-lg-2 w-100 w-lg-auto" to="/login">
-                Logga in
-              </Link>
-            </li>
-
-            <li className="nav-item mt-2 mt-lg-0">
-              <Link className="btn ch-btn-primary w-100 w-lg-auto" to="/register">
-                Registrera
-              </Link>
-            </li>
 
           </ul>
         </div>
