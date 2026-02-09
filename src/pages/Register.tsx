@@ -51,7 +51,7 @@ export default function Register() {
                 throw new Error(`Registrering misslyckades (${res.status})`);
             }
 
-            navigate('/signin');
+            navigate('/login');
         } catch (err: any) {
             setError(err.message ?? 'Ett fel uppstod vid registrering');
         } finally {
@@ -153,7 +153,7 @@ export default function Register() {
 
                             <div className="text-center mt-3">
                                 <span className="text-muted">Har du redan ett konto? </span>
-                                <Link to="/signin">Logga in</Link>
+                                <Link to="/login">Logga in</Link>
                             </div>
                         </Card.Body>
                     </Card>

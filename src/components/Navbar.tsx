@@ -29,20 +29,20 @@ export default function Navbar() {
 
             <li className="nav-item">
               <Link className="nav-link" to="/about">
-                About
+                Om oss
               </Link>
             </li>
 
             {/* Buttons */}
             <li className="nav-item mt-2 mt-lg-0">
-              <Link className="btn ch-btn-outline me-lg-2 w-100 w-lg-auto" to="/signin">
-                Sign in
+              <Link className="btn ch-btn-outline me-lg-2 w-100 w-lg-auto" to="/login">
+                Logga in
               </Link>
             </li>
 
             <li className="nav-item mt-2 mt-lg-0">
               <Link className="btn ch-btn-primary w-100 w-lg-auto" to="/register">
-                Register
+                Registrera
               </Link>
             </li>
 

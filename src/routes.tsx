@@ -1,7 +1,7 @@
 // src/routes.tsx
 import Layout from "./pages/Layout";
 import Main from "./pages/Main";
-import SignIn from "./pages/SignIn";
+import LogIn from "./pages/LogIn";
 import Register from "./pages/Register";
 import FilmDetails from "./pages/FilmDetails";
 import About from "./pages/About";
@@ -13,7 +13,7 @@ const routes = [
     element: <Layout />,
     children: [
       { path: "/", element: <Main /> },            // "/"
-      { path: "/signin", element: <SignIn /> },     // "/signin"
+      { path: "/login", element: <LogIn /> },     // "/signin"
       { path: "/register", element: <Register /> },
       { path: "/films/:id", element: <FilmDetails /> }, // "/films/:id"
       { path: "/about", element: <About /> },            // "/"
