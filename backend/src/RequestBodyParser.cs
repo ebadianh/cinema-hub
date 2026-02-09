@@ -9,6 +9,22 @@ public static class RequestBodyParser
         var cleaned = Obj();
         body.GetKeys().ForEach(key
             => cleaned[key] = ((object)(body[key])).TryToNumber());
+
+        if (table == "users")
+        {
+            if (cleaned.HasKey("firstName") && cleaned.firstName is string)
+            {
+                string fn = cleaned.firstName;
+                if (fn.Length > 0)
+                    cleaned.firstName = char.ToUpper(fn[0]) + fn.Substring(1).ToLower();
+            }
+            if (cleaned.HasKey("lastName") && cleaned.lastName is string)
+            {
+                string ln = cleaned.lastName;
+                if (ln.Length > 0)
+                    cleaned.lastName = char.ToUpper(ln[0]) + ln.Substring(1).ToLower();
+            }
+        }
         // Always encrypt fields named "password"
         if (cleaned.HasKey("password"))
         {
