@@ -2,6 +2,7 @@
 import Layout from "./pages/Layout";
 import Main from "./pages/Main";
 import LogIn from "./pages/LogIn";
+import Profile from "./pages/Profilepage";
 import Register from "./pages/Register";
 import FilmDetails from "./pages/FilmDetails";
 import About from "./pages/About";
@@ -14,6 +15,7 @@ const routes = [
     children: [
       { path: "/", element: <Main /> },            // "/"
       { path: "/login", element: <LogIn /> },     // "/signin"
+      { path: "/profile/:id", element: <Profile /> }, // Profile Page
       { path: "/register", element: <Register /> },
       { path: "/films/:id", element: <FilmDetails /> }, // "/films/:id"
       { path: "/about", element: <About /> },            // "/"
