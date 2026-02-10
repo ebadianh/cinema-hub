@@ -137,7 +137,10 @@ body {
 }
 
 .ch-hero-slide {
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  background-image: url(https://images.pexels.com/photos/7991489/pexels-photo-7991489.jpeg?_gl=1*19xada0*_ga*MjA5MjY2NDYyNi4xNzY4MTI4MTg4*_ga_8JE65Q40S6*czE3NzA3MzExNzQkbzQkZzEkdDE3NzA3MzEzMjckajM1JGwwJGgw);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   min-height: 500px;
   position: relative;
   display: flex;
@@ -159,12 +162,14 @@ body {
 .ch-hero-text {
   flex: 1;
   text-align: left;
+  padding: 4rem;
 }
 
 .ch-hero-poster-section {
   flex-shrink: 0;
   width: 280px;
   text-align: center;
+  margin-right: 4rem;
 }
 
 .ch-hero-poster {
