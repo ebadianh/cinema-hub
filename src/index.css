@@ -4,12 +4,12 @@
 
 :root {
   --ch-bg: #0e0e1b;
-  --ch-surface: rgba(255,255,255,0.04);
-  --ch-surface-strong: rgba(255,255,255,0.08);
-  --ch-border: rgba(255,255,255,0.12);
+  --ch-surface: rgba(255, 255, 255, 0.04);
+  --ch-surface-strong: rgba(255, 255, 255, 0.08);
+  --ch-border: rgba(255, 255, 255, 0.12);
 
   --ch-text: #ffffff;
-  --ch-text-muted: rgba(255,255,255,0.65);
+  --ch-text-muted: rgba(255, 255, 255, 0.65);
 
   --ch-accent: #2f6fff;
   --ch-accent-hover: #4d82ff;
@@ -110,15 +110,15 @@ body {
   justify-content: center;
 
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   transition: 0.2s ease;
 }
 
 .navbar-toggler:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.4);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .navbar-toggler:focus {
@@ -126,26 +126,147 @@ body {
 }
 
 
-/* HERO SECTION */
+/* ===============================
+   HERO CAROUSEL
+================================ */
 
-.ch-hero {
-  background-image: url("/hero.jpg");
-  background-size: cover;
-  background-position: center;
-  min-height: 220px; /* justera efter smak */
-  background-color: #111; /* fallback */
+.ch-hero-carousel {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.ch-hero-slide {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  min-height: 500px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.ch-hero-layout {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  z-index: 2;
+  position: relative;
+}
+
+.ch-hero-text {
+  flex: 1;
+  text-align: left;
+}
+
+.ch-hero-poster-section {
+  flex-shrink: 0;
+  width: 280px;
+  text-align: center;
+}
+
+.ch-hero-poster {
+  margin-bottom: 0;
+}
+
+.ch-hero-poster img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .ch-hero-layout {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .ch-hero-text {
+    text-align: center;
+  }
+
+  .ch-hero-poster-section {
+    width: 220px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ch-hero-slide {
+    min-height: 600px;
+  }
 }
 
 .ch-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0,0,0,0.55),
-    rgba(0,0,0,0.65)
-  );
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.7) 100%);
+  z-index: 1;
+}
+
+.ch-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ch-hero-carousel .carousel-control-prev,
+.ch-hero-carousel .carousel-control-next {
+  width: 60px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.ch-hero-carousel .carousel-control-prev:hover,
+.ch-hero-carousel .carousel-control-next:hover {
+  opacity: 1;
+}
+
+.ch-hero-carousel .carousel-control-prev-icon,
+.ch-hero-carousel .carousel-control-next-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 8px;
+}
+
+.ch-hero-carousel .carousel-indicators {
+  margin-bottom: 1.5rem;
+}
+
+.ch-hero-carousel .carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.ch-hero-carousel .carousel-indicators button.active {
+  background-color: var(--ch-accent);
+  border-color: var(--ch-accent);
+  transform: scale(1.2);
+}
+
+.ch-hero-carousel .carousel-item {
+  transition: transform 0.8s ease-in-out;
 }
 
 .ch-muted {
   color: var(--ch-text-muted);
+}
+
+.ch-hero-content h1,
+.ch-hero-content p {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.ch-hero-content .badge {
+  font-size: 0.85rem;
+  font-weight: 500;
 }
