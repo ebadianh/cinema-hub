@@ -63,9 +63,9 @@ export default function Register() {
         <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
             <Row className="w-100">
                 <Col md={{ span: 6, offset: 3 }} lg={{ span: 6, offset: 3 }}>
-                    <Card className="p-4 shadow">
+                    <Card className="mt-5 p-4 shadow">
                         <Card.Body>
-                            <h1>Skapa konto</h1>
+                            <h1 className="text-center mb-5">Skapa konto</h1>
 
                             {error && (
                                 <Alert variant="danger" onClose={() => setError(null)} dismissible>
