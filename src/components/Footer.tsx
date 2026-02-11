@@ -22,13 +22,13 @@ export default function Footer() {
             <ul className="list-unstyled">
               <li>
                 <Link className="text-decoration-none text-secondary" to="/about">
-                  About
+                  Om oss
                 </Link>
               </li>
 
               <li>
                 <Link className="text-decoration-none text-secondary" to="/contact">
-                  Contact
+                  Kontakt
                 </Link>
               </li>
 
@@ -45,9 +45,9 @@ export default function Footer() {
             <h6 className="fw-semibold">Support</h6>
 
             <ul className="list-unstyled text-secondary">
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              <li>Help Center</li>
+              <li>Integritetspolicy</li>
+              <li>Användarvillkor</li>
+              <li>Hjälpcenter</li>
             </ul>
           </div>
 
