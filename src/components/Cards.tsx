@@ -165,7 +165,8 @@ export default function Cards() {
             <div className="card h-100 shadow-sm">
               <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
                 className="card-img-top"
-                alt={f.title} />
+                alt={f.title}
+                style={{ height: "350px", objectFit: "cover" }} />
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title mb-1">{f.title}</h5>
 

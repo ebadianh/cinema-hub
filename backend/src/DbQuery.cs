@@ -295,7 +295,18 @@ public static class DbQuery
                 ('Toy Story 4', 'Woody och gänget ger sig ut på ett nytt äventyr.', 100, 'Alla', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BMTYzMDM4NzkxOV5BMl5BanBnXkFtZTgwNzM1Mzg2NzM@._V1_.jpg"", ""toystory2.jpg""]', '[""https://youtube.com/toystory4""]'),
                 ('The Godfather', 'En maffiafamiljs patriark överför kontrollen till sin motvillige son.', 175, '15', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/godfather""]'),
                 ('Spirited Away', 'En flicka hamnar i en värld av gudar och andar.', 125, '7', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BNTEyNmEwOWUtYzkyOC00ZTQ4LTllZmUtMjk0Y2YwOGUzYjRiXkEyXkFqcGc@._V1_.jpg"", ""spirited2.jpg""]', '[""https://youtube.com/spiritedaway""]'),
-                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BNWIyNmU5MGYtZDZmNi00ZjAwLWJlYjgtZTc0ZGIxMDE4ZGYwXkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/dune""]');
+                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BNWIyNmU5MGYtZDZmNi00ZjAwLWJlYjgtZTc0ZGIxMDE4ZGYwXkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/dune""]'),
+                ('Interstellar', 'En grupp astronauter reser genom ett maskhål i rymden för att rädda mänskligheten.', 169, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=zSWdZVtXT7E""]'),
+                ('The Dark Knight', 'Batman ställs mot Jokern i en kamp om stadens själ.', 152, '15', 'Action', '[""https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=kmJLuwP3MbY""]'),
+                ('Coco', 'En pojke reser till de dödas rike för att upptäcka sin familjs historia.', 105, '7', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BMDIyM2E2NTAtMzlhNy00ZGUxLWI1NjgtZDY5MzhiMDc5NGU3XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=xlnPHQ3TLX8""]'),
+                ('The Grand Budapest Hotel', 'En excentrisk concierge och hans lobby boy dras in i ett mordmysterium.', 99, '11', 'Komedi', '[""https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=1Fg5iWmQjwk""]'),
+                ('Arrival', 'En lingvist försöker kommunicera med utomjordingar som landat på jorden.', 116, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BMTExMzU0ODcxNDheQTJeQWpwZ15BbWU4MDE1OTI4MzAy._V1_.jpg""]', '[""https://www.youtube.com/watch?v=tFMo3UJ4B4g""]'),
+                ('The Pursuit of Happyness', 'En ensamstående pappa kämpar för att skapa ett bättre liv för sin son.', 117, '7', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BMTQ5NjQ0NDI3NF5BMl5BanBnXkFtZTcwNDI0MjEzMw@@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=DMOBlEcRuw8""]'),
+                ('Mad Max: Fury Road', 'I en postapokalyptisk öken försöker en grupp fly från en tyrannisk härskare.', 120, '15', 'Action', '[""https://m.media-amazon.com/images/M/MV5BZDRkODJhOTgtOTc1OC00NTgzLTk4NjItNDgxZDY4YjlmNDY2XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=hEJnMQG9ev8""]'),
+                ('Paddington 2', 'En charmig björn hamnar i trubbel när han försöker köpa en speciell present.', 103, 'Alla', 'Familj', '[""https://m.media-amazon.com/images/M/MV5BNTk1YzlhMTUtZmU5MC00NmRmLTlkZjItYzQ0NTY4Y2NiNzc4XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=sw7RElt-SvE""]'),
+                ('Her', 'En man utvecklar en oväntad relation med ett avancerat operativsystem.', 126, '11', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BMjA1Nzk0OTM2OF5BMl5BanBnXkFtZTgwNjU2NjEwMDE@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=dJTU48_yghs""]'),
+                ('Knives Out', 'En berömd deckarförfattare hittas död och en detektiv utreder familjen.', 130, '11', 'Mysterium', '[""https://m.media-amazon.com/images/M/MV5BZDU5ZTRkYmItZjg0Mi00ZTQwLThjMWItNWM3MTMxMzVjZmVjXkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=gj5ibYSz8C0""]');
+
 
                 -- Directors
                 INSERT INTO Directors (film_id, name) VALUES
@@ -304,7 +315,18 @@ public static class DbQuery
                 (3, 'Josh Cooley'),
                 (4, 'Francis Ford Coppola'),
                 (5, 'Hayao Miyazaki'),
-                (6, 'Denis Villeneuve');
+                (6, 'Denis Villeneuve'),
+                (7, 'Christopher Nolan'),
+                (8, 'Christopher Nolan'),
+                (9, 'Lee Unkrich'),
+                (10, 'Wes Anderson'),
+                (11, 'Denis Villeneuve'),
+                (12, 'Gabriele Muccino'),
+                (13, 'George Miller'),
+                (14, 'Paul King'),
+                (15, 'Spike Jonze'),
+                (16, 'Rian Johnson');
+
 
                 -- Actors
                 INSERT INTO Actors (film_id, name, role_order) VALUES
@@ -320,7 +342,43 @@ public static class DbQuery
                 (5, 'Rumi Hiiragi', 1),
                 (5, 'Miyu Irino', 2),
                 (6, 'Timothée Chalamet', 1),
-                (6, 'Zendaya', 2);
+                (6, 'Zendaya', 2),
+
+                (7, 'Matthew McConaughey', 1),
+                (7, 'Anne Hathaway', 2),
+                (7, 'Jessica Chastain', 3),
+
+                (8, 'Christian Bale', 1),
+                (8, 'Heath Ledger', 2),
+                (8, 'Aaron Eckhart', 3),
+
+                (9, 'Anthony Gonzalez', 1),
+                (9, 'Gael García Bernal', 2),
+
+                (10, 'Ralph Fiennes', 1),
+                (10, 'Tony Revolori', 2),
+                (10, 'Saoirse Ronan', 3),
+
+                (11, 'Amy Adams', 1),
+                (11, 'Jeremy Renner', 2),
+
+                (12, 'Will Smith', 1),
+                (12, 'Jaden Smith', 2),
+
+                (13, 'Tom Hardy', 1),
+                (13, 'Charlize Theron', 2),
+                (13, 'Nicholas Hoult', 3),
+
+                (14, 'Ben Whishaw', 1),
+                (14, 'Hugh Bonneville', 2),
+
+                (15, 'Joaquin Phoenix', 1),
+                (15, 'Scarlett Johansson', 2),
+                (15, 'Amy Adams', 3),
+
+                (16, 'Daniel Craig', 1),
+                (16, 'Ana de Armas', 2),
+                (16, 'Chris Evans', 3);
 
                 -- Reviews (några filmer med 2-3, några med 0)
                 INSERT INTO Reviews (film_id, source, quote, stars, max_stars) VALUES
