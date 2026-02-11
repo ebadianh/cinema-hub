@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 type Film = {
   id: number;
@@ -94,40 +95,54 @@ export default function Cards() {
       <div className="row g-3">
         {films.map((f) => (
           <div key={f.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-            <div className="card h-100 shadow-sm">
-              <div className="card-body d-flex flex-column">
-                <h5 className="card-title mb-1">{f.title}</h5>
+            <Link
+              to={`/films/${f.id}`}
+              className="text-decoration-none text-reset"
+            >
+              <div className="card h-100 shadow-sm">
+                <div className="card-body d-flex flex-column">
+                  <h5 className="card-title mb-1">{f.title}</h5>
 
-                <div className="text-muted small mb-2">
-                  {f.production_year} • {f.duration_minutes} min • {f.age_rating}+
-                </div>
-
-                <div className="mb-2">
-                  <span className="badge text-bg-secondary me-2">{f.genre}</span>
-                  <span className="badge text-bg-light">{f.distributor}</span>
-                </div>
-
-                <p className="card-text small flex-grow-1">
-                  {f.description}
-                </p>
-
-                <div className="small">
-                  <div>
-                    <strong>Director:</strong> {" "}
-                    {getDirectorsForFilm(f.id).map((d) => d.name).join(", ") || "N/A"}
+                  <div className="text-muted small mb-2">
+                    {f.production_year} • {f.duration_minutes} min •{" "}
+                    {f.age_rating}+
                   </div>
-                  <div className="text-muted">
-                    <strong>Actors:</strong> {" "}
-                    {getActorsForFilm(f.id).map((a) => a.name).join(", ") || "N/A"}
-                  </div>
-                </div>
 
-                {/* Optional: debug / extra fields */}
-                {/* <div className="text-muted small mt-2">
-                  lang_id: {f.language_id} • sub_id: {f.subtitle_id}
-                </div> */}
+                  <div className="mb-2">
+                    <span className="badge text-bg-secondary me-2">
+                      {f.genre}
+                    </span>
+                    <span className="badge text-bg-light">
+                      {f.distributor}
+                    </span>
+                  </div>
+
+                  <p className="card-text small flex-grow-1">
+                    {f.description}
+                  </p>
+
+                  <div className="small">
+                    <div>
+                      <strong>Director:</strong>{" "}
+                      {getDirectorsForFilm(f.id)
+                        .map((d) => d.name)
+                        .join(", ") || "N/A"}
+                    </div>
+                    <div className="text-muted">
+                      <strong>Actors:</strong>{" "}
+                      {getActorsForFilm(f.id)
+                        .map((a) => a.name)
+                        .join(", ") || "N/A"}
+                    </div>
+                  </div>
+
+                  {/* Optional: debug / extra fields */}
+                  {/* <div className="text-muted small mt-2">
+                    lang_id: {f.language_id} • sub_id: {f.subtitle_id}
+                  </div> */}
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>
