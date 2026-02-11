@@ -34,6 +34,11 @@ export default function Cards() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  //filter
+  const [selectedAge, setSelectedAge] = useState<string>("all");
+  const [selectedGenre, setSelectedGenre] = useState<string>("all");
+
+
   function formatDuration(minutes: number) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -92,15 +97,70 @@ export default function Cards() {
   if (loading) return <div className="container mt-4">Laddar filmer…</div>;
   if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
 
+  const filteredFilms = films.filter((film) => {
+    if (selectedAge !== "all") {
+      const maxAge = parseInt(selectedAge);
+      if (film.age_rating > maxAge) {
+        return false;
+      }
+    }
+
+    if (selectedGenre !== "all" && film.genre !== selectedGenre) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div className="container mt-4">
       <div className="d-flex align-items-end justify-content-between mb-3">
         <h1 className="mb-0">Filmer</h1>
-        <span className="text-muted">{films.length} totalt</span>
+        <span className="text-muted">{filteredFilms.length} av {films.length} filmer</span>
+      </div>
+
+      <div className="row g-3 mb-4">
+        <div className="col-md-6 col-lg-3">
+          <label htmlFor="ageFilter" className="form-label small text-muted">
+            Åldersgräns
+          </label>
+          <select
+            id="ageFilter"
+            className="form-select"
+            value={selectedAge}
+            onChange={(e) => setSelectedAge(e.target.value)}>
+
+            <option value="all">Alla åldrar</option>
+            <option value="0">Barntillåten (Alla)</option>
+            <option value="7">7+</option>
+            <option value="11">11+</option>
+            <option value="15">15+</option>
+          </select>
+        </div>
+
+        <div className="col-md-6 col-lg-3">
+          <label htmlFor="genreFilter" className="form-label small text-muted">
+            Genre
+          </label>
+          <select
+            id="genreFilter"
+            className="form-select"
+            value={selectedGenre}
+            onChange={(e) => setSelectedGenre(e.target.value)}>
+
+            <option value="all">Alla genrer</option>
+            <option value="Drama">Drama</option>
+            <option value="Action">Action</option>
+            <option value="Komedi">Komedi</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Animerat">Animerat</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Skräck">Skräck</option>
+          </select>
+        </div>
       </div>
 
       <div className="row g-3">
-        {films.map((f) => (
+        {filteredFilms.map((f) => (
           <div key={f.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div className="card h-100 shadow-sm">
               <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
