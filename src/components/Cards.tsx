@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 
 type Film = {
   id: number;
@@ -193,6 +195,12 @@ export default function Cards() {
                     {getActorsForFilm(f.id).map((a) => a.name).join(", ") || "N/A"}
                   </div>
                 </div>
+
+              <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
+                Mer info
+              </Link>
+
+
 
                 {/* Optional: debug / extra fields */}
                 {/* <div className="text-muted small mt-2">
