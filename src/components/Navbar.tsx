@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import type User from "../interfaces/Users";
+import { useState } from "react";
 const logo = "/C.png";
 
-  interface NavbarProps {
-    user: User | null;
-    setUser: (user: User | null) => void;
-  }
+interface NavbarProps {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
 
 export default function Navbar({ user, setUser }: NavbarProps) {
   const logout = async () => {
@@ -17,6 +19,19 @@ export default function Navbar({ user, setUser }: NavbarProps) {
       setUser(null);
     } catch (error) {
       console.error("Logout misslyckades:", error);
+    }
+  };
+  
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+
+  const handleLogoutClick = () => {
+    if (confirmingLogout) {
+      // Andra klicket - genomför logout
+      setConfirmingLogout(false);
+      logout();
+    } else {
+      // Första klicket - visa bekräftelse
+      setConfirmingLogout(true);
     }
   };
 
@@ -60,9 +75,14 @@ export default function Navbar({ user, setUser }: NavbarProps) {
                 </Link>
               </li>
               <li className="nav-item mt-2 mt-lg-0">
-                <button className="btn ch-btn-primary w-100 w-lg-auto" onClick={logout}>
-                  Logga ut
+                <button
+                  className={`btn w-100 w-lg-auto ch-btn-logout ${
+                    confirmingLogout ? 'ch-btn-danger' : 'ch-btn-primary'
+                      }`}
+                    onClick={handleLogoutClick}>
+                  {confirmingLogout ? 'Bekräfta' : 'Logga ut'}
                 </button>
+
               </li>
               </>
             ) : (
