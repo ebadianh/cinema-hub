@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Seat from "../components/booking/Seat";
 
 
 export default function SelectSeats() {
