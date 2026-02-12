@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import type User from '../interfaces/Users';
+import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
 interface OutletContextType {
     setUser: (user: User | null) => void;
 }
-import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
 export default function LogIn() {
     const [email, setEmail] = useState('');
