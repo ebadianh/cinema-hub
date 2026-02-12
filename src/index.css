@@ -13,6 +13,9 @@
 
   --ch-accent: #2f6fff;
   --ch-accent-hover: #4d82ff;
+
+  --ch-danger: #dc3545;
+  --ch-danger-hover: #bb2d3b;
 }
 
 /* Global page */
@@ -64,6 +67,23 @@ body {
   background: var(--ch-surface-strong);
   border-color: var(--ch-accent);
 }
+
+ .ch-btn-danger {
+   background: var(--ch-danger);
+   border: none;
+   color: white;
+   transition: background 0.2s ease;
+ }
+
+ .ch-btn-danger:hover {
+   background: var(--ch-danger-hover);
+ }
+
+ .ch-btn-logout {
+   min-width: 95px;  /* Säkerställer samma storlek för båda texterna */
+   text-align: center;
+ }
+
 
 /* Navbar toggler fix for dark theme */
 
