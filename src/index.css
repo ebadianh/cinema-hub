@@ -184,6 +184,13 @@ body {
 }
 
 @media (max-width: 768px) {
+  .ch-hero-text {
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
   .ch-hero-layout {
     flex-direction: column;
     gap: 2rem;
@@ -274,6 +281,13 @@ body {
 .ch-hero-content .badge {
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+@media (min-width: 1200px) {
+  .col-lg-2 {
+    flex: 0 0 auto;
+    width: 20%;
+  }
 }
 
 /* FilmDetails.css */

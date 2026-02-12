@@ -163,13 +163,13 @@ export default function Cards() {
 
       <div className="row g-3">
         {filteredFilms.map((f) => (
-          <div key={f.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-            <div className="card h-100 shadow-sm">
+          <div key={f.id} className="col-6 col-md-4 col-lg-2">
+            <div className="card h-100 shadow-sm p-0 overflow-hidden">
               <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
-                className="card-img-top"
+                className="card-img-top w-100"
                 alt={f.title}
-                style={{ height: "400px", objectFit: "scale-down" }} />
-              <div className="card-body d-flex flex-column">
+                style={{ height: "350px", objectFit: "cover" }} />
+              <div className="card-body d-flex flex-column p-2">
                 <h5 className="card-title mb-1">{f.title}</h5>
 
                 <div className="text-muted small mb-2">
@@ -180,10 +180,6 @@ export default function Cards() {
                   <span className="badge text-bg-secondary me-2">{f.genre}</span>
                   <span className="badge text-bg-light">{f.distributor}</span>
                 </div>
-
-                <p className="card-text small flex-grow-1">
-                  {f.description}
-                </p>
 
                 <div className="small">
                   <div>
@@ -196,9 +192,9 @@ export default function Cards() {
                   </div>
                 </div>
 
-              <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
-                Mer info
-              </Link>
+                <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
+                  Mer info
+                </Link>
 
 
 
