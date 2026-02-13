@@ -3,7 +3,7 @@
 ================================ */
 
 :root {
-  --ch-bg: #0e0e1b;
+  --ch-bg: #090b14;
   --ch-surface: rgba(255, 255, 255, 0.04);
   --ch-surface-strong: rgba(255, 255, 255, 0.08);
   --ch-border: rgba(255, 255, 255, 0.12);
@@ -283,6 +283,27 @@ body {
   font-weight: 500;
 }
 
+.ch-hero-mobile {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.ch-hero-mobile h2 {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8)
+}
+
+@media (max-width: 767px) {
+  .ch-hero-slide {
+    min-height: 300px;
+  }
+
+  .ch-hero-carousel .carousel-indicators {
+    margin-bottom: 0.5rem;
+  }
+}
+
 @media (min-width: 1200px) {
   .col-lg-2 {
     flex: 0 0 auto;
@@ -319,13 +340,7 @@ body {
   margin-left: 1rem;
 }
 
-@media (max-width: 768px) {
 
-  .section-title::before,
-  .section-title::after {
-    display: none;
-  }
-}
 
 /* FilmDetails.css */
 /* 
