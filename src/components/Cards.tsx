@@ -117,11 +117,9 @@ export default function Cards() {
     <div className="container mt-4">
       <div className="text-center mb-4">
         <h2 className="section-title d-inline-block position-relative px-4">Filmer</h2>
-        <div className="text-right mb-4">
-        </div>
       </div>
 
-      <div className="d-flex justify-content-between align-items-end mb-4">
+      <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
         <div className="d-flex gap-3">
           <div style={{ minWidth: '200px' }}>
             <label htmlFor="ageFilter" className="form-label small text-muted">
@@ -142,11 +140,11 @@ export default function Cards() {
           </div>
 
           <div style={{ minWidth: '200px' }}>
-            <label htmlFor="genreFilter" className="form-label small text-muted">
+            <label htmlFor="ageGenreFilter" className="form-label small text-muted">
               Genre
             </label>
             <select
-              id="genreFilter"
+              id="ageGenreFilter"
               className="form-select"
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}>
@@ -165,6 +163,44 @@ export default function Cards() {
 
         <div className="text-muted small pb-2">
           {filteredFilms.length} av {films.length} filmer
+        </div>
+      </div>
+
+      <div className="d-lg-none mb-4">
+        <div className="row g-3">
+          <div className="col-6">
+            <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
+            <select
+              id="ageFilterMobile"
+              className="form-select"
+              value={selectedAge}
+              onChange={(e) => setSelectedAge(e.target.value)}>
+
+              <option value="all">Alla åldrar</option>
+              <option value="0">Barntillåten</option>
+              <option value="7">7+</option>
+              <option value="11">11+</option>
+              <option value="15">15+</option>
+            </select>
+          </div>
+          <div className="col-6">
+            <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
+            <select
+              id="genreFilterMobile"
+              className="form-select"
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}>
+
+              <option value="all">Alla genrer</option>
+              <option value="Drama">Drama</option>
+              <option value="Action">Action</option>
+              <option value="Komedi">Komedi</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Animerat">Animerat</option>
+              <option value="Thriller">Thriller</option>
+              <option value="Skräck">Skräck</option>
+            </select>
+          </div>
         </div>
       </div>
 

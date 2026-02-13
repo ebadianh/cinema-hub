@@ -79,7 +79,7 @@ export default function Hero() {
             <Carousel.Item key={film.id}>
               <div className="ch-hero-slide">
                 <div className="ch-hero__overlay" />
-                <div className="ch-hero-layout">
+                <div className="ch-hero-layout d-none d-md-flex">
                   <div className="ch-hero-text">
                     <h1 className="display-4 fw-bold mb-3">{film.title}</h1>
                     <p className="lead mb-3 ch-muted">
@@ -107,6 +107,15 @@ export default function Hero() {
                       Se mer
                     </button>
                   </div>
+                </div>
+
+                <div className="ch-hero-mobile d-md-none text-center py-4">
+                  <h2 className="display-6 fw-bold mb-2">{film.title}</h2>
+                  <div className="d-flex gap-2 justify-content-center mb-3">
+                    <span className="badge bg-secondary px-2 py-1">{film.genre}</span>
+                    <span className="badge bg-dark px-2 py-1">{film.age_rating}</span>
+                  </div>
+                  <button className="btn ch-btn-primary px-4">Boka biljetter</button>
                 </div>
               </div>
             </Carousel.Item>
