@@ -290,6 +290,43 @@ body {
   }
 }
 
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--ch-text);
+}
+
+.section-title::before,
+.section-title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg,
+      transparent,
+      var(--ch-border),
+      transparent);
+}
+
+.section-title::before {
+  right: 100%;
+  margin-right: 1rem;
+}
+
+.section-title::after {
+  left: 100%;
+  margin-left: 1rem;
+}
+
+@media (max-width: 768px) {
+
+  .section-title::before,
+  .section-title::after {
+    display: none;
+  }
+}
+
 /* FilmDetails.css */
 /* 
 .filmDetailsPage {
