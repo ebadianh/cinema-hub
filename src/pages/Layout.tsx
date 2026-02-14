@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import type User from "../interfaces/Users";
+import AiChatWidget from "./AiChatWidget";
 
 // pages/Layout.tsx
 export default function Layout() {
@@ -27,6 +28,8 @@ export default function Layout() {
       <main className="flex-grow-1">       {/* Added flex for body */}
         <Outlet context={{ setUser }} />
       </main>
+      <AiChatWidget />
+
       <Footer />
     </div>
   );
