@@ -39,8 +39,12 @@ public static class DbQuery
         if (config.seedDataIfEmpty == true)
         {
             SeedDataIfEmpty(db);
+
             // Create stored procedures
             CreateStoredProcedures(db);
+
+            // Create views
+            CreateViews(db);
         }
 
         db.Close();
@@ -102,7 +106,7 @@ public static class DbQuery
             );
 
             -- Users
-            CREATE TABLE Users (
+            CREATE TABLE IF NOT EXISTS Users (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 created DATETIME DEFAULT CURRENT_TIMESTAMP,
                 email VARCHAR(255) NOT NULL UNIQUE,
@@ -113,7 +117,7 @@ public static class DbQuery
             );
 
             -- Films
-            CREATE TABLE Films (
+            CREATE TABLE IF NOT EXISTS Films (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
@@ -125,7 +129,7 @@ public static class DbQuery
             );
 
             -- Directors
-            CREATE TABLE Directors (
+            CREATE TABLE IF NOT EXISTS Directors (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 film_id INT NOT NULL,
                 name VARCHAR(255) NOT NULL,
@@ -133,7 +137,7 @@ public static class DbQuery
             );
 
             -- Actors
-            CREATE TABLE Actors (
+            CREATE TABLE IF NOT EXISTS Actors (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 film_id INT NOT NULL,
                 name VARCHAR(255) NOT NULL,
@@ -142,7 +146,7 @@ public static class DbQuery
             );
 
             -- Reviews
-            CREATE TABLE Reviews (
+            CREATE TABLE IF NOT EXISTS Reviews (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 film_id INT NOT NULL,
                 source VARCHAR(100) NOT NULL,
@@ -153,29 +157,30 @@ public static class DbQuery
             );
 
             -- Salongs
-            CREATE TABLE Salongs (
+            CREATE TABLE IF NOT EXISTS Salongs (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(100) NOT NULL
             );
 
             -- Seats
-            CREATE TABLE Seats (
+            CREATE TABLE IF NOT EXISTS Seats (
+                id INT PRIMARY KEY AUTO_INCREMENT,
                 salong_id INT NOT NULL,
                 row_num INT NOT NULL,
                 seat_number INT NOT NULL,
-                PRIMARY KEY (salong_id, row_num, seat_number),
+                UNIQUE KEY (salong_id, row_num, seat_number),
                 FOREIGN KEY (salong_id) REFERENCES Salongs(id)
             );
 
             -- Ticket_Type
-            CREATE TABLE Ticket_Type (
+            CREATE TABLE IF NOT EXISTS Ticket_Type (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(50) NOT NULL,
                 price DECIMAL(10, 2) NOT NULL
             );
 
             -- Showings
-            CREATE TABLE Showings (
+            CREATE TABLE IF NOT EXISTS Showings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 film_id INT NOT NULL,
                 salong_id INT NOT NULL,
@@ -187,7 +192,7 @@ public static class DbQuery
             );
 
             -- Bookings
-            CREATE TABLE Bookings (
+            CREATE TABLE IF NOT EXISTS Bookings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 email VARCHAR(255) NOT NULL,
                 showing_id INT NOT NULL,
@@ -196,15 +201,14 @@ public static class DbQuery
             );
 
             -- Booked_Seats
-            CREATE TABLE Booked_Seats (
-                salong_id INT NOT NULL,
-                row_num INT NOT NULL,
-                seat_number INT NOT NULL,
+            CREATE TABLE IF NOT EXISTS Booked_Seats (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                seat_id INT NOT NULL,
                 showing_id INT NOT NULL,
                 booking_id INT NOT NULL,
                 ticket_type_id INT NOT NULL,
-                PRIMARY KEY (salong_id, row_num, seat_number, showing_id),
-                FOREIGN KEY (salong_id, row_num, seat_number) REFERENCES Seats(salong_id, row_num, seat_number),
+                UNIQUE KEY (seat_id, showing_id),
+                FOREIGN KEY (seat_id) REFERENCES Seats(id),
                 FOREIGN KEY (showing_id) REFERENCES Showings(id),
                 FOREIGN KEY (booking_id) REFERENCES Bookings(id),
                 FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
@@ -222,6 +226,35 @@ public static class DbQuery
                 command.ExecuteNonQuery();
             }
         }
+    }
+
+    private static void CreateViews(MySqlConnection db)
+    {
+        var createViewSql = @"
+            CREATE OR REPLACE VIEW showings_detail AS
+            SELECT
+                s.id,
+                s.film_id,
+                s.salong_id,
+                s.start_time,
+                s.language,
+                s.subtitle,
+                f.title AS film_title,
+                f.description AS film_description,
+                f.duration_minutes,
+                f.age_rating,
+                f.genre,
+                f.images AS film_images,
+                f.trailers AS film_trailers,
+                sa.name AS salong_name
+            FROM Showings s
+            JOIN Films f ON s.film_id = f.id
+            JOIN Salongs sa ON s.salong_id = sa.id
+        ";
+
+        var command = db.CreateCommand();
+        command.CommandText = createViewSql;
+        command.ExecuteNonQuery();
     }
 
     private static void SeedDataIfEmpty(MySqlConnection db)
@@ -271,22 +304,25 @@ public static class DbQuery
                 ('Stora Salongen'),
                 ('Lilla Salongen');
 
-                -- Seats för Stora Salongen (id 1): 7 rader, varierande 6-8 säten
+                -- Seats för Stora Salongen (id 1): 8 rader [8,9,10,10,10,10,12,12] = 81 platser
                 INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
-                (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4), (1, 1, 5), (1, 1, 6),
-                (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 2, 4), (1, 2, 5), (1, 2, 6), (1, 2, 7),
-                (1, 3, 1), (1, 3, 2), (1, 3, 3), (1, 3, 4), (1, 3, 5), (1, 3, 6), (1, 3, 7), (1, 3, 8),
-                (1, 4, 1), (1, 4, 2), (1, 4, 3), (1, 4, 4), (1, 4, 5), (1, 4, 6), (1, 4, 7), (1, 4, 8),
-                (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4), (1, 5, 5), (1, 5, 6), (1, 5, 7), (1, 5, 8),
-                (1, 6, 1), (1, 6, 2), (1, 6, 3), (1, 6, 4), (1, 6, 5), (1, 6, 6), (1, 6, 7),
-                (1, 7, 1), (1, 7, 2), (1, 7, 3), (1, 7, 4), (1, 7, 5), (1, 7, 6);
+                (1,1,1),(1,1,2),(1,1,3),(1,1,4),(1,1,5),(1,1,6),(1,1,7),(1,1,8),
+                (1,2,1),(1,2,2),(1,2,3),(1,2,4),(1,2,5),(1,2,6),(1,2,7),(1,2,8),(1,2,9),
+                (1,3,1),(1,3,2),(1,3,3),(1,3,4),(1,3,5),(1,3,6),(1,3,7),(1,3,8),(1,3,9),(1,3,10),
+                (1,4,1),(1,4,2),(1,4,3),(1,4,4),(1,4,5),(1,4,6),(1,4,7),(1,4,8),(1,4,9),(1,4,10),
+                (1,5,1),(1,5,2),(1,5,3),(1,5,4),(1,5,5),(1,5,6),(1,5,7),(1,5,8),(1,5,9),(1,5,10),
+                (1,6,1),(1,6,2),(1,6,3),(1,6,4),(1,6,5),(1,6,6),(1,6,7),(1,6,8),(1,6,9),(1,6,10),
+                (1,7,1),(1,7,2),(1,7,3),(1,7,4),(1,7,5),(1,7,6),(1,7,7),(1,7,8),(1,7,9),(1,7,10),(1,7,11),(1,7,12),
+                (1,8,1),(1,8,2),(1,8,3),(1,8,4),(1,8,5),(1,8,6),(1,8,7),(1,8,8),(1,8,9),(1,8,10),(1,8,11),(1,8,12);
 
-                -- Seats för Lilla Salongen (id 2): 4 rader, 5 säten per rad
+                -- Seats för Lilla Salongen (id 2): 6 rader [6,8,9,10,10,12] = 55 platser
                 INSERT INTO Seats (salong_id, row_num, seat_number) VALUES
-                (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 1, 4), (2, 1, 5),
-                (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 2, 4), (2, 2, 5),
-                (2, 3, 1), (2, 3, 2), (2, 3, 3), (2, 3, 4), (2, 3, 5),
-                (2, 4, 1), (2, 4, 2), (2, 4, 3), (2, 4, 4), (2, 4, 5);
+                (2,1,1),(2,1,2),(2,1,3),(2,1,4),(2,1,5),(2,1,6),
+                (2,2,1),(2,2,2),(2,2,3),(2,2,4),(2,2,5),(2,2,6),(2,2,7),(2,2,8),
+                (2,3,1),(2,3,2),(2,3,3),(2,3,4),(2,3,5),(2,3,6),(2,3,7),(2,3,8),(2,3,9),
+                (2,4,1),(2,4,2),(2,4,3),(2,4,4),(2,4,5),(2,4,6),(2,4,7),(2,4,8),(2,4,9),(2,4,10),
+                (2,5,1),(2,5,2),(2,5,3),(2,5,4),(2,5,5),(2,5,6),(2,5,7),(2,5,8),(2,5,9),(2,5,10),
+                (2,6,1),(2,6,2),(2,6,3),(2,6,4),(2,6,5),(2,6,6),(2,6,7),(2,6,8),(2,6,9),(2,6,10),(2,6,11),(2,6,12);
 
                 -- Films
                 INSERT INTO Films (title, description, duration_minutes, age_rating, genre, images, trailers) VALUES
@@ -342,15 +378,33 @@ public static class DbQuery
                 (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska');
 
 
-                -- Bookings
+                -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
+                -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
+                --         rad7 p10-12 (id 67,68,69), rad8 p10-12 (id 79,80,81)
                 INSERT INTO Bookings (email, showing_id) VALUES
-                ('anna.svensson@email.se', 1);
+                ('anna.svensson@email.se', 1),
+                ('erik.johansson@email.se', 1),
+                ('lisa.andersson@email.se', 1);
 
-                -- Booked_Seats
-                INSERT INTO Booked_Seats (salong_id, row_num, seat_number, showing_id, booking_id, ticket_type_id) VALUES
-                (1, 3, 4, 1, 1, 1),
-                (1, 3, 5, 1, 1, 1),
-                (1, 3, 6, 1, 1, 3);
+                INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id) VALUES
+                -- Rad 1 (id 1-8): alla bokade
+                (1,1,1,1),(2,1,1,1),(3,1,1,2),(4,1,1,1),(5,1,1,3),(6,1,1,1),(7,1,1,1),(8,1,1,2),
+                -- Rad 2 (id 9-17): alla bokade
+                (9,1,1,1),(10,1,1,1),(11,1,1,3),(12,1,1,1),(13,1,1,2),(14,1,1,1),(15,1,1,1),(16,1,1,1),(17,1,1,3),
+                -- Rad 3 (id 18-27): plats 1-4 och 8-10 bokade, plats 5-7 (id 22,23,24) lediga
+                (18,1,2,1),(19,1,2,1),(20,1,2,2),(21,1,2,1),
+                (25,1,2,1),(26,1,2,3),(27,1,2,1),
+                -- Rad 4 (id 28-37): plats 1-4,7,9,10 bokade, plats 5,6,8 (id 32,33,35) lediga
+                (28,1,2,1),(29,1,2,2),(30,1,2,1),(31,1,2,1),
+                (34,1,2,1),(36,1,2,3),(37,1,2,1),
+                -- Rad 5 (id 38-47): alla bokade
+                (38,1,2,1),(39,1,2,1),(40,1,2,2),(41,1,2,1),(42,1,2,3),(43,1,2,1),(44,1,2,1),(45,1,2,1),(46,1,2,2),(47,1,2,1),
+                -- Rad 6 (id 48-57): alla bokade
+                (48,1,3,1),(49,1,3,1),(50,1,3,3),(51,1,3,1),(52,1,3,2),(53,1,3,1),(54,1,3,1),(55,1,3,1),(56,1,3,2),(57,1,3,1),
+                -- Rad 7 (id 58-69): plats 1-9 bokade, plats 10-12 (id 67,68,69) lediga
+                (58,1,3,1),(59,1,3,2),(60,1,3,1),(61,1,3,1),(62,1,3,3),(63,1,3,1),(64,1,3,1),(65,1,3,1),(66,1,3,2),
+                -- Rad 8 (id 70-81): plats 1-9 bokade, plats 10-12 (id 79,80,81) lediga
+                (70,1,3,1),(71,1,3,1),(72,1,3,3),(73,1,3,1),(74,1,3,2),(75,1,3,1),(76,1,3,1),(77,1,3,1),(78,1,3,2);
             ";
 
             // Execute each statement separately
@@ -496,7 +550,6 @@ public static class DbQuery
             IN selected_seats_json JSON
         )
         BEGIN
-            DECLARE v_salong_id INT;
             DECLARE v_booking_id INT;
 
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -506,17 +559,14 @@ public static class DbQuery
 
             START TRANSACTION;
 
-            SELECT salong_id INTO v_salong_id FROM Showings WHERE id = selected_showing_id;
-
             INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
             SET v_booking_id = LAST_INSERT_ID();
 
-            INSERT INTO Booked_Seats (salong_id, row_num, seat_number, showing_id, booking_id, ticket_type_id)
-            SELECT v_salong_id, seats.row_num, seats.seat_number, selected_showing_id, v_booking_id, seats.ticket_type_id
+            INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id)
+            SELECT seats.seat_id, selected_showing_id, v_booking_id, seats.ticket_type_id
             FROM JSON_TABLE(selected_seats_json, '$[*]' COLUMNS(
-                row_num INT PATH '$.row',
-                seat_number INT PATH '$.seat',
-                ticket_type_id INT PATH '$.ticketTypeId'
+                seat_id INT PATH '$.seat_id',
+                ticket_type_id INT PATH '$.ticket_type_id'
             )) AS seats;
 
             COMMIT;

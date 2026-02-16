@@ -19,7 +19,7 @@ const routes = [
       { path: "/films/:id", element: <FilmDetails /> }, // "/films/:id"
       { path: "/about", element: <About /> },            // "/"
       { path: '/chat', element: <AiChatPage/> },
-      { path: '/booking', element: <Booking/> },
+      { path: '/booking/:showingId', element: <Booking/> },
       { path: "*", element: <h1>Page not found</h1> },
     ],
   },

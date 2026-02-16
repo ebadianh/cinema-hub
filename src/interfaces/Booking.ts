@@ -1,11 +1,19 @@
 
 
-export interface Showings{
+export interface Showings {
   id: number;
   film_id: number;
   salong_id: number;
   start_time: string;
+  language?: string;
+  subtitle?: string;
   film_title?: string;
+  film_description?: string;
+  duration_minutes?: number;
+  age_rating?: string;
+  genre?: string;
+  film_images?: string[];
+  film_trailers?: string[];
   salong_name: string;
 }
 

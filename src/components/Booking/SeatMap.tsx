@@ -1,14 +1,23 @@
-  import Seat from './Seat';
-  import type { Seat as SeatType, SelectedSeat, SeatStatus } from '../../interfaces/Booking';
+import Seat from './Seat';
+import type { Seat as SeatType, SelectedSeat, SeatStatus } from '../../interfaces/Booking';
 
 interface SeatMapProps {
   seats: SeatType[];
   bookedSeatIds: Set<number>;
   selectedSeats: SelectedSeat[];
   onSeatClick: (seat: SeatType) => void;
+  manualMode: boolean;
+  onToggleMode: () => void;
 }
 
-export default function SeatMap({ seats, bookedSeatIds, selectedSeats, onSeatClick }: SeatMapProps){
+export default function SeatMap({
+  seats,
+  bookedSeatIds,
+  selectedSeats,
+  onSeatClick,
+  manualMode,
+  onToggleMode
+}: SeatMapProps) {
   const seatsByRow: Record<number, SeatType[]> = {};
   seats.forEach(seat => {
     if (!seatsByRow[seat.row_num]) {
@@ -18,7 +27,7 @@ export default function SeatMap({ seats, bookedSeatIds, selectedSeats, onSeatCli
   });
 
   const rows = Object.keys(seatsByRow).map(Number).sort((a, b) => a - b);
-  
+
   const getSeatStatus = (seat: SeatType): SeatStatus => {
     if (bookedSeatIds.has(seat.id)) return "booked";
     if (selectedSeats.some(s => s.seat.id === seat.id)) return "selected";
@@ -27,6 +36,8 @@ export default function SeatMap({ seats, bookedSeatIds, selectedSeats, onSeatCli
 
   return (
     <div className="ch-seat-map">
+        
+
       <div className="ch-screen-label">Bioduk</div>
       <div className="ch-screen"></div>
 
@@ -45,7 +56,6 @@ export default function SeatMap({ seats, bookedSeatIds, selectedSeats, onSeatCli
                 />
               ))}
           </div>
-          <span className="ch-row-label">{rowNum}</span>
         </div>
       ))}
 
@@ -62,8 +72,15 @@ export default function SeatMap({ seats, bookedSeatIds, selectedSeats, onSeatCli
           <div className="ch-legend-box ch-legend-box--booked"></div>
           <span>Upptaget</span>
         </div>
+        
       </div>
+      <button
+          className={`ch-seat-mode-toggle ${manualMode ? 'ch-seat-mode-toggle--active' : ''}`}
+          onClick={onToggleMode}
+          type="button"
+        >
+          {manualMode ? 'Individuellt val' : 'Automatiskt val'}
+        </button>
     </div>
   );
-
 }
