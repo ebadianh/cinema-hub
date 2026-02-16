@@ -207,11 +207,10 @@ export default function Cards() {
       <div className="row g-3">
         {filteredFilms.map((f) => (
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
-            <div className="card h-100 shadow-sm p-0 overflow-hidden">
+            <div className="poster-wrapper">
               <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
-                className="card-img-top w-100"
-                alt={f.title}
-                style={{ height: "350px", objectFit: "cover" }} />
+                className="poster-img"
+                alt={f.title} />
               <div className="card-body d-flex flex-column p-2">
                 <h5 className="card-title small mb-1 text-truncate">{f.title}</h5>
 

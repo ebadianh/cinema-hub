@@ -294,9 +294,30 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8)
 }
 
-@media (max-width: 767px) {
+.ch-hero-mobile-poster {
+  width: 160px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20 px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
   .ch-hero-slide {
-    min-height: 300px;
+    min-height: 380px;
+    padding: 2rem 1rem;
+  }
+
+  .ch-hero-layout {
+    gap: 1.5rem;
+  }
+
+  .ch-hero-poster-section {
+    width: 200px;
+    margin-right: 0;
+  }
+
+  .ch-hero-text {
+    padding: 0;
+    text-align: center;
   }
 
   .ch-hero-carousel .carousel-indicators {
@@ -338,6 +359,19 @@ body {
 .section-title::after {
   left: 100%;
   margin-left: 1rem;
+}
+
+.poster-wrapper {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+}
+
+.poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 
