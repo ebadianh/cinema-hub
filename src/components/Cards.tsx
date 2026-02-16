@@ -48,13 +48,12 @@ export default function Cards() {
 
         const filmsData = await res.json();
         const filmsList: Film[] = Array.isArray(filmsData) ? filmsData : filmsData.films ?? [];
-
-        const res2 = await fetch("/api/directors", { signal: controller.signal });       
+        const res2 = await fetch("/api/directors", { signal: controller.signal });    
         if (!res2.ok) throw new Error(`Directors: ${res2.status} ${res2.statusText}`);
         const directorsData = await res2.json();
         const directorsList: Director[] = Array.isArray(directorsData) ? directorsData : directorsData.directors ?? [];
         
-        const res3 = await fetch("/api/actors", { signal: controller.signal });
+        const res3 = await fetch("/api/actors", { signal: controller.signal }); 
         if (!res3.ok) throw new Error(`Actors: ${res3.status} ${res3.statusText}`);
         const actorsData = await res3.json();
         const actorsList: Actor[] = Array.isArray(actorsData) ? actorsData : actorsData.actors ?? [];
@@ -64,12 +63,12 @@ export default function Cards() {
         setActors(actorsList);
 
 
-      } catch (e: any) {
+      } catch (e: any) { 
         if (e.name !== "AbortError") {
           setError(e.message ?? "Failed to load");
         }
       } finally {
-        setLoading(false);
+        setLoading(false); 
       }
     })();
 
@@ -79,7 +78,7 @@ export default function Cards() {
   const getDirectorsForFilm = (filmId: number) =>
     directors.filter((d) => d.film_id === filmId);
   const getActorsForFilm = (filmId: number) =>
-    actors.filter((a) => a.film_id === filmId)
+    actors.filter((a) => a.film_id === filmId) 
     .sort((a, b) => (a.role_order ?? 999) - (b.role_order ?? 999));
 
   if (loading) return <div className="container mt-4">Loading films…</div>;
@@ -104,7 +103,7 @@ export default function Cards() {
                   <h5 className="card-title mb-1">{f.title}</h5>
 
                   <div className="text-muted small mb-2">
-                    {f.production_year} • {f.duration_minutes} min •{" "}
+                    {f.production_year} • {f.duration_minutes} min •{" "} 
                     {f.age_rating}+
                   </div>
 
@@ -113,7 +112,7 @@ export default function Cards() {
                       {f.genre}
                     </span>
                     <span className="badge text-bg-light">
-                      {f.distributor}
+                      {f.distributor} 
                     </span>
                   </div>
 
