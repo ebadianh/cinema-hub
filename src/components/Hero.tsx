@@ -110,9 +110,12 @@ export default function Hero() {
                 </div>
 
                 <div className="ch-hero-mobile d-md-none text-center py-4">
-                  <img src={film.images[0]}
-                    alt={film.title}
-                    className="display-6 fw-bold mb-2" />
+                  <div className="hero-mobile-poster-wrapper">
+                    <img src={film.images[0]}
+                      alt={film.title}
+                      className="hero-mobile-poster-img"
+                    />
+                  </div>
                   <h2 className="display-6 fw-bold mb-2">{film.title}</h2>
                   <div className="d-flex gap-2 justify-content-center mb-3">
                     <span className="badge bg-secondary px-2 py-1">{film.genre}</span>
@@ -125,6 +128,6 @@ export default function Hero() {
           ))}
         </Carousel>
       </div>
-    </section>
+    </section >
   );
 }

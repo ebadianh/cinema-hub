@@ -207,10 +207,13 @@ export default function Cards() {
       <div className="row g-3">
         {filteredFilms.map((f) => (
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
-            <div className="poster-wrapper">
-              <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
-                className="poster-img"
-                alt={f.title} />
+            <div className="card h-100 shadow-sm p-0 overflow-hidden">
+              <div className="poster-wrapper">
+                <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
+                  className="poster-img"
+                  alt={f.title} />
+              </div>
+
               <div className="card-body d-flex flex-column p-2">
                 <h5 className="card-title small mb-1 text-truncate">{f.title}</h5>
 
@@ -222,15 +225,15 @@ export default function Cards() {
                 <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
                   Mer info
                 </Link>
+              </div>
 
 
 
 
-                {/* Optional: debug / extra fields */}
-                {/* <div className="text-muted small mt-2">
+              {/* Optional: debug / extra fields */}
+              {/* <div className="text-muted small mt-2">
                   lang_id: {f.language_id} • sub_id: {f.subtitle_id}
                 </div> */}
-              </div>
             </div>
           </div>
         ))}
