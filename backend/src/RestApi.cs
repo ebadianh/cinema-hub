@@ -104,11 +104,8 @@ public static class RestApi
         if (!result.HasKey("error"))
         {
             // Release locks and broadcast updated availability via SSE
-            var holderIdProp = body.holderId;
-            if (holderIdProp != null)
-            {
-                SeatLockManager.ReleaseLocks((string)holderIdProp);
-            }
+            var holderId = Session.GetSessionId(context);
+            SeatLockManager.ReleaseLocks(holderId);
             var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
             SseManager.BroadcastToShowing(showingId, unavailable);
         }

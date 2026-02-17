@@ -1,9 +1,7 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 export default function useSeatLocking(showingId: string | undefined) {
   const [lockedByMe, setLockedByMe] = useState<Set<number>>(new Set());
-  const holderIdRef = useRef(crypto.randomUUID());
-  const holderId = holderIdRef.current;
 
   const lockSeats = useCallback(async (seatIds: number[]): Promise<boolean> => {
     if (!showingId) return false;
@@ -15,7 +13,8 @@ export default function useSeatLocking(showingId: string | undefined) {
       const res = await fetch(`/api/showings/${showingId}/seats/lock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seatIds, holderId }),
+        credentials: "include",
+        body: JSON.stringify({ seatIds }),
       });
 
       if (!res.ok) {
@@ -28,7 +27,7 @@ export default function useSeatLocking(showingId: string | undefined) {
       setLockedByMe(new Set());
       return false;
     }
-  }, [showingId, holderId]);
+  }, [showingId]);
 
   const releaseLocks = useCallback(async () => {
     if (!showingId) return;
@@ -37,14 +36,15 @@ export default function useSeatLocking(showingId: string | undefined) {
       await fetch(`/api/showings/${showingId}/seats/release`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ holderId }),
+        credentials: "include",
+        body: JSON.stringify({}),
       });
     } catch {
       // ignore
     }
 
     setLockedByMe(new Set());
-  }, [showingId, holderId]);
+  }, [showingId]);
 
-  return { holderId, lockedByMe, lockSeats, releaseLocks };
+  return { lockedByMe, lockSeats, releaseLocks };
 }

@@ -23,7 +23,7 @@ export default function Booking() {
 
   // Real-time seat availability via SSE
   const { unavailableSeatIds } = useSeatStream(showingId);
-  const { holderId, lockedByMe, lockSeats, releaseLocks } = useSeatLocking(showingId);
+  const { lockedByMe, lockSeats, releaseLocks } = useSeatLocking(showingId);
 
   // Alias for backward compat within this component
   const bookedSeatIds = unavailableSeatIds;
@@ -274,7 +274,7 @@ export default function Booking() {
       if (showingId) {
         navigator.sendBeacon(
           `/api/showings/${showingId}/seats/release`,
-          JSON.stringify({ holderId })
+          JSON.stringify({})
         );
       }
     };
@@ -283,7 +283,7 @@ export default function Booking() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       releaseLocks();
     };
-  }, [showingId, holderId, releaseLocks]);
+  }, [showingId, releaseLocks]);
 
   // Lås säten och öppna bekräftelsedialog
   const handleConfirmClick = async () => {
@@ -310,7 +310,6 @@ export default function Booking() {
       const bookingData = {
         showing_id: parseInt(showingId),
         email: email,
-        holderId: holderId,
         tickets: selectedSeats.map(s => ({
           seat_id: s.seat.id,
           ticket_type_id: s.ticketType.id

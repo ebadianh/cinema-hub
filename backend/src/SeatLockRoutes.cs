@@ -35,13 +35,44 @@ public static class SeatLockRoutes
         // Lock seats endpoint
         App.MapPost("/api/showings/{showingId}/seats/lock", async (HttpContext context, int showingId) =>
         {
+            var holderId = Session.GetSessionId(context);
+
             using var reader = new StreamReader(context.Request.Body);
             var bodyStr = await reader.ReadToEndAsync();
             var body = JsonSerializer.Deserialize<JsonElement>(bodyStr);
 
             var seatIds = body.GetProperty("seatIds").EnumerateArray()
                 .Select(e => e.GetInt32()).ToArray();
-            var holderId = body.GetProperty("holderId").GetString()!;
+
+            // Max 10 seats per session
+            var existingLocks = SeatLockManager.GetLockCountForHolder(holderId);
+            if (existingLocks + seatIds.Length > 10)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsJsonAsync(new { error = "Max 10 seats can be locked per session" });
+                return;
+            }
+
+            // Validate that seat_ids belong to the showing's salong
+            var validSeats = SQLQuery(
+                @"SELECT s.id FROM seats s
+                  JOIN salongs sa ON s.salong_id = sa.id
+                  JOIN showings sh ON sh.salong_id = sa.id
+                  WHERE sh.id = @showingId AND s.id IN (" + string.Join(",", seatIds) + ")",
+                new { showingId }
+            );
+            var validSeatIds = new HashSet<int>();
+            foreach (var row in validSeats)
+            {
+                validSeatIds.Add((int)row.id);
+            }
+            var invalidIds = seatIds.Where(id => !validSeatIds.Contains(id)).ToArray();
+            if (invalidIds.Length > 0)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsJsonAsync(new { error = "Invalid seat IDs for this showing", invalidSeatIds = invalidIds });
+                return;
+            }
 
             // Check DB for already booked seats
             var booked = SQLQuery(
@@ -82,11 +113,7 @@ public static class SeatLockRoutes
         // Release locks endpoint
         App.MapPost("/api/showings/{showingId}/seats/release", async (HttpContext context, int showingId) =>
         {
-            using var reader = new StreamReader(context.Request.Body);
-            var bodyStr = await reader.ReadToEndAsync();
-            var body = JsonSerializer.Deserialize<JsonElement>(bodyStr);
-
-            var holderId = body.GetProperty("holderId").GetString()!;
+            var holderId = Session.GetSessionId(context);
 
             SeatLockManager.ReleaseLocks(holderId);
 

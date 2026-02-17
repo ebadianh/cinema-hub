@@ -8,7 +8,7 @@ public static class SeatLockManager
 {
     private static readonly ConcurrentDictionary<int, SeatLock> _locks = new();
     private static readonly TimeSpan LockTimeout = TimeSpan.FromMinutes(5);
-    private static Timer? _cleanupTimer;
+    private static Timer _cleanupTimer = null!;
 
     public static void Start()
     {
@@ -50,6 +50,11 @@ public static class SeatLockManager
         }
     }
 
+    public static int GetLockCountForHolder(string holderId)
+    {
+        return _locks.Values.Count(l => l.HolderId == holderId && l.ExpiresAt > DateTime.UtcNow);
+    }
+
     public static HashSet<int> GetLockedSeatIds(int showingId)
     {
         var now = DateTime.UtcNow;
@@ -77,7 +82,7 @@ public static class SeatLockManager
         return unavailable;
     }
 
-    private static void CleanupExpiredLocks(object? state)
+    private static void CleanupExpiredLocks(object state)
     {
         var now = DateTime.UtcNow;
         var expiredByShowing = new HashSet<int>();
