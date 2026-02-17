@@ -101,6 +101,18 @@ public static class RestApi
             context
         );
 
+        if (!result.HasKey("error"))
+        {
+            // Release locks and broadcast updated availability via SSE
+            var holderIdProp = body.holderId;
+            if (holderIdProp != null)
+            {
+                SeatLockManager.ReleaseLocks((string)holderIdProp);
+            }
+            var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
+            SseManager.BroadcastToShowing(showingId, unavailable);
+        }
+
         return RestResult.Parse(context, result);
     }
 }

@@ -11,6 +11,7 @@ interface SeatMapProps {
   previewSeatIds: Set<number>;
   onSeatHover: (seat: SeatType) => void;
   onSeatLeave: () => void;
+  lockedByMe: Set<number>;
 }
 
 export default function SeatMap({
@@ -22,7 +23,8 @@ export default function SeatMap({
   onToggleMode,
   previewSeatIds,
   onSeatHover,
-  onSeatLeave
+  onSeatLeave,
+  lockedByMe
 }: SeatMapProps) {
   const seatsByRow: Record<number, SeatType[]> = {};
   seats.forEach(seat => {
@@ -35,8 +37,8 @@ export default function SeatMap({
   const rows = Object.keys(seatsByRow).map(Number).sort((a, b) => a - b);
 
   const getSeatStatus = (seat: SeatType): SeatStatus => {
-    if (bookedSeatIds.has(seat.id)) return "booked";
     if (selectedSeats.some(s => s.seat.id === seat.id)) return "selected";
+    if (bookedSeatIds.has(seat.id) && !lockedByMe.has(seat.id)) return "booked";
     if (previewSeatIds.has(seat.id)) return "preview";
     return "available";
   };

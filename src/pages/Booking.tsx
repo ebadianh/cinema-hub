@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SeatMap from "../components/booking/SeatMap";
 import BookingSummary from "../components/booking/BookingSummary";
 import ConfirmationModal from "../components/booking/ConfirmationModal";
 import MovieInfoCard from "../components/booking/MovieInfoCard";
+import useSeatStream from "../hooks/useSeatStream";
+import useSeatLocking from "../hooks/useSeatLocking";
 import type { Showings, Seat, TicketType, SelectedSeat } from "../interfaces/Booking";
 import type User from "../interfaces/Users";
 
@@ -17,8 +19,14 @@ export default function Booking() {
   // Data states
   const [showing, setShowing] = useState<Showings | null>(null);
   const [seats, setSeats] = useState<Seat[]>([]);
-  const [bookedSeatIds, setBookedSeatIds] = useState<Set<number>>(new Set());
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+
+  // Real-time seat availability via SSE
+  const { unavailableSeatIds } = useSeatStream(showingId);
+  const { holderId, lockedByMe, lockSeats, releaseLocks } = useSeatLocking(showingId);
+
+  // Alias for backward compat within this component
+  const bookedSeatIds = unavailableSeatIds;
 
   // Selection states - ny approach med ticketCounts
   const [ticketCounts, setTicketCounts] = useState<Record<number, number>>({});
@@ -73,12 +81,6 @@ export default function Booking() {
         if (!seatsRes.ok) throw new Error("Kunde inte hämta säten");
         const seatsData = await seatsRes.json();
         setSeats(seatsData);
-
-        // Hämta bokade säten
-        const bookedRes = await fetch(`/api/booked_seats?where=showing_id=${showingId}`);
-        if (!bookedRes.ok) throw new Error("Kunde inte hämta bokade säten");
-        const bookedData = await bookedRes.json();
-        setBookedSeatIds(new Set(bookedData.map((b: { seat_id: number }) => b.seat_id)));
 
         // Hämta biljetttyper
         const ticketRes = await fetch('/api/ticket_type');
@@ -253,10 +255,48 @@ export default function Booking() {
     setPreviewSeatIds(new Set());
   };
 
-  // Öppna bekräftelsedialog
-  const handleConfirmClick = () => {
+  // Remove selected seats that become unavailable (locked/booked by others)
+  useEffect(() => {
+    setSelectedSeats(prev => {
+      const filtered = prev.filter(
+        s => !unavailableSeatIds.has(s.seat.id) || lockedByMe.has(s.seat.id)
+      );
+      if (filtered.length !== prev.length) {
+        return filtered;
+      }
+      return prev;
+    });
+  }, [unavailableSeatIds, lockedByMe]);
+
+  // Cleanup locks on unmount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (showingId) {
+        navigator.sendBeacon(
+          `/api/showings/${showingId}/seats/release`,
+          JSON.stringify({ holderId })
+        );
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      releaseLocks();
+    };
+  }, [showingId, holderId, releaseLocks]);
+
+  // Lås säten och öppna bekräftelsedialog
+  const handleConfirmClick = async () => {
     if (selectedSeats.length === 0 || !email.trim()) return;
-    setShowModal(true);
+
+    const seatIds = selectedSeats.map(s => s.seat.id);
+    const success = await lockSeats(seatIds);
+
+    if (success) {
+      setShowModal(true);
+    } else {
+      setError("Några av de valda sätena är inte längre tillgängliga. Försök igen.");
+    }
   };
 
   // Skicka bokning till API
@@ -270,6 +310,7 @@ export default function Booking() {
       const bookingData = {
         showing_id: parseInt(showingId),
         email: email,
+        holderId: holderId,
         tickets: selectedSeats.map(s => ({
           seat_id: s.seat.id,
           ticket_type_id: s.ticketType.id
@@ -397,6 +438,7 @@ export default function Booking() {
           previewSeatIds={previewSeatIds}
           onSeatHover={handleSeatHover}
           onSeatLeave={handleSeatLeave}
+          lockedByMe={lockedByMe}
         />
       </div>
 
@@ -424,7 +466,11 @@ export default function Booking() {
           onConfirm={handleSubmitBooking}
           onCancel={() => {
             setShowModal(false);
-            if (bookingConfirmed) navigate('/');
+            if (bookingConfirmed) {
+              navigate('/');
+            } else {
+              releaseLocks();
+            }
           }}
           loading={submitting}
           bookingNumber={bookingNumber}
