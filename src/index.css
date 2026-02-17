@@ -507,6 +507,12 @@ body {
   border-color: var(--ch-accent-hover);
 }
 
+.ch-seat--preview {
+  background: rgba(47, 111, 255, 0.3);
+  border-color: rgba(77, 130, 255, 0.6);
+  transform: scale(1.05);
+}
+
 .ch-seat--booked {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.12);
@@ -1048,7 +1054,7 @@ body {
   }
 
   .ch-booking-right {
-    position: fixed;
+
     bottom: 0;
     left: 0;
     right: 0;

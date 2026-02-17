@@ -8,6 +8,9 @@ interface SeatMapProps {
   onSeatClick: (seat: SeatType) => void;
   manualMode: boolean;
   onToggleMode: () => void;
+  previewSeatIds: Set<number>;
+  onSeatHover: (seat: SeatType) => void;
+  onSeatLeave: () => void;
 }
 
 export default function SeatMap({
@@ -16,7 +19,10 @@ export default function SeatMap({
   selectedSeats,
   onSeatClick,
   manualMode,
-  onToggleMode
+  onToggleMode,
+  previewSeatIds,
+  onSeatHover,
+  onSeatLeave
 }: SeatMapProps) {
   const seatsByRow: Record<number, SeatType[]> = {};
   seats.forEach(seat => {
@@ -31,6 +37,7 @@ export default function SeatMap({
   const getSeatStatus = (seat: SeatType): SeatStatus => {
     if (bookedSeatIds.has(seat.id)) return "booked";
     if (selectedSeats.some(s => s.seat.id === seat.id)) return "selected";
+    if (previewSeatIds.has(seat.id)) return "preview";
     return "available";
   };
 
@@ -53,6 +60,8 @@ export default function SeatMap({
                   seat={seat}
                   status={getSeatStatus(seat)}
                   onClick={() => onSeatClick(seat)}
+                  onMouseEnter={() => onSeatHover(seat)}
+                  onMouseLeave={onSeatLeave}
                 />
               ))}
           </div>

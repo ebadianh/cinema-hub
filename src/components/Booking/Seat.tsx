@@ -4,19 +4,23 @@ interface SeatProps {
   seat: SeatType;
   status: SeatStatus;
   onClick: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }
 
-export default function Seat({ seat, status, onClick } : SeatProps) {
+export default function Seat({ seat, status, onClick, onMouseEnter, onMouseLeave } : SeatProps) {
 
   const handleClick = () => {
     if (status !== "booked") {
       onClick()
-    } 
+    }
   }
   return (
     <button
       className={`ch-seat ch-seat--${status}`}
       onClick={handleClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       disabled={status === "booked"}
       title={`Rad ${seat.row_num}, Plats ${seat.seat_number}`}
     >

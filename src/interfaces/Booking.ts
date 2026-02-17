@@ -35,4 +35,4 @@ export interface SelectedSeat{
   ticketType: TicketType;
 }
 
-export type SeatStatus = "available" | "booked" | "selected";
+export type SeatStatus = "available" | "booked" | "selected" | "preview";

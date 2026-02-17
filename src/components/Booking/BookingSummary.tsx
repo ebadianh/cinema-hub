@@ -49,20 +49,22 @@ export default function BookingSummary({
       return a.seat.seat_number - b.seat.seat_number;
     });
 
-    return sorted.map(s => `${s.seat.row_num}:${s.seat.seat_number}`).join(', ');
+  return sorted.map(s => `${s.seat.row_num}:${s.seat.seat_number}`).join(', ');
   };
 
   return (
     <div className="ch-booking-right">
-      <div className="ch-booking-summary">
-        <TicketCounter
+        <div className="ch-booking-summary mb-4">
+          <TicketCounter
           ticketTypes={ticketTypes}
           ticketCounts={ticketCounts}
           onCountChange={onCountChange}
           maxAvailable={maxAvailable}
         />
+        </div>
+      <div className="ch-booking-summary">
+        
 
-        <div className="ch-booking-divider"></div>
 
         {hasSelectedSeats ? (
           <>

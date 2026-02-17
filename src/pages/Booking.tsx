@@ -23,6 +23,7 @@ export default function Booking() {
   // Selection states - ny approach med ticketCounts
   const [ticketCounts, setTicketCounts] = useState<Record<number, number>>({});
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([]);
+  const [previewSeatIds, setPreviewSeatIds] = useState<Set<number>>(new Set());
   const [email, setEmail] = useState("");
 
   // Lägesval
@@ -94,6 +95,19 @@ export default function Booking() {
 
     fetchData();
   }, [showingId]);
+
+  // Sätt default: 2 vuxenbiljetter
+  useEffect(() => {
+    if (ticketTypes.length === 0) return;
+    const adult = ticketTypes.find(t => t.name.toLowerCase().includes('vuxen'));
+    if (adult) {
+      setTicketCounts(prev => {
+        const totalExisting = Object.values(prev).reduce((sum, c) => sum + c, 0);
+        if (totalExisting > 0) return prev;
+        return { ...prev, [adult.id]: 2 };
+      });
+    }
+  }, [ticketTypes]);
 
   // Handler för att ändra antal biljetter
   const handleCountChange = (ticketTypeId: number, count: number) => {
@@ -217,6 +231,26 @@ export default function Booking() {
       const allocated = allocateFromSeat(clicked);
       setSelectedSeats(assignTicketTypes(allocated));
     }
+    setPreviewSeatIds(new Set());
+  };
+
+  const handleSeatHover = (seat: Seat) => {
+    if (totalTickets === 0) return;
+    if (bookedSeatIds.has(seat.id)) return;
+
+    if (manualMode) {
+      const alreadySelected = selectedSeats.some(s => s.seat.id === seat.id);
+      if (!alreadySelected && selectedSeats.length < totalTickets) {
+        setPreviewSeatIds(new Set([seat.id]));
+      }
+    } else {
+      const allocated = allocateFromSeat(seat);
+      setPreviewSeatIds(new Set(allocated.map(s => s.id)));
+    }
+  };
+
+  const handleSeatLeave = () => {
+    setPreviewSeatIds(new Set());
   };
 
   // Öppna bekräftelsedialog
@@ -361,6 +395,9 @@ export default function Booking() {
           onSeatClick={handleSeatClick}
           manualMode={manualMode}
           onToggleMode={() => setManualMode(prev => !prev)}
+          previewSeatIds={previewSeatIds}
+          onSeatHover={handleSeatHover}
+          onSeatLeave={handleSeatLeave}
         />
       </div>
 
