@@ -291,7 +291,6 @@ export default function Booking() {
       const result = await res.json();
       setBookingNumber(result.booking_number || result.id?.toString());
       setBookingConfirmed(true);
-      setShowModal(false);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ett fel uppstod vid bokning");
@@ -423,8 +422,13 @@ export default function Booking() {
           selectedSeats={selectedSeats}
           email={email}
           onConfirm={handleSubmitBooking}
-          onCancel={() => setShowModal(false)}
+          onCancel={() => {
+            setShowModal(false);
+            if (bookingConfirmed) navigate('/');
+          }}
           loading={submitting}
+          bookingNumber={bookingNumber}
+          error={error}
         />
       )}
     </div>

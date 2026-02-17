@@ -657,6 +657,20 @@ body {
   margin: 0 auto;
 }
 
+.ch-error-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(231, 76, 60, 0.2);
+  border: 3px solid #e74c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #e74c3c;
+  margin: 0 auto;
+}
+
 .actionRow {
   display: flex;
   gap: 12px;
@@ -751,11 +765,11 @@ body {
 
 /* Höger kolumn - sticky */
 .ch-booking-right {
-  position: sticky;
+  
   top: 2rem;
   align-self: flex-start;
   max-height: calc(100vh - 4rem);
-  overflow-y: auto;
+
 }
 
 /* Sätesrad */

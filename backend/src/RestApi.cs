@@ -92,8 +92,8 @@ public static class RestApi
         var body = JSON.Parse(bodyJson.ToString());
 
         var email = (string)body.email;
-        var showingId = (int)body.showingId;
-        var seatsJson = JSON.Stringify(body.seats);
+        var showingId = (int)body.showing_id;
+        var seatsJson = JSON.Stringify(body.tickets);
 
         var result = SQLQueryOne(
             "CALL CreateBookingWithSeats(@email, @showingId, @seatsJson)",
