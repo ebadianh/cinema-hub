@@ -130,12 +130,18 @@ body {
    HERO CAROUSEL
 ================================ */
 
+/* ROTEN */
 .ch-hero-carousel {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
+.ch-hero-carousel .carousel-item {
+  transition: transform 0.8s ease-in-out;
+}
+
+/* STAM-huvudbehållare för varje slide */
 .ch-hero-slide {
   background-image: url(https://images.pexels.com/photos/7991489/pexels-photo-7991489.jpeg?_gl=1*19xada0*_ga*MjA5MjY2NDYyNi4xNzY4MTI4MTg4*_ga_8JE65Q40S6*czE3NzA3MzExNzQkbzQkZzEkdDE3NzA3MzEzMjckajM1JGwwJGgw);
   background-size: cover;
@@ -149,6 +155,17 @@ body {
   padding: 3rem 2rem;
 }
 
+/* GREN-dark-background */
+.ch-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.7) 100%);
+  z-index: 1;
+}
+
+/* GREN-desktoplayout */
 .ch-hero-layout {
   display: flex;
   gap: 4rem;
@@ -159,12 +176,26 @@ body {
   position: relative;
 }
 
+/* GREN-mobilelayout */
+.ch-hero-mobile {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.ch-hero-mobile h2 {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* LÖV-textblock-vänster */
 .ch-hero-text {
   flex: 1;
   text-align: left;
   padding: 4rem;
 }
 
+/* LÖV-poster-höger */
 .ch-hero-poster-section {
   flex-shrink: 0;
   width: 280px;
@@ -183,48 +214,7 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-@media (max-width: 768px) {
-  .ch-hero-text {
-    text-align: center;
-    padding: 1.5rem 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .ch-hero-layout {
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .ch-hero-text {
-    text-align: center;
-  }
-
-  .ch-hero-poster-section {
-    width: 220px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .ch-hero-slide {
-    min-height: 600px;
-  }
-}
-
-.ch-hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.7) 100%);
-  z-index: 1;
-}
-
-.ch-hero-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
+/* KONTROLLER - Pilarna */
 .ch-hero-carousel .carousel-control-prev,
 .ch-hero-carousel .carousel-control-next {
   width: 60px;
@@ -246,6 +236,7 @@ body {
   padding: 8px;
 }
 
+/* KONTROLLER - Indikationer */
 .ch-hero-carousel .carousel-indicators {
   margin-bottom: 1.5rem;
 }
@@ -265,8 +256,9 @@ body {
   transform: scale(1.2);
 }
 
-.ch-hero-carousel .carousel-item {
-  transition: transform 0.8s ease-in-out;
+.ch-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .ch-muted {
@@ -283,18 +275,8 @@ body {
   font-weight: 500;
 }
 
-.ch-hero-mobile {
-  position: relative;
-  z-index: 2;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.ch-hero-mobile h2 {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8)
-}
-
-
+/* ===RESPONSIV=== */
+/* Mobile and tablet */
 @media (max-width: 768px) {
   .ch-hero-slide {
     min-height: 380px;
@@ -302,12 +284,8 @@ body {
   }
 
   .ch-hero-layout {
+    flex-direction: column;
     gap: 1.5rem;
-  }
-
-  .ch-hero-poster-section {
-    width: 200px;
-    margin-right: 0;
   }
 
   .ch-hero-text {
@@ -315,8 +293,27 @@ body {
     text-align: center;
   }
 
+  .ch-hero-poster-section {
+    width: 200px;
+    margin-right: 0;
+  }
+
   .ch-hero-carousel .carousel-indicators {
     margin-bottom: 0.5rem;
+  }
+
+  .hero-mobile-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-mobile-poster-wrapper {
+    width: 160px;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    margin: 0 auto;
   }
 
   .ch-hero-mobile-poster {
@@ -326,33 +323,29 @@ body {
   }
 }
 
-.hero-mobile-poster-wrapper {
-  width: 160px;
-  aspect-ratio: 2 / 3;
-  overflow: hidden;
-  margin: 0 auto;
-}
-
-.hero-mobile-poster-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-@media (min-width: 1200px) {
-  .col-lg-2 {
-    flex: 0 0 auto;
-    width: 20%;
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .ch-hero-slide {
+    min-height: 600px;
   }
 }
 
+/* Desktop */
+@media (min-width: 1200px) {
+  .ch-hero-slide {
+    min-height: 600px;
+  }
+}
+
+/* CARDS/FILMS-SEKTION */
+/* linjer på sidorna om "Filmer" */
 .section-title {
   font-size: 2rem;
   font-weight: 600;
   color: var(--ch-text);
 }
 
+/* före och efter titel */
 .section-title::before,
 .section-title::after {
   content: "";
@@ -376,12 +369,14 @@ body {
   margin-left: 1rem;
 }
 
+/* kontrollerar bildförhållandet */
 .poster-wrapper {
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
 }
 
+/* säkerställer att bilden passar kortet */
 .poster-img {
   width: 100%;
   height: 100%;
@@ -389,9 +384,10 @@ body {
   display: block;
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
-  .ch-hero-slide {
-    min-height: 600px;
+@media (min-width: 1200px) {
+  .col-lg-2 {
+    flex: 0 0 auto;
+    width: 20%;
   }
 }
 

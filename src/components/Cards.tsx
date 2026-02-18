@@ -35,18 +35,15 @@ export default function Cards() {
   const [actors, setActors] = useState<Actor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAge, setSelectedAge] = useState<string>("all"); // filter
+  const [selectedGenre, setSelectedGenre] = useState<string>("all"); // filter
 
-  //filter
-  const [selectedAge, setSelectedAge] = useState<string>("all");
-  const [selectedGenre, setSelectedGenre] = useState<string>("all");
-
-
+  // Formaterar om till "X tim Y min"
   function formatDuration(minutes: number) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h} tim ${m} min`;
   }
-
 
 
   useEffect(() => {
@@ -99,30 +96,34 @@ export default function Cards() {
   if (loading) return <div className="container mt-4">Laddar filmer…</div>;
   if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
 
+
+  // Filter-logik
   const filteredFilms = films.filter((film) => {
-    if (selectedAge !== "all") {
+    if (selectedAge !== "all") { // filter på åldersgräns
       const maxAge = parseInt(selectedAge);
       if (film.age_rating > maxAge) {
         return false;
       }
     }
 
-    if (selectedGenre !== "all" && film.genre !== selectedGenre) {
+    if (selectedGenre !== "all" && film.genre !== selectedGenre) { // filter på genre
       return false;
     }
     return true;
   });
 
+  // Main Render
   return (
     <div className="container mt-4">
-      <div className="text-center mb-4">
+      <div className="text-center mb-4"> {/* titel med linjer */}
         <h2 className="section-title d-inline-block position-relative px-4">Filmer</h2>
       </div>
 
+      {/* Desktop filter */}
       <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
         <div className="d-flex gap-3">
           <div style={{ minWidth: '200px' }}>
-            <label htmlFor="ageFilter" className="form-label small text-muted">
+            <label htmlFor="ageFilter" className="form-label small text-muted"> {/* åldersgräns-filter */}
               Åldersgräns
             </label>
             <select
@@ -139,6 +140,7 @@ export default function Cards() {
             </select>
           </div>
 
+          {/* Genre-filter */}
           <div style={{ minWidth: '200px' }}>
             <label htmlFor="ageGenreFilter" className="form-label small text-muted">
               Genre
@@ -161,17 +163,19 @@ export default function Cards() {
           </div>
         </div>
 
+        {/* Antal filmer */}
         <div className="text-muted small pb-2">
           {filteredFilms.length} av {films.length} filmer
         </div>
       </div>
 
+      {/* Mobile and tablet */}
       <div className="d-lg-none mb-4">
         <div className="row g-3">
           <div className="col-6">
             <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
             <select
-              id="ageFilterMobile"
+              id="ageFilterMobile" // åldersgräns-filter
               className="form-select"
               value={selectedAge}
               onChange={(e) => setSelectedAge(e.target.value)}>
@@ -186,7 +190,7 @@ export default function Cards() {
           <div className="col-6">
             <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
             <select
-              id="genreFilterMobile"
+              id="genreFilterMobile" // genre-filter
               className="form-select"
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}>
@@ -204,24 +208,28 @@ export default function Cards() {
         </div>
       </div>
 
+      {/* Filmkort - Grid */}
       <div className="row g-3">
         {filteredFilms.map((f) => (
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
             <div className="card h-100 shadow-sm p-0 overflow-hidden">
-              <div className="poster-wrapper">
+              <div className="poster-wrapper"> {/* poster */}
                 <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
                   className="poster-img"
                   alt={f.title} />
               </div>
 
+              {/* Filminfo */}
               <div className="card-body d-flex flex-column p-2">
                 <h5 className="card-title small mb-1 text-truncate">{f.title}</h5>
 
+                {/* Badges */}
                 <div className="mb-2">
                   <span className="badge text-bg-secondary me-2">{f.genre}</span>
                   <span className="badge text-bg-light">{f.distributor}</span>
                 </div>
 
+                {/* CTA */}
                 <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
                   Mer info
                 </Link>
