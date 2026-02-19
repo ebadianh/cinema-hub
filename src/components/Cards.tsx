@@ -35,13 +35,15 @@ export default function Cards() {
   const [actors, setActors] = useState<Actor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAge, setSelectedAge] = useState<string>("all"); // filter
+  const [selectedGenre, setSelectedGenre] = useState<string>("all"); // filter
 
+  // Formaterar om till "X tim Y min"
   function formatDuration(minutes: number) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h} tim ${m} min`;
   }
-
 
 
   useEffect(() => {
@@ -94,62 +96,156 @@ export default function Cards() {
   if (loading) return <div className="container mt-4">Laddar filmer…</div>;
   if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
 
+
+  // Filter-logik
+  const filteredFilms = films.filter((film) => {
+    if (selectedAge !== "all") { // filter på åldersgräns
+      const maxAge = parseInt(selectedAge);
+      if (film.age_rating > maxAge) {
+        return false;
+      }
+    }
+
+    if (selectedGenre !== "all" && film.genre !== selectedGenre) { // filter på genre
+      return false;
+    }
+    return true;
+  });
+
+  // Main Render
   return (
     <div className="container mt-4">
-      <div className="d-flex align-items-end justify-content-between mb-3">
-        <h1 className="mb-0">Filmer</h1>
-        <span className="text-muted">{films.length} totalt</span>
+      <div className="text-center mb-4"> {/* titel med linjer */}
+        <h2 className="section-title d-inline-block position-relative px-4">Filmer</h2>
       </div>
 
+      {/* Desktop filter */}
+      <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
+        <div className="d-flex gap-3">
+          <div style={{ minWidth: '200px' }}>
+            <label htmlFor="ageFilter" className="form-label small text-muted"> {/* åldersgräns-filter */}
+              Åldersgräns
+            </label>
+            <select
+              id="ageFilter"
+              className="form-select"
+              value={selectedAge}
+              onChange={(e) => setSelectedAge(e.target.value)}>
+
+              <option value="all">Alla åldrar</option>
+              <option value="0">Barntillåten</option>
+              <option value="7">7+</option>
+              <option value="11">11+</option>
+              <option value="15">15+</option>
+            </select>
+          </div>
+
+          {/* Genre-filter */}
+          <div style={{ minWidth: '200px' }}>
+            <label htmlFor="ageGenreFilter" className="form-label small text-muted">
+              Genre
+            </label>
+            <select
+              id="ageGenreFilter"
+              className="form-select"
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}>
+
+              <option value="all">Alla genrer</option>
+              <option value="Drama">Drama</option>
+              <option value="Action">Action</option>
+              <option value="Komedi">Komedi</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Animerat">Animerat</option>
+              <option value="Thriller">Thriller</option>
+              <option value="Skräck">Skräck</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Antal filmer */}
+        <div className="text-muted small pb-2">
+          {filteredFilms.length} av {films.length} filmer
+        </div>
+      </div>
+
+      {/* Mobile and tablet */}
+      <div className="d-lg-none mb-4">
+        <div className="row g-3">
+          <div className="col-6">
+            <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
+            <select
+              id="ageFilterMobile" // åldersgräns-filter
+              className="form-select"
+              value={selectedAge}
+              onChange={(e) => setSelectedAge(e.target.value)}>
+
+              <option value="all">Alla åldrar</option>
+              <option value="0">Barntillåten</option>
+              <option value="7">7+</option>
+              <option value="11">11+</option>
+              <option value="15">15+</option>
+            </select>
+          </div>
+          <div className="col-6">
+            <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
+            <select
+              id="genreFilterMobile" // genre-filter
+              className="form-select"
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}>
+
+              <option value="all">Alla genrer</option>
+              <option value="Drama">Drama</option>
+              <option value="Action">Action</option>
+              <option value="Komedi">Komedi</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Animerat">Animerat</option>
+              <option value="Thriller">Thriller</option>
+              <option value="Skräck">Skräck</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Filmkort - Grid */}
       <div className="row g-3">
-        {films.map((f) => (
-          <div key={f.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-            <div className="card h-100 shadow-sm">
-              <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
-                className="card-img-top"
-                alt={f.title} />
-              <div className="card-body d-flex flex-column">
-                <h5 className="card-title mb-1">{f.title}</h5>
+        {filteredFilms.map((f) => (
+          <div key={f.id} className="col-6 col-md-4 col-lg-2">
+            <div className="card h-100 shadow-sm p-0 overflow-hidden">
+              <div className="poster-wrapper"> {/* poster */}
+                <img src={f.images && f.images.length > 0 ? f.images[0] : '/placeholder.jpg'}
+                  className="poster-img"
+                  alt={f.title} />
+              </div>
 
-                <div className="text-muted small mb-2">
-                  {f.production_year} • {formatDuration(f.duration_minutes)} • {f.age_rating}+
-                </div>
+              {/* Filminfo */}
+              <div className="card-body d-flex flex-column p-2">
+                <h5 className="card-title small mb-1 text-truncate">{f.title}</h5>
 
+                {/* Badges */}
                 <div className="mb-2">
                   <span className="badge text-bg-secondary me-2">{f.genre}</span>
                   <span className="badge text-bg-light">{f.distributor}</span>
                 </div>
 
-                <p className="card-text small flex-grow-1">
-                  {f.description}
-                </p>
-
-                <div className="small">
-                  <div>
-                    <strong>Regissör:</strong> {" "}
-                    {getDirectorsForFilm(f.id).map((d) => d.name).join(", ") || "N/A"}
-                  </div>
-                  <div className="text-muted">
-                    <strong>Skådespelare:</strong> {" "}
-                    {getActorsForFilm(f.id).map((a) => a.name).join(", ") || "N/A"}
-                  </div>
-                </div>
-
-              <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
-                Mer info
-              </Link>
+                {/* CTA */}
+                <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
+                  Mer info
+                </Link>
+              </div>
 
 
 
-                {/* Optional: debug / extra fields */}
-                {/* <div className="text-muted small mt-2">
+
+              {/* Optional: debug / extra fields */}
+              {/* <div className="text-muted small mt-2">
                   lang_id: {f.language_id} • sub_id: {f.subtitle_id}
                 </div> */}
-              </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 }

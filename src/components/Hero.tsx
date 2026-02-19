@@ -65,6 +65,7 @@ export default function Hero() {
     );
   }
 
+  /* Huvudvy - karusell med filmer */
   return (
     <section className="py-4">
       <div className="container">
@@ -79,26 +80,26 @@ export default function Hero() {
             <Carousel.Item key={film.id}>
               <div className="ch-hero-slide">
                 <div className="ch-hero__overlay" />
-                <div className="ch-hero-layout">
-                  <div className="ch-hero-text">
+                <div className="ch-hero-layout d-none d-md-flex"> {/* elementet är gömt från 768px och neråt */}
+                  <div className="ch-hero-text"> {/* filminfo vänster */}
                     <h1 className="display-4 fw-bold mb-3">{film.title}</h1>
-                    <p className="lead mb-3 ch-muted">
+                    <p className="lead mb-3 ch-muted"> {/* beskrivning */}
                       {film.description?.substring(0, 150)}
                       {film.description && film.description.length > 150 ? "..." : ""}
                     </p>
-                    <div className="d-flex gap-2 flex-wrap mb-4">
+                    <div className="d-flex gap-2 flex-wrap mb-4"> {/* badges */}
                       <span className="badge bg-secondary px-3 py-2">{film.genre}</span>
                       <span className="badge bg-dark px-3 py-2">{film.age_rating}+</span>
                       <span className="badge bg-dark px-3 py-2">
                         {Math.floor(film.duration_minutes / 60)} tim {film.duration_minutes % 60} min
                       </span>
                     </div>
-                    <button className="btn ch-btn-primary btn-lg px-4">
+                    <button className="btn ch-btn-primary btn-lg px-4"> {/* CTA */}
                       Boka biljetter
                     </button>
                   </div>
 
-
+                  {/* Poster - Höger */}
                   <div className="ch-hero-poster-section">
                     <div className="ch-hero-poster">
                       <img src={film.images[0]} alt={film.title} />
@@ -108,11 +109,27 @@ export default function Hero() {
                     </button>
                   </div>
                 </div>
+
+                {/* Mobile layout */}
+                <div className="ch-hero-mobile d-md-none text-center py-4">
+                  <div className="hero-mobile-poster-wrapper"> {/* poster */}
+                    <img src={film.images[0]}
+                      alt={film.title}
+                      className="hero-mobile-poster-img"
+                    />
+                  </div>
+                  <h2 className="display-6 fw-bold mb-2">{film.title}</h2> {/* filminfo */}
+                  <div className="d-flex gap-2 justify-content-center mb-3">
+                    <span className="badge bg-secondary px-2 py-1">{film.genre}</span>
+                    <span className="badge bg-dark px-2 py-1">{film.age_rating}+</span>
+                  </div>
+                  <button className="btn ch-btn-primary px-4">Boka biljetter</button> {/* CTA */}
+                </div>
               </div>
             </Carousel.Item>
           ))}
         </Carousel>
       </div>
-    </section>
+    </section >
   );
 }
