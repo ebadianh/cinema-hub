@@ -248,12 +248,22 @@ body {
   background-color: rgba(255, 255, 255, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
+  transform: none;
 }
 
 .ch-hero-carousel .carousel-indicators button.active {
   background-color: var(--ch-accent);
   border-color: var(--ch-accent);
-  transform: scale(1.2);
+  transform: none;
+}
+
+.ch-hero-carousel .carousel-indicators {
+  transform: none;
+}
+
+.ch-hero-carousel .carousel-indicators button,
+.ch-hero-carousel .carousel-indicators button.active {
+  transform: none;
 }
 
 .ch-hero-content {

@@ -121,7 +121,7 @@ export default function Hero() {
                   <h2 className="display-6 fw-bold mb-2">{film.title}</h2> {/* filminfo */}
                   <div className="d-flex gap-2 justify-content-center mb-3">
                     <span className="badge bg-secondary px-2 py-1">{film.genre}</span>
-                    <span className="badge bg-dark px-2 py-1">{film.age_rating}</span>
+                    <span className="badge bg-dark px-2 py-1">{film.age_rating}+</span>
                   </div>
                   <button className="btn ch-btn-primary px-4">Boka biljetter</button> {/* CTA */}
                 </div>
