@@ -18,7 +18,7 @@ public static class SseManager
         _clients.TryRemove(connectionId, out _);
     }
 
-    public static void BroadcastToShowing(int showingId, HashSet<int> unavailableSeatIds)
+    public static async Task BroadcastToShowing(int showingId, HashSet<int> unavailableSeatIds)
     {
         var json = JsonSerializer.Serialize(new { unavailableSeatIds = unavailableSeatIds.ToArray() });
         var message = $"data: {json}\n\n";
@@ -32,8 +32,8 @@ public static class SseManager
             try
             {
                 var bytes = System.Text.Encoding.UTF8.GetBytes(message);
-                kv.Value.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-                kv.Value.Response.Body.FlushAsync();
+                await kv.Value.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                await kv.Value.Response.Body.FlushAsync();
             }
             catch
             {

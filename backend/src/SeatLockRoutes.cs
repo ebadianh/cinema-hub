@@ -44,6 +44,13 @@ public static class SeatLockRoutes
             var seatIds = body.GetProperty("seatIds").EnumerateArray()
                 .Select(e => e.GetInt32()).ToArray();
 
+            if (seatIds.Length == 0)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsJsonAsync(new { error = "seatIds cannot be empty" });
+                return;
+            }
+
             // Max 10 seats per session
             var existingLocks = SeatLockManager.GetLockCountForHolder(holderId);
             if (existingLocks + seatIds.Length > 10)
@@ -98,7 +105,7 @@ public static class SeatLockRoutes
             if (success)
             {
                 var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
-                SseManager.BroadcastToShowing(showingId, unavailable);
+                await SseManager.BroadcastToShowing(showingId, unavailable);
                 context.Response.StatusCode = 200;
                 await context.Response.WriteAsJsonAsync(new { ok = true });
             }
@@ -115,10 +122,10 @@ public static class SeatLockRoutes
         {
             var holderId = Session.GetSessionId(context);
 
-            SeatLockManager.ReleaseLocks(holderId);
+            SeatLockManager.ReleaseLocks(holderId, showingId);
 
             var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
-            SseManager.BroadcastToShowing(showingId, unavailable);
+            await SseManager.BroadcastToShowing(showingId, unavailable);
 
             context.Response.StatusCode = 200;
             await context.Response.WriteAsJsonAsync(new { ok = true });

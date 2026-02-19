@@ -87,7 +87,7 @@ public static class RestApi
             }
         });
     }
-    public static IResult PostBooking(HttpContext context, JsonElement bodyJson)
+    public static async Task<IResult> PostBooking(HttpContext context, JsonElement bodyJson)
     {
         var body = JSON.Parse(bodyJson.ToString());
 
@@ -105,9 +105,9 @@ public static class RestApi
         {
             // Release locks and broadcast updated availability via SSE
             var holderId = Session.GetSessionId(context);
-            SeatLockManager.ReleaseLocks(holderId);
+            SeatLockManager.ReleaseLocks(holderId, showingId);
             var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
-            SseManager.BroadcastToShowing(showingId, unavailable);
+            await SseManager.BroadcastToShowing(showingId, unavailable);
         }
 
         return RestResult.Parse(context, result);

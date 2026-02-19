@@ -41,9 +41,9 @@ public static class SeatLockManager
         }
     }
 
-    public static void ReleaseLocks(string holderId)
+    public static void ReleaseLocks(string holderId, int showingId)
     {
-        var toRemove = _locks.Where(kv => kv.Value.HolderId == holderId).Select(kv => kv.Key).ToList();
+        var toRemove = _locks.Where(kv => kv.Value.HolderId == holderId && kv.Value.ShowingId == showingId).Select(kv => kv.Key).ToList();
         foreach (var key in toRemove)
         {
             _locks.TryRemove(key, out _);
@@ -82,7 +82,7 @@ public static class SeatLockManager
         return unavailable;
     }
 
-    private static void CleanupExpiredLocks(object state)
+    private static async void CleanupExpiredLocks(object state)
     {
         var now = DateTime.UtcNow;
         var expiredByShowing = new HashSet<int>();
@@ -102,7 +102,7 @@ public static class SeatLockManager
         foreach (var showingId in expiredByShowing)
         {
             var unavailable = GetUnavailableSeatIds(showingId);
-            SseManager.BroadcastToShowing(showingId, unavailable);
+            await SseManager.BroadcastToShowing(showingId, unavailable);
         }
     }
 }
