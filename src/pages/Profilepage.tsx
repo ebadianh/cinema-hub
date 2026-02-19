@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import type User from '../interfaces/Users';
-import { Container, Row, Col, Card, Alert, Badge, Button } from 'react-bootstrap';
 
 interface OutletContextType {
     user: User | null;
@@ -134,46 +133,46 @@ export default function Profile() {
     if (!profile) return null;
 
     return (
-        <Container className="mt-5 mb-5">
-            <Row>
-                <Col md={{ span: 8, offset: 2 }}>
+        <div className="container mt-5 mb-5">
+            <div className="row">
+                <div className="col-12 col-md-8 offset-md-2">
 
-                    <Card className="shadow mb-4">
-                        <Card.Body>
+                    <div className="card shadow mb-4">
+                        <div className="card-body">
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h2>{profile.firstName} {profile.lastName}</h2>
                                     <p className="text-muted mb-0">{profile.email}</p>
                                 </div>
                                 {profile.role === 'admin' && (
-                                    <Badge bg="danger">Admin</Badge>
+                                    <span className="badge bg-danger">Admin</span>
                                 )}
                             </div>
 
                             {isOwnProfile && (
-                                <Alert variant="info" className="mt-3 mb-0">
+                                <div className="alert alert-info mt-3 mb-0" role="alert">
                                     Detta är din profil
-                                </Alert>
+                                </div>
                             )}
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </div>
 
                     {isAdmin && !isOwnProfile && (
-                        <Card className="mb-4 border-danger">
-                            <Card.Header className="bg-danger text-white">
+                        <div className="card mb-4 border-danger">
+                            <div className="card-header bg-danger text-white">
                                 Admin-verktyg
-                            </Card.Header>
-                            <Card.Body>
+                            </div>
+                            <div className="card-body">
                                 <p className="text-muted">Här kan admin-funktioner läggas till i framtiden.</p>
-                            </Card.Body>
-                        </Card>
+                            </div>
+                        </div>
                     )}
 
-                    <Card className="shadow mb-4">
-                        <Card.Header>
+                    <div className="card shadow mb-4">
+                        <div className="card-header">
                             <h5 className="mb-0">Kommande bokningar</h5>
-                        </Card.Header>
-                        <Card.Body>
+                        </div>
+                        <div className="card-body">
                             {loadingBookings ? (
                                 <p className="text-muted">Laddar bokningar...</p>
                             ) : upcomingBookings.length === 0 ? (
@@ -192,24 +191,23 @@ export default function Profile() {
                                                 Bokningsnr: #{booking.id}
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
+                                        <button
+                                            className="btn btn-outline-danger btn-sm"
                                             onClick={() => handleCancel(booking.id, booking.showing!.start_time)}
                                         >
                                             Avboka
-                                        </Button>
+                                        </button>
                                     </div>
                                 ))
                             )}
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="shadow">
-                        <Card.Header>
+                    <div className="card shadow">
+                        <div className="card-header">
                             <h5 className="mb-0">Bokningshistorik</h5>
-                        </Card.Header>
-                        <Card.Body>
+                        </div>
+                        <div className="card-body">
                             {loadingBookings ? (
                                 <p className="text-muted">Laddar historik...</p>
                             ) : pastBookings.length === 0 ? (
@@ -228,15 +226,15 @@ export default function Profile() {
                                                 Bokningsnr: #{booking.id}
                                             </p>
                                         </div>
-                                        <Badge bg="secondary">Genomförd</Badge>
+                                        <span className="badge bg-secondary">Genomförd</span>
                                     </div>
                                 ))
                             )}
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </div>
 
-                </Col>
-            </Row>
-        </Container>
+                </div>
+            </div>
+        </div>
     );
 }
