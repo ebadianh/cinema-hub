@@ -343,6 +343,10 @@ body {
   font-size: 2rem;
   font-weight: 600;
   color: var(--ch-text);
+    overflow: hidden;
+      max-width: 100%;
+
+
 }
 
 /* före och efter titel */
