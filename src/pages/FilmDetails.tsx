@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 type Film = {
   id: number;
@@ -20,6 +20,7 @@ type Film = {
 
 type Director = { id: number; film_id: number; name: string };
 type Actor = { id: number; film_id: number; name: string; role_order: number };
+type Showing = { id: number; film_id: number; salong_id: number; start_time: string; language: string; subtitle: string; salong_name?: string };
 
 function parseJsonArray(value: unknown): string[] {
   if (!value) return [];
@@ -72,11 +73,10 @@ export default function FilmDetails() {
   const [film, setFilm] = useState<Film | null>(null);
   const [directors, setDirectors] = useState<Director[]>([]);
   const [actors, setActors] = useState<Actor[]>([]);
+  const [showings, setShowings] = useState<Showing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Mock showtimes tills du kopplar showings från DB
-  const showtimes = useMemo(() => ["4:30 PM", "7:15 PM", "9:45 PM"], []);
+  const navigate = useNavigate();
 
   const pageStyle: React.CSSProperties = {
     minHeight: "100vh",
@@ -141,6 +141,14 @@ export default function FilmDetails() {
             .filter(a => a.film_id === filmId)
             .sort((a, b) => (a.role_order ?? 999) - (b.role_order ?? 999))
         );
+
+        // Hämta visningar för denna film
+        const resShowings = await fetch(`/api/showings?where=film_id=${filmId}`, { signal: controller.signal });
+        if (resShowings.ok) {
+          const showingsData = await resShowings.json();
+          const showingsList: Showing[] = Array.isArray(showingsData) ? showingsData : showingsData.showings ?? [];
+          setShowings(showingsList);
+        }
       } catch (e: any) {
         if (e.name !== "AbortError") setError(e.message ?? "Failed to load");
       } finally {
@@ -236,39 +244,41 @@ export default function FilmDetails() {
                   <div className="fw-semibold" style={{ color: "rgba(255,255,255,.88)" }}>{film.age_rating}+</div>
                 </div>
 
-                <div className="d-grid" style={{ gridTemplateColumns: "92px 1fr", columnGap: 10 }}>
-                  <div className="fw-bold" style={{ color: "rgba(255,255,255,.70)" }}>Showtimes:</div>
-                  <div className="d-flex flex-wrap gap-2">
-                    {showtimes.map(t => (
-                      <span
-                        key={t}
-                        className="px-3 py-2 rounded-3 fw-bold"
-                        style={{
-                          fontSize: ".9rem",
-                          color: "rgba(255,255,255,.88)",
-                          background: "rgba(255,255,255,.06)",
-                          border: "1px solid rgba(255,255,255,.08)",
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
+                {showings.length > 0 && (
+                  <div className="d-grid" style={{ gridTemplateColumns: "92px 1fr", columnGap: 10 }}>
+                    <div className="fw-bold" style={{ color: "rgba(255,255,255,.70)" }}>Visningar:</div>
+                    <div className="d-flex flex-wrap gap-2">
+                      {showings.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => navigate(`/booking/${s.id}`)}
+                          className="px-3 py-2 rounded-3 fw-bold btn btn-outline-light"
+                          style={{
+                            fontSize: ".9rem",
+                            color: "rgba(255,255,255,.88)",
+                            background: "rgba(255,255,255,.06)",
+                            border: "1px solid rgba(255,255,255,.08)",
+                          }}
+                        >
+                          {new Date(s.start_time).toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" })}{" "}
+                          {new Date(s.start_time).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {showings.length > 0 && (
+                <div className="d-flex flex-wrap gap-3 mt-4">
+                  <button
+                    className="btn btn-danger fw-bold px-4 py-2 rounded-3"
+                    onClick={() => navigate(`/booking/${showings[0].id}`)}
+                  >
+                    Boka biljetter
+                  </button>
                 </div>
-              </div>
-
-              <div className="d-flex flex-wrap gap-3 mt-4">
-                <button className="btn btn-danger fw-bold px-4 py-2 rounded-3">
-                  Book Tickets
-                </button>
-
-                <button
-                  className="btn btn-outline-light fw-bold px-4 py-2 rounded-3"
-                  style={{ borderColor: "rgba(255,255,255,.20)" }}
-                >
-                  Select Seats <span className="ms-2" style={{ fontSize: "1.2rem", lineHeight: 1 }}>›</span>
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
