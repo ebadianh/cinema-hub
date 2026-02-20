@@ -397,8 +397,23 @@ public static class DbQuery
                 (1, 1, '2025-02-10 18:00:00', 'Engelska', 'Svenska'),
                 (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
                 (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
-                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska');
-
+                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
+                (4, 2, '2025-02-12 18:00:00', 'Engelska', 'Svenska'),
+                (5, 1, '2025-02-12 15:00:00', 'Japanska', 'Svenska'),
+                (7, 1, '2025-02-12 20:00:00', 'Engelska', 'Svenska'),
+                (8, 2, '2025-02-13 18:00:00', 'Engelska', 'Svenska'),
+                (9, 1, '2025-02-13 14:00:00', 'Engelska', 'Svenska'),
+                (10, 2, '2025-02-13 20:00:00', 'Engelska', 'Svenska'),
+                (11, 1, '2025-02-14 18:00:00', 'Engelska', 'Svenska'),
+                (12, 2, '2025-02-14 15:00:00', 'Engelska', 'Svenska'),
+                (13, 1, '2025-02-14 21:00:00', 'Engelska', NULL),
+                (14, 2, '2025-02-15 11:00:00', 'Engelska', 'Svenska'),
+                (15, 1, '2025-02-15 18:00:00', 'Engelska', 'Svenska'),
+                (16, 2, '2025-02-15 20:00:00', 'Engelska', 'Svenska'),
+                (1, 2, '2025-02-15 15:00:00', 'Engelska', NULL),
+                (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
+                (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
+                (6, 2, '2025-02-16 20:00:00', 'Engelska', 'Svenska');
 
                 -- Bookings
                 INSERT INTO Bookings (email, showing_id) VALUES
