@@ -88,12 +88,6 @@ export default function Cards() {
     return () => controller.abort();
   }, []);
 
-  const getDirectorsForFilm = (filmId: number) =>
-    directors.filter((d) => d.film_id === filmId);
-  const getActorsForFilm = (filmId: number) =>
-    actors.filter((a) => a.film_id === filmId)
-      .sort((a, b) => (a.role_order ?? 999) - (b.role_order ?? 999));
-
   if (loading) return <div className="container mt-4">Laddar filmer…</div>;
   if (error) return <div className="container mt-4 text-danger">Error: {error}</div>;
 

@@ -101,6 +101,7 @@ export default function FilmDetails() {
   const [film, setFilm] = useState<Film | null>(null);
   const [directors, setDirectors] = useState<Director[]>([]);
   const [actors, setActors] = useState<Actor[]>([]);
+  const [showings, setShowings] = useState<Showing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
  
@@ -154,6 +155,14 @@ export default function FilmDetails() {
             .filter((a) => a.film_id === filmId)
             .sort((a, b) => (a.role_order ?? 999) - (b.role_order ?? 999))
         );
+
+        // Hämta visningar för denna film
+        const resShowings = await fetch(`/api/showings?where=film_id=${filmId}`, { signal: controller.signal });
+        if (resShowings.ok) {
+          const showingsData = await resShowings.json();
+          const showingsList: Showing[] = Array.isArray(showingsData) ? showingsData : showingsData.showings ?? [];
+          setShowings(showingsList);
+        }
       } catch (e: any) {
         if (e.name !== "AbortError") setError(e.message ?? "Kunde inte ladda");
       } finally {
