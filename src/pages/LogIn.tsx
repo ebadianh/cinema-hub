@@ -3,6 +3,7 @@ import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import type User from '../interfaces/Users';
 
 interface OutletContextType {
+    user: User | null;  // ← LÄGG TILL denna rad
     setUser: (user: User | null) => void;
 }
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
