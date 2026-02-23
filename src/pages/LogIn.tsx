@@ -4,6 +4,7 @@ import type User from '../interfaces/Users';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
 interface OutletContextType {
+    user: User | null;  // ← LÄGG TILL denna rad
     setUser: (user: User | null) => void;
 }
 

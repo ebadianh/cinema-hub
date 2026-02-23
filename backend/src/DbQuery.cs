@@ -442,11 +442,11 @@ public static class DbQuery
                 (10, 2, '2025-02-13 20:00:00', 'Engelska', 'Svenska'),
                 (11, 1, '2025-02-14 18:00:00', 'Engelska', 'Svenska'),
                 (12, 2, '2025-02-14 15:00:00', 'Engelska', 'Svenska'),
-                (13, 1, '2025-02-14 21:00:00', 'Engelska', NULL),
+                (13, 1, '2025-02-14 21:00:00', 'Engelska', 'Svenska'),
                 (14, 2, '2025-02-15 11:00:00', 'Engelska', 'Svenska'),
                 (15, 1, '2025-02-15 18:00:00', 'Engelska', 'Svenska'),
                 (16, 2, '2025-02-15 20:00:00', 'Engelska', 'Svenska'),
-                (1, 2, '2025-02-15 15:00:00', 'Engelska', NULL),
+                (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
                 (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
                 (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
                 (6, 2, '2025-02-16 20:00:00', 'Engelska', 'Svenska');

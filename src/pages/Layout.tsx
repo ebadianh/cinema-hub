@@ -25,7 +25,7 @@ export default function Layout() {
 
       <Navbar user={user} setUser={setUser} />
       <main className="flex-grow-1">       {/* Added flex for body */}
-        <Outlet context={{ setUser }} />
+        <Outlet context={{ user, setUser }} />
       </main>
       <Footer />
     </div>
