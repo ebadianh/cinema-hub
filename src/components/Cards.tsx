@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Filter from "./Filter.tsx";
 
-
 type Film = {
   id: number;
   title: string;
