@@ -40,7 +40,7 @@ export default function useSeatLocking(showingId: string | undefined) {
         body: JSON.stringify({}),
       });
     } catch {
-      // ignore
+      // Best-effort — servern rensar via timeout
     }
 
     setLockedByMe(new Set());

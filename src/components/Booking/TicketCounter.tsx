@@ -1,4 +1,5 @@
 import type { TicketType } from '../../interfaces/Booking';
+import { calculateTotalTickets } from '../../utils/bookingUtils';
 
 interface TicketCounterProps {
   ticketTypes: TicketType[];
@@ -13,7 +14,7 @@ export default function TicketCounter({
   onCountChange,
   maxAvailable
 }: TicketCounterProps) {
-  const totalTickets = Object.values(ticketCounts).reduce((sum, c) => sum + c, 0);
+  const totalTickets = calculateTotalTickets(ticketCounts);
 
   const handleDecrease = (typeId: number) => {
     const current = ticketCounts[typeId] || 0;

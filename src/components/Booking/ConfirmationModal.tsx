@@ -1,7 +1,8 @@
-import type { SelectedSeat, Showings } from '../../interfaces/Booking';
+import type { SelectedSeat, ShowingDetail } from '../../interfaces/Booking';
+import { calculateTotalPrice, generateTicketSummary, formatSeatList, formatShowtime } from '../../utils/bookingUtils';
 
 interface ConfirmationModalProps {
-  showing: Showings | null;
+  showing: ShowingDetail | null;
   selectedSeats: SelectedSeat[];
   email: string;
   onConfirm: () => void;
@@ -21,18 +22,8 @@ export default function ConfirmationModal({
   bookingNumber,
   error
 }: ConfirmationModalProps) {
-  const totalPrice = selectedSeats.reduce(
-    (sum, s) => sum + s.ticketType.price,
-    0
-  );
-
-  const ticketSummary = selectedSeats.reduce((acc, { ticketType }) => {
-    if (!acc[ticketType.name]) {
-      acc[ticketType.name] = { count: 0, price: ticketType.price };
-    }
-    acc[ticketType.name].count++;
-    return acc;
-  }, {} as Record<string, { count: number; price: number }>);
+  const totalPrice = selectedSeats.reduce((sum, s) => sum + s.ticketType.price, 0);
+  const ticketSummary = generateTicketSummary(selectedSeats);
 
   return (
     <div className="ch-modal-overlay" onClick={onCancel}>
@@ -75,7 +66,7 @@ export default function ConfirmationModal({
               <div className="mb-3 pb-3 border-bottom">
                 <div className="fw-semibold">{showing.film_title}</div>
                 <div className="text-muted small">
-                  {showing.start_time} | {showing.salong_name}
+                  {formatShowtime(showing.start_time)} | {showing.salong_name}
                 </div>
               </div>
             )}
@@ -83,9 +74,7 @@ export default function ConfirmationModal({
             <div className="mb-3">
               <strong>Platser:</strong>
               <div className="text-muted">
-                {selectedSeats
-                  .map(s => `Rad ${s.seat.row_num}, Plats ${s.seat.seat_number}`)
-                  .join(' | ')}
+                {formatSeatList(selectedSeats, 'long')}
               </div>
             </div>
 

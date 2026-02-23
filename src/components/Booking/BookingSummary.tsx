@@ -1,8 +1,9 @@
-import type { SelectedSeat, Showings, TicketType } from '../../interfaces/Booking';
+import type { SelectedSeat, ShowingDetail, TicketType } from '../../interfaces/Booking';
 import TicketCounter from './TicketCounter';
+import { calculateTotalPrice, calculateTotalTickets, formatSeatList } from '../../utils/bookingUtils';
 
 interface BookingSummaryProps {
-  showing: Showings | null;
+  showing: ShowingDetail | null;
   selectedSeats: SelectedSeat[];
   ticketTypes: TicketType[];
   ticketCounts: Record<number, number>;
@@ -16,7 +17,6 @@ interface BookingSummaryProps {
 }
 
 export default function BookingSummary({
-  showing,
   selectedSeats,
   ticketTypes,
   ticketCounts,
@@ -28,29 +28,10 @@ export default function BookingSummary({
   loading,
   maxAvailable
 }: BookingSummaryProps) {
-  // Beräkna totalpris baserat på ticketCounts
-  const totalPrice = ticketTypes.reduce((sum, type) => {
-    const count = ticketCounts[type.id] || 0;
-    return sum + (count * type.price);
-  }, 0);
-
-  const totalTickets = Object.values(ticketCounts).reduce((sum, c) => sum + c, 0);
+  const totalPrice = calculateTotalPrice(ticketCounts, ticketTypes);
+  const totalTickets = calculateTotalTickets(ticketCounts);
   const hasSelectedSeats = selectedSeats.length > 0;
   const canSubmit = hasSelectedSeats && email.trim() !== '' && selectedSeats.length === totalTickets;
-
-  // Formatera valda platser
-  const formatSelectedSeats = () => {
-    if (selectedSeats.length === 0) return null;
-
-    const sorted = [...selectedSeats].sort((a, b) => {
-      if (a.seat.row_num !== b.seat.row_num) {
-        return a.seat.row_num - b.seat.row_num;
-      }
-      return a.seat.seat_number - b.seat.seat_number;
-    });
-
-  return sorted.map(s => `${s.seat.row_num}:${s.seat.seat_number}`).join(', ');
-  };
 
   return (
     <div className="ch-booking-right">
@@ -63,7 +44,6 @@ export default function BookingSummary({
         />
         </div>
       <div className="ch-booking-summary">
-        
 
 
         {hasSelectedSeats ? (
@@ -71,7 +51,7 @@ export default function BookingSummary({
             <div className="ch-selected-seats-section">
               <h6>Valda platser</h6>
               <div className="ch-selected-seats-list">
-                {formatSelectedSeats()}
+                {formatSeatList(selectedSeats, 'short')}
               </div>
             </div>
 
