@@ -1,5 +1,3 @@
-
-
 type FilterProps = {
   selectedAge: string;
   selectedGenre: string;
