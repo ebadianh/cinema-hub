@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Filter from "./Filter.tsx";
 
 
 type Film = {
@@ -119,94 +120,14 @@ export default function Cards() {
         <h2 className="section-title d-inline-block position-relative px-4">Filmer</h2>
       </div>
 
-      {/* Desktop filter */}
-      <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
-        <div className="d-flex gap-3">
-          <div style={{ minWidth: '200px' }}>
-            <label htmlFor="ageFilter" className="form-label small text-muted"> {/* åldersgräns-filter */}
-              Åldersgräns
-            </label>
-            <select
-              id="ageFilter"
-              className="form-select"
-              value={selectedAge}
-              onChange={(e) => setSelectedAge(e.target.value)}>
-
-              <option value="all">Alla åldrar</option>
-              <option value="0">Barntillåten</option>
-              <option value="7">7+</option>
-              <option value="11">11+</option>
-              <option value="15">15+</option>
-            </select>
-          </div>
-
-          {/* Genre-filter */}
-          <div style={{ minWidth: '200px' }}>
-            <label htmlFor="ageGenreFilter" className="form-label small text-muted">
-              Genre
-            </label>
-            <select
-              id="ageGenreFilter"
-              className="form-select"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}>
-
-              <option value="all">Alla genrer</option>
-              <option value="Drama">Drama</option>
-              <option value="Action">Action</option>
-              <option value="Komedi">Komedi</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Animerat">Animerat</option>
-              <option value="Thriller">Thriller</option>
-              <option value="Skräck">Skräck</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Antal filmer */}
-        <div className="text-muted small pb-2">
-          {filteredFilms.length} av {films.length} filmer
-        </div>
-      </div>
-
-      {/* Mobile and tablet */}
-      <div className="d-lg-none mb-4">
-        <div className="row g-3">
-          <div className="col-6">
-            <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
-            <select
-              id="ageFilterMobile" // åldersgräns-filter
-              className="form-select"
-              value={selectedAge}
-              onChange={(e) => setSelectedAge(e.target.value)}>
-
-              <option value="all">Alla åldrar</option>
-              <option value="0">Barntillåten</option>
-              <option value="7">7+</option>
-              <option value="11">11+</option>
-              <option value="15">15+</option>
-            </select>
-          </div>
-          <div className="col-6">
-            <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
-            <select
-              id="genreFilterMobile" // genre-filter
-              className="form-select"
-              value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}>
-
-              <option value="all">Alla genrer</option>
-              <option value="Drama">Drama</option>
-              <option value="Action">Action</option>
-              <option value="Komedi">Komedi</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Animerat">Animerat</option>
-              <option value="Thriller">Thriller</option>
-              <option value="Skräck">Skräck</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <Filter
+        selectedAge={selectedAge}
+        selectedGenre={selectedGenre}
+        onAgeChange={setSelectedAge}
+        onGenreChange={setSelectedGenre}
+        filteredCount={filteredFilms.length}
+        totalCount={films.length}
+      />
 
       {/* Filmkort - Grid */}
       <div className="row g-3">
