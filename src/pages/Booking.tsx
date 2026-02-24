@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import SeatMap from "../components/Booking/SeatMap";
 import BookingSummary from "../components/Booking/BookingSummary";
 import ConfirmationModal from "../components/Booking/ConfirmationModal";
@@ -61,9 +62,12 @@ export default function Booking() {
           <div className="ch-success-icon mb-4">&#10003;</div>
           <h2 className="mb-3">Tack för din bokning!</h2>
           {flow.bookingReference && (
-            <p className="lead mb-4">
-              Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
-            </p>
+            <>
+              <p className="lead mb-4">
+                Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
+              </p>
+              <QRCodeSVG value={flow.bookingReference} size={128} />
+            </>
           )}
           <p className="text-muted mb-4">
             En bekräftelse har skickats till {email}
