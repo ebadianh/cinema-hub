@@ -1,5 +1,5 @@
 import type { SelectedSeat, ShowingDetail } from '../../interfaces/Booking';
-import { calculateTotalPrice, generateTicketSummary, formatSeatList, formatShowtime } from '../../utils/bookingUtils';
+import { generateTicketSummary, formatSeatList, formatShowtime } from '../../utils/bookingUtils';
 
 interface ConfirmationModalProps {
   showing: ShowingDetail | null;
@@ -8,8 +8,6 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading: boolean;
-  bookingReference?: string | null;
-  error?: string | null;
 }
 
 export default function ConfirmationModal({
@@ -19,8 +17,6 @@ export default function ConfirmationModal({
   onConfirm,
   onCancel,
   loading,
-  bookingReference,
-  error
 }: ConfirmationModalProps) {
   const totalPrice = selectedSeats.reduce((sum, s) => sum + s.ticketType.price, 0);
   const ticketSummary = generateTicketSummary(selectedSeats);
@@ -29,93 +25,60 @@ export default function ConfirmationModal({
     <div className="ch-modal-overlay" onClick={onCancel}>
       <div className="ch-modal" onClick={(e) => e.stopPropagation()}>
 
-        {bookingReference ? (
-          <div className="text-center">
-            <div className="ch-success-icon mb-4">&#10003;</div>
-            <h4 className="mb-3">Bokning bekräftad!</h4>
-            <p className="lead mb-3">
-              Bokningsnummer: <strong>{bookingReference}</strong>
-            </p>
-            <p className="text-muted mb-4">
-              En bekräftelse skickas till {email}
-            </p>
-            <button
-              className="btn ch-btn-primary w-100"
-              onClick={onCancel}
-            >
-              Tillbaka till startsidan
-            </button>
+        <h4 className="mb-4">Bekräfta din bokning</h4>
+
+        {showing && (
+          <div className="mb-3 pb-3 border-bottom">
+            <div className="fw-semibold">{showing.film_title}</div>
+            <div className="text-muted small">
+              {formatShowtime(showing.start_time)} | {showing.salong_name}
+            </div>
           </div>
-        ) : error ? (
-          <div className="text-center">
-            <div className="ch-error-icon mb-4">!</div>
-            <h4 className="mb-3">Något gick fel</h4>
-            <p className="text-muted mb-4">{error}</p>
-            <button
-              className="btn ch-btn-outline w-100"
-              onClick={onCancel}
-            >
-              Försök igen
-            </button>
-          </div>
-        ) : (
-          <>
-            <h4 className="mb-4">Bekräfta din bokning</h4>
-
-            {showing && (
-              <div className="mb-3 pb-3 border-bottom">
-                <div className="fw-semibold">{showing.film_title}</div>
-                <div className="text-muted small">
-                  {formatShowtime(showing.start_time)} | {showing.salong_name}
-                </div>
-              </div>
-            )}
-
-            <div className="mb-3">
-              <strong>Platser:</strong>
-              <div className="text-muted">
-                {formatSeatList(selectedSeats, 'long')}
-              </div>
-            </div>
-
-            <div className="mb-3 pb-3 border-bottom">
-              <strong>Biljetter:</strong>
-              {Object.entries(ticketSummary).map(([name, { count, price }]) => (
-                <div key={name} className="d-flex justify-content-between text-muted">
-                  <span>{count}x {name}</span>
-                  <span>{count * price} kr</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-3">
-              <strong>E-post:</strong>
-              <div className="text-muted">{email}</div>
-            </div>
-
-            <div className="ch-modal-total mb-4">
-              <span>Totalt att betala</span>
-              <span className="fw-bold">{totalPrice} kr</span>
-            </div>
-
-            <div className="d-flex gap-3">
-              <button
-                className="btn ch-btn-outline flex-fill"
-                onClick={onCancel}
-                disabled={loading}
-              >
-                Avbryt
-              </button>
-              <button
-                className="btn ch-btn-primary flex-fill"
-                onClick={onConfirm}
-                disabled={loading}
-              >
-                {loading ? 'Bokar...' : 'Bekräfta'}
-              </button>
-            </div>
-          </>
         )}
+
+        <div className="mb-3">
+          <strong>Platser:</strong>
+          <div className="text-muted">
+            {formatSeatList(selectedSeats, 'long')}
+          </div>
+        </div>
+
+        <div className="mb-3 pb-3 border-bottom">
+          <strong>Biljetter:</strong>
+          {Object.entries(ticketSummary).map(([name, { count, price }]) => (
+            <div key={name} className="d-flex justify-content-between text-muted">
+              <span>{count}x {name}</span>
+              <span>{count * price} kr</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mb-3">
+          <strong>E-post:</strong>
+          <div className="text-muted">{email}</div>
+        </div>
+
+        <div className="ch-modal-total mb-4">
+          <span>Totalt att betala</span>
+          <span className="fw-bold">{totalPrice} kr</span>
+        </div>
+
+        <div className="d-flex gap-3">
+          <button
+            className="btn ch-btn-outline flex-fill"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Avbryt
+          </button>
+          <button
+            className="btn ch-btn-primary flex-fill"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? 'Bokar...' : 'Bekräfta'}
+          </button>
+        </div>
       </div>
     </div>
   );

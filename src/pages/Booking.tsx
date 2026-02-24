@@ -142,8 +142,6 @@ export default function Booking() {
             }
           }}
           loading={flow.submitting}
-          bookingReference={flow.bookingReference}
-          error={flow.error}
         />
       )}
     </div>
