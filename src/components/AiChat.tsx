@@ -1,5 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Card, Form, Button, Spinner } from 'react-bootstrap';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
+import type { PluggableList } from 'unified';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -12,6 +16,25 @@ interface ChatResponse {
   }>;
 }
 
+const STORAGE_KEY = 'cinemahub_ai_chat_v1';
+const MAX_MESSAGES_TO_STORE = 200;
+
+// Typade pluginlistor => TS blir nöjd
+const remarkPlugins: PluggableList = [remarkGfm];
+const rehypePlugins: PluggableList = [rehypeSanitize];
+
+function isValidMessages(data: any): data is Message[] {
+  return (
+    Array.isArray(data) &&
+    data.every(
+      (m) =>
+        m &&
+        (m.role === 'user' || m.role === 'assistant' || m.role === 'system') &&
+        typeof m.content === 'string'
+    )
+  );
+}
+
 export default function AiChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -19,6 +42,33 @@ export default function AiChat() {
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Håll koll på om vi ska “stick to bottom”
+  const stickToBottomRef = useRef(true);
+
+  // 1) Ladda historik från localStorage vid mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (isValidMessages(parsed)) {
+        setMessages(parsed);
+      }
+    } catch {
+      // Ignorera korrupt data
+    }
+  }, []);
+
+  // 2) Spara historik till localStorage när messages ändras
+  useEffect(() => {
+    try {
+      const trimmed = messages.slice(-MAX_MESSAGES_TO_STORE);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    } catch {
+      // quota / privacy mode
+    }
+  }, [messages]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -28,11 +78,21 @@ export default function AiChat() {
     el.style.height = Math.min(el.scrollHeight, 160) + 'px';
   }, [input]);
 
-  // Scroll inside the chat body (NOT the page)
+  // Uppdatera stickToBottomRef när användaren scrollar
+  const onBodyScroll = () => {
+    const el = bodyRef.current;
+    if (!el) return;
+
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottomRef.current = distanceFromBottom < 120; // px-tröskel
+  };
+
+  // Auto-scroll till botten efter nya messages (bara om användaren var nära botten)
   useLayoutEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
-    // schedule after render to avoid “almost bottom”
+    if (!stickToBottomRef.current) return;
+
     requestAnimationFrame(() => {
       el.scrollTop = el.scrollHeight;
     });
@@ -43,8 +103,6 @@ export default function AiChat() {
     if (!text || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: text };
-
-    // build next list immediately (avoid stale closure)
     const nextMessages = [...messages, userMessage];
 
     setMessages(nextMessages);
@@ -64,18 +122,19 @@ export default function AiChat() {
       }
 
       const data: ChatResponse = await response.json();
+
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.choices?.[0]?.message?.content ?? '(No response)'
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          content: `Fel: ${error instanceof Error ? error.message : 'Okänt fel'}`
         }
       ]);
     } finally {
@@ -90,38 +149,68 @@ export default function AiChat() {
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  };
+
   return (
     <Card className="ai-chat shadow-sm">
       <Card.Header className="ai-chat__header">
         <div className="d-flex align-items-center justify-content-between">
-          <div className="fw-semibold">AI Chat</div>
-          {isLoading && (
-            <div className="ai-chat__status">
-              <Spinner animation="border" size="sm" className="me-2" />
-              Thinking…
-            </div>
-          )}
+          <div className="fw-semibold">Cinema-Bot</div>
+
+          <div className="d-flex align-items-center gap-2">
+            {isLoading && (
+              <div className="ai-chat__status">
+                <Spinner animation="border" size="sm" className="me-2" />
+                Tänker…
+              </div>
+            )}
+
+            <Button variant="outline-light" size="sm" onClick={clearChat}>
+              Rensa
+            </Button>
+          </div>
         </div>
       </Card.Header>
 
-      <div ref={bodyRef} className="ai-chat__body">
+      <div ref={bodyRef} className="ai-chat__body" onScroll={onBodyScroll}>
         {messages.length === 0 ? (
           <div className="ai-chat__empty">
-            Ask about movies, recommendations, plot questions, etc.
+            Fråga om öppettider, priser, snacks, bokning eller vilka filmer som går.
           </div>
         ) : (
           messages.map((m, i) => (
             <div
               key={i}
-              className={`ai-chat__bubble ${m.role === 'user' ? 'is-user' : 'is-assistant'}`}
+              className={`ai-chat__bubble ${
+                m.role === 'user' ? 'is-user' : 'is-assistant'
+              }`}
             >
-              {m.content}
+              {m.role === 'assistant' ? (
+                <ReactMarkdown
+                  remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}
+                  components={{
+                    a: ({ node, ...props }) => (
+                      <a {...props} target="_blank" rel="noreferrer noopener" />
+                    )
+                  }}
+                >
+                  {m.content}
+                </ReactMarkdown>
+              ) : (
+                m.content
+              )}
             </div>
           ))
         )}
       </div>
 
-      <Card.Footer className="ai-chat__footer" style={{backgroundColor:'#060645'}}>
+      <Card.Footer className="ai-chat__footer" style={{ backgroundColor: '#060645' }}>
         <div className="ai-chat__inputRow">
           <Form.Control
             as="textarea"
@@ -129,7 +218,7 @@ export default function AiChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message…"
+            placeholder="Skriv ditt meddelande…"
             rows={1}
             disabled={isLoading}
             className="ai-chat__textarea"
@@ -140,10 +229,13 @@ export default function AiChat() {
             disabled={!input.trim() || isLoading}
             className="ai-chat__send"
           >
-            Send
+            Skicka
           </Button>
         </div>
-        <div className="ai-chat__hint" style={{color:'white'}}>Enter to send • Shift+Enter for new line</div>
+
+        <div className="ai-chat__hint" style={{ color: 'white' }}>
+          Enter för att skicka • Shift+Enter för ny rad
+        </div>
       </Card.Footer>
     </Card>
   );
