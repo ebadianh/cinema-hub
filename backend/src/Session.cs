@@ -38,6 +38,12 @@ public static partial class Session
         return session;
     }
 
+    public static string GetSessionId(HttpContext context)
+    {
+        var session = GetRawSession(context);
+        return (string)session.id;
+    }
+
     public static void Start()
     {
         // Start a loop that delete old sessions continuously

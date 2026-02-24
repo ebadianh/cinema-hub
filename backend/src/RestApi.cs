@@ -87,19 +87,28 @@ public static class RestApi
             }
         });
     }
-    public static IResult PostBooking(HttpContext context, JsonElement bodyJson)
+    public static async Task<IResult> PostBooking(HttpContext context, JsonElement bodyJson)
     {
         var body = JSON.Parse(bodyJson.ToString());
 
         var email = (string)body.email;
-        var showingId = (int)body.showingId;
-        var seatsJson = JSON.Stringify(body.seats);
+        var showingId = (int)body.showing_id;
+        var seatsJson = JSON.Stringify(body.tickets);
 
         var result = SQLQueryOne(
             "CALL CreateBookingWithSeats(@email, @showingId, @seatsJson)",
             new { email, showingId, seatsJson },
             context
         );
+
+        if (!result.HasKey("error"))
+        {
+            // Release locks and broadcast updated availability via SSE
+            var holderId = Session.GetSessionId(context);
+            SeatLockManager.ReleaseLocks(holderId, showingId);
+            var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
+            await SseManager.BroadcastToShowing(showingId, unavailable);
+        }
 
         return RestResult.Parse(context, result);
     }

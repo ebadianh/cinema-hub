@@ -13,6 +13,8 @@ public static class Server
         LoginRoutes.Start();
         AiChatRoutes.Start(); 
         RestApi.Start();
+        SeatLockRoutes.Start();
+        SeatLockManager.Start();
         Session.Start();
         // Start the server on port 3001
         var runUrl = "http://localhost:" + Globals.port;
