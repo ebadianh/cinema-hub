@@ -1255,3 +1255,74 @@ body {
     justify-content: center;
   }
 }
+
+/* ===============================
+   BOOKING CONFIRMATION PAGE
+================================ */
+
+.ch-confirmation-page {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--ch-bg);
+}
+
+.ch-confirmation-card {
+  max-width: 600px;
+  width: 100%;
+  background: var(--ch-surface);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+}
+
+.ch-ref-code {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ch-accent);
+  letter-spacing: 0.15em;
+  margin: 0.5rem 0 1rem;
+}
+
+.ch-confirmation-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ch-border);
+}
+
+.ch-confirmation-section h5 {
+  margin-bottom: 0.75rem;
+  color: var(--ch-text);
+}
+
+.ch-seat-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ch-seat-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: var(--ch-surface-strong);
+  border: 1px solid var(--ch-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--ch-text);
+}
+
+@media (max-width: 768px) {
+  .ch-confirmation-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .ch-confirmation-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .ch-ref-code {
+    font-size: 1.5rem;
+  }
+}

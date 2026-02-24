@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import SeatMap from "../components/Booking/SeatMap";
 import BookingSummary from "../components/Booking/BookingSummary";
@@ -66,7 +66,9 @@ export default function Booking() {
               <p className="lead mb-4">
                 Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
               </p>
-              <QRCodeSVG value={flow.bookingReference} size={128} />
+              <Link to={`/booking/confirmation/${flow.bookingReference}`}>
+              <QRCodeSVG value={`${window.location.origin}/booking/confirmation/${flow.bookingReference}`} size={128} />
+              </Link>
             </>
           )}
           <p className="text-muted mb-4">

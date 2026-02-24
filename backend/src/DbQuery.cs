@@ -256,6 +256,45 @@ public static class DbQuery
         var command = db.CreateCommand();
         command.CommandText = createViewSql;
         command.ExecuteNonQuery();
+
+        var bookingDetailsViewSql = @"
+            CREATE OR REPLACE VIEW booking_details AS
+            SELECT
+                b.id AS booking_id,
+                b.booking_reference,
+                b.email,
+                b.booked_at,
+                s.start_time,
+                f.title AS film_title,
+                f.description AS film_description,
+                f.duration_minutes,
+                f.age_rating,
+                f.genre,
+                f.images AS film_images,
+                sa.name AS salong_name,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'row_num', se.row_num,
+                        'seat_number', se.seat_number,
+                        'ticket_type', tt.name,
+                        'ticket_price', tt.price
+                    )
+                ) AS seats
+            FROM Bookings b
+            JOIN Showings s ON b.showing_id = s.id
+            JOIN Films f ON s.film_id = f.id
+            JOIN Salongs sa ON s.salong_id = sa.id
+            JOIN Booked_Seats bs ON bs.booking_id = b.id
+            JOIN Seats se ON bs.seat_id = se.id
+            JOIN Ticket_Type tt ON bs.ticket_type_id = tt.id
+            GROUP BY b.id, b.booking_reference, b.email, b.booked_at,
+                     s.start_time, f.title, f.description, f.duration_minutes,
+                     f.age_rating, f.genre, f.images, sa.name
+        ";
+
+        var command2 = db.CreateCommand();
+        command2.CommandText = bookingDetailsViewSql;
+        command2.ExecuteNonQuery();
     }
 
     private static void SeedDataIfEmpty(MySqlConnection db)
@@ -278,6 +317,7 @@ public static class DbQuery
                 ('visitor,user,admin', 'GET', 'allow', '/api/films', 'true', 'Allow all to read films'),
                 ('visitor,user,admin', 'GET', 'allow', '/api/showings', 'true', 'Allow all to read showings'),
                 ('visitor,user,admin', 'GET', 'allow', '/api/seats', 'true', 'Allow all to read seats'),
+                ('visitor,user,admin', 'GET', 'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
                 ('user,admin', '*', 'allow', '/api/bookings', 'true', 'Allow logged-in users to manage bookings'),
                 ('admin', '*', 'allow', '/api', 'true', 'Admins can access all API routes'),
                 ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),

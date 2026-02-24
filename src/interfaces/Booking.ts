@@ -34,3 +34,26 @@ export interface SelectedSeat {
 }
 
 export type SeatStatus = "available" | "booked" | "selected" | "preview";
+
+export interface BookedSeatInfo {
+  row_num: number;
+  seat_number: number;
+  ticket_type: string;
+  ticket_price: number;
+}
+
+export interface BookingConfirmationData {
+  booking_id: number;
+  booking_reference: string;
+  email: string;
+  booked_at: string;
+  start_time: string;
+  film_title: string;
+  film_description: string;
+  duration_minutes: number;
+  age_rating: string;
+  genre: string;
+  film_images: string[];
+  salong_name: string;
+  seats: BookedSeatInfo[];
+}
