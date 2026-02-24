@@ -1,14 +1,12 @@
+import "../ai-chat.css";
+
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Card, Form, Button, Spinner } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import type { PluggableList } from 'unified';
-
-interface Message {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
+import type { Message } from '../pages/AiChatWidget';
 
 interface ChatResponse {
   choices: Array<{
@@ -16,59 +14,24 @@ interface ChatResponse {
   }>;
 }
 
-const STORAGE_KEY = 'cinemahub_ai_chat_v1';
-const MAX_MESSAGES_TO_STORE = 200;
+type Props = {
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  onClear: () => void;
+};
 
-// Typade pluginlistor => TS blir nöjd
 const remarkPlugins: PluggableList = [remarkGfm];
 const rehypePlugins: PluggableList = [rehypeSanitize];
 
-function isValidMessages(data: any): data is Message[] {
-  return (
-    Array.isArray(data) &&
-    data.every(
-      (m) =>
-        m &&
-        (m.role === 'user' || m.role === 'assistant' || m.role === 'system') &&
-        typeof m.content === 'string'
-    )
-  );
-}
-
-export default function AiChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function AiChat({ messages, setMessages, onClear }: Props) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Håll koll på om vi ska “stick to bottom”
+  // Scroll behavior
   const stickToBottomRef = useRef(true);
-
-  // 1) Ladda historik från localStorage vid mount
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (isValidMessages(parsed)) {
-        setMessages(parsed);
-      }
-    } catch {
-      // Ignorera korrupt data
-    }
-  }, []);
-
-  // 2) Spara historik till localStorage när messages ändras
-  useEffect(() => {
-    try {
-      const trimmed = messages.slice(-MAX_MESSAGES_TO_STORE);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-    } catch {
-      // quota / privacy mode
-    }
-  }, [messages]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -78,16 +41,13 @@ export default function AiChat() {
     el.style.height = Math.min(el.scrollHeight, 160) + 'px';
   }, [input]);
 
-  // Uppdatera stickToBottomRef när användaren scrollar
   const onBodyScroll = () => {
     const el = bodyRef.current;
     if (!el) return;
-
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    stickToBottomRef.current = distanceFromBottom < 120; // px-tröskel
+    stickToBottomRef.current = distanceFromBottom < 120;
   };
 
-  // Auto-scroll till botten efter nya messages (bara om användaren var nära botten)
   useLayoutEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
@@ -122,15 +82,14 @@ export default function AiChat() {
       }
 
       const data: ChatResponse = await response.json();
-
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.choices?.[0]?.message?.content ?? '(No response)'
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         {
           role: 'assistant',
@@ -149,13 +108,6 @@ export default function AiChat() {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {}
-  };
-
   return (
     <Card className="ai-chat shadow-sm">
       <Card.Header className="ai-chat__header">
@@ -170,7 +122,7 @@ export default function AiChat() {
               </div>
             )}
 
-            <Button variant="outline-light" size="sm" onClick={clearChat}>
+            <Button variant="outline-light" size="sm" onClick={onClear}>
               Rensa
             </Button>
           </div>
@@ -186,9 +138,7 @@ export default function AiChat() {
           messages.map((m, i) => (
             <div
               key={i}
-              className={`ai-chat__bubble ${
-                m.role === 'user' ? 'is-user' : 'is-assistant'
-              }`}
+              className={`ai-chat__bubble ${m.role === 'user' ? 'is-user' : 'is-assistant'}`}
             >
               {m.role === 'assistant' ? (
                 <ReactMarkdown
@@ -210,7 +160,7 @@ export default function AiChat() {
         )}
       </div>
 
-      <Card.Footer className="ai-chat__footer" style={{ backgroundColor: '#060645' }}>
+      <Card.Footer className="ai-chat__footer">
         <div className="ai-chat__inputRow">
           <Form.Control
             as="textarea"
@@ -233,7 +183,7 @@ export default function AiChat() {
           </Button>
         </div>
 
-        <div className="ai-chat__hint" style={{ color: 'white' }}>
+        <div className="ai-chat__hint" style={{color: 'white'}}>
           Enter för att skicka • Shift+Enter för ny rad
         </div>
       </Card.Footer>
