@@ -60,9 +60,9 @@ export default function Booking() {
         <div className="ch-booking-confirmed text-center">
           <div className="ch-success-icon mb-4">&#10003;</div>
           <h2 className="mb-3">Tack för din bokning!</h2>
-          {flow.bookingNumber && (
+          {flow.bookingReference && (
             <p className="lead mb-4">
-              Ditt bokningsnummer: <strong>{flow.bookingNumber}</strong>
+              Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
             </p>
           )}
           <p className="text-muted mb-4">
@@ -142,7 +142,7 @@ export default function Booking() {
             }
           }}
           loading={flow.submitting}
-          bookingNumber={flow.bookingNumber}
+          bookingReference={flow.bookingReference}
           error={flow.error}
         />
       )}

@@ -194,6 +194,7 @@ public static class DbQuery
             -- Bookings
             CREATE TABLE IF NOT EXISTS Bookings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
+                booking_reference VARCHAR(10) NOT NULL UNIQUE,
                 email VARCHAR(255) NOT NULL,
                 showing_id INT NOT NULL,
                 booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -454,10 +455,10 @@ public static class DbQuery
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
                 --         rad7 p10-12 (id 67,68,69), rad8 p10-12 (id 79,80,81)
-                INSERT INTO Bookings (email, showing_id) VALUES
-                ('anna.svensson@email.se', 1),
-                ('erik.johansson@email.se', 1),
-                ('lisa.andersson@email.se', 1);
+                INSERT INTO Bookings (email, showing_id, booking_reference) VALUES
+                ('anna.svensson@email.se', 1, 'AB34CD'),
+                ('erik.johansson@email.se', 1, 'XY7K3M'),
+                ('lisa.andersson@email.se', 1, 'P9R2HW');
 
                 INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id) VALUES
                 -- Rad 1 (id 1-8): alla bokade
@@ -620,7 +621,8 @@ public static class DbQuery
         CREATE PROCEDURE CreateBookingWithSeats(
             IN customer_email VARCHAR(255),
             IN selected_showing_id INT,
-            IN selected_seats_json JSON
+            IN selected_seats_json JSON,
+            IN booking_ref VARCHAR(10)
         )
         BEGIN
             DECLARE v_booking_id INT;
@@ -628,11 +630,12 @@ public static class DbQuery
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
+                RESIGNAL;
             END;
 
             START TRANSACTION;
 
-            INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
+            INSERT INTO Bookings (email, showing_id, booking_reference) VALUES (customer_email, selected_showing_id, booking_ref);
             SET v_booking_id = LAST_INSERT_ID();
 
             INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id)
@@ -644,7 +647,7 @@ public static class DbQuery
 
             COMMIT;
 
-            SELECT v_booking_id AS bookingId;
+            SELECT v_booking_id AS bookingId, booking_ref AS booking_reference;
         END
         ";
         createCommand.ExecuteNonQuery();

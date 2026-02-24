@@ -8,7 +8,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading: boolean;
-  bookingNumber?: string | null;
+  bookingReference?: string | null;
   error?: string | null;
 }
 
@@ -19,7 +19,7 @@ export default function ConfirmationModal({
   onConfirm,
   onCancel,
   loading,
-  bookingNumber,
+  bookingReference,
   error
 }: ConfirmationModalProps) {
   const totalPrice = selectedSeats.reduce((sum, s) => sum + s.ticketType.price, 0);
@@ -29,12 +29,12 @@ export default function ConfirmationModal({
     <div className="ch-modal-overlay" onClick={onCancel}>
       <div className="ch-modal" onClick={(e) => e.stopPropagation()}>
 
-        {bookingNumber ? (
+        {bookingReference ? (
           <div className="text-center">
             <div className="ch-success-icon mb-4">&#10003;</div>
             <h4 className="mb-3">Bokning bekräftad!</h4>
             <p className="lead mb-3">
-              Bokningsnummer: <strong>{bookingNumber}</strong>
+              Bokningsnummer: <strong>{bookingReference}</strong>
             </p>
             <p className="text-muted mb-4">
               En bekräftelse skickas till {email}

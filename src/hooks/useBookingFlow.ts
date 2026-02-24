@@ -11,7 +11,7 @@ export default function useBookingFlow(
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
-  const [bookingNumber, setBookingNumber] = useState<string | null>(null);
+  const [bookingReference, setBookingReference] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleConfirmClick = useCallback(async () => {
@@ -56,7 +56,7 @@ export default function useBookingFlow(
       }
 
       const result = await res.json();
-      setBookingNumber(result.booking_number || result.id?.toString());
+      setBookingReference(result.booking_reference);
       setBookingConfirmed(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ett fel uppstod vid bokning");
@@ -93,7 +93,7 @@ export default function useBookingFlow(
     showModal,
     submitting,
     bookingConfirmed,
-    bookingNumber,
+    bookingReference,
     error,
     handleConfirmClick,
     handleSubmitBooking,
