@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import SeatMap from "../components/booking/SeatMap";
-import BookingSummary from "../components/booking/BookingSummary";
-import ConfirmationModal from "../components/booking/ConfirmationModal";
-import MovieInfoCard from "../components/booking/MovieInfoCard";
+import SeatMap from "../components/Booking/SeatMap";
+import BookingSummary from "../components/Booking/BookingSummary";
+import ConfirmationModal from "../components/Booking/ConfirmationModal";
+import MovieInfoCard from "../components/Booking/MovieInfoCard";
 import useBookingData from "../hooks/useBookingData";
 import useSeatStream from "../hooks/useSeatStream";
 import useSeatLocking from "../hooks/useSeatLocking";
@@ -82,12 +82,6 @@ export default function Booking() {
   return (
     <div className="ch-booking-page">
       <div className="ch-booking-left">
-        <button
-          className="btn ch-btn-outline ch-back-btn"
-          onClick={() => navigate(-1)}
-        >
-          &larr; Tillbaka
-        </button>
 
         {showing && (
           <MovieInfoCard

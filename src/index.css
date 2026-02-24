@@ -742,6 +742,12 @@ body {
   z-index: 1050;
   padding: 1rem;
 }
+.ch-seat-toggle-container {
+  display: flex;
+  justify-content: center; /* Centrerar horisontellt */
+  width: 100%;
+  padding: 20px 0; /* Valfritt: ger lite luft */
+}
 
 .ch-modal {
   background: var(--ch-bg);

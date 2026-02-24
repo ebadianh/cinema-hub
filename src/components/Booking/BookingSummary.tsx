@@ -1,5 +1,5 @@
 import type { SelectedSeat, ShowingDetail, TicketType } from '../../interfaces/Booking';
-import TicketCounter from './TicketCounter';
+import TicketCounter from './TicketCounter.tsx';
 import { calculateTotalPrice, calculateTotalTickets, formatSeatList } from '../../utils/bookingUtils';
 
 interface BookingSummaryProps {
