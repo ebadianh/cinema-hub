@@ -171,7 +171,8 @@ export default function Cards() {
                 </div>
 
                 {/* CTA */}
-                <Link className="btn btn-primary mt-3" to={`/films/${f.id}`}>
+                <Link className="btn btn-primary mt-3"
+                  to={`/films/${f.id}${selectedDate !== "all" ? `?date=${selectedDate}` : ""}`}> {/* skickar datumet med i URL:en*/}
                   Mer info
                 </Link>
               </div>
