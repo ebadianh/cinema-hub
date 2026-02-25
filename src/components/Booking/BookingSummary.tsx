@@ -50,7 +50,7 @@ export default function BookingSummary({
           <>
             <div className="ch-selected-seats-section">
               <h6>Valda platser</h6>
-              <div className="ch-selected-seats-list">
+              <div className="ch-selected-seats-list" aria-live="polite">
                 {formatSeatList(selectedSeats, 'short')}
               </div>
             </div>
@@ -78,8 +78,9 @@ export default function BookingSummary({
             <div className="ch-booking-divider"></div>
 
             <div className="ch-email-section">
-              <label className="form-label">E-postadress</label>
+              <label className="form-label" htmlFor="booking-email">E-postadress</label>
               <input
+                id="booking-email"
                 type="email"
                 className="form-control"
                 value={email}
