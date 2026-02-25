@@ -1,4 +1,5 @@
 import AiChat from "../components/AiChat";
+import "../ai-chat.css"
 
 AiChatPage.route = {
   path: '/ai-chat',
@@ -8,7 +9,6 @@ AiChatPage.route = {
 
 export default function AiChatPage() {
   return <>
-    <p>Perhaps it would be better if the AI chat was always available on all pages rather than just on a specific page?</p>
     <AiChat />
   </>
 }
