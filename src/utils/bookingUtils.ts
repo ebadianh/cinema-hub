@@ -67,11 +67,11 @@ export function determineSeatStatus(
 
 export function formatShowtime(isoString: string): string {
   const date = new Date(isoString);
-  return date.toLocaleString("sv-SE", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const weekday = date.toLocaleDateString("sv-SE", { weekday: "long" });
+  const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${capitalized} ${day}/${month} | Klockan: ${hours}.${minutes}`;
 }

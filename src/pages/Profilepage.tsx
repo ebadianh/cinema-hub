@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import type User from '../interfaces/Users';
+import { formatShowtime } from '../utils/bookingUtils';
 
 interface OutletContextType {
     user: User | null;
@@ -184,7 +185,7 @@ export default function Profile() {
                                             <strong>{booking.film?.title ?? 'Okänd film'}</strong>
                                             <p className="text-muted mb-0 small">
                                                 {booking.showing
-                                                    ? new Date(booking.showing.start_time).toLocaleString('sv-SE')
+                                                    ? formatShowtime(booking.showing.start_time)
                                                     : 'Okänt datum'}
                                             </p>
                                             <p className="text-muted mb-0 small">
@@ -219,7 +220,7 @@ export default function Profile() {
                                             <strong>{booking.film?.title ?? 'Okänd film'}</strong>
                                             <p className="text-muted mb-0 small">
                                                 {booking.showing
-                                                    ? new Date(booking.showing.start_time).toLocaleString('sv-SE')
+                                                    ? formatShowtime(booking.showing.start_time)
                                                     : 'Okänt datum'}
                                             </p>
                                             <p className="text-muted mb-0 small">

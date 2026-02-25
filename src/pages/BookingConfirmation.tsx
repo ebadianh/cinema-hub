@@ -66,7 +66,7 @@ export default function BookingConfirmation() {
             duration={duration}
             genre={booking.genre}
             description={booking.film_description}
-            showtime={booking.start_time}
+            showtime={formatShowtime(booking.start_time)}
             salongName={booking.salong_name}
           />
         </div>

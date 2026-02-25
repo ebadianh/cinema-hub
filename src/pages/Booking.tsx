@@ -10,6 +10,7 @@ import useSeatStream from "../hooks/useSeatStream";
 import useSeatLocking from "../hooks/useSeatLocking";
 import useSeatSelection from "../hooks/useSeatSelection";
 import useBookingFlow from "../hooks/useBookingFlow";
+import { formatShowtime } from "../utils/bookingUtils";
 
 export default function Booking() {
   const { showingId } = useParams<{ showingId: string }>();
@@ -96,7 +97,7 @@ export default function Booking() {
             duration={showing.duration_minutes ? `${Math.floor(showing.duration_minutes / 60)}h ${showing.duration_minutes % 60}min` : undefined}
             genre={showing.genre}
             description={showing.film_description}
-            showtime={showing.start_time}
+            showtime={formatShowtime(showing.start_time)}
             salongName={showing.salong_name}
           />
         )}
