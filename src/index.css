@@ -1339,3 +1339,14 @@ body {
     font-size: 1.5rem;
   }
 }
+
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
