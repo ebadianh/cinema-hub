@@ -1248,4 +1248,17 @@ body {
     gap: 1rem;
     justify-content: center;
   }
+
+/* Navbar fix i responsivt läge */
+
+@media (max-width: 991.98px) {
+
+  .ch-navbar .ch-btn-primary,
+  .ch-navbar .ch-btn-outline {
+    width: 100%;
+    display: block;
+    margin: 2px 0;
+  }
+
+}
 }
