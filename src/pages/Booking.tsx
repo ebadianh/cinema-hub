@@ -72,7 +72,7 @@ export default function Booking() {
               </Link>
             </>
           )}
-          <p className="text-muted mb-4">
+          <p className="text-muted my-4">
             En bekräftelse har skickats till {email}
           </p>
           <button
