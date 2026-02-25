@@ -1,4 +1,4 @@
-import Seat from './Seat';
+import Seat from './Seat.tsx';
 import type { Seat as SeatType, SelectedSeat } from '../../interfaces/Booking';
 import { groupSeatsByRow, determineSeatStatus } from '../../utils/bookingUtils';
 
@@ -72,13 +72,16 @@ export default function SeatMap({
         </div>
 
       </div>
+      <div className="ch-seat-toggle-container">
+
       <button
           className={`ch-seat-mode-toggle ${manualMode ? 'ch-seat-mode-toggle--active' : ''}`}
           onClick={onToggleMode}
           type="button"
-        >
-          {manualMode ? 'Individuellt val' : 'Automatiskt val'}
+          >
+          {manualMode ? 'Välj sits' : 'Autovälj'}
         </button>
+          </div>
     </div>
   );
 }

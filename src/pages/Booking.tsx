@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import SeatMap from "../components/booking/SeatMap";
-import BookingSummary from "../components/booking/BookingSummary";
-import ConfirmationModal from "../components/booking/ConfirmationModal";
-import MovieInfoCard from "../components/booking/MovieInfoCard";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
+import SeatMap from "../components/Booking/SeatMap";
+import BookingSummary from "../components/Booking/BookingSummary";
+import ConfirmationModal from "../components/Booking/ConfirmationModal";
+import MovieInfoCard from "../components/Booking/MovieInfoCard";
 import useBookingData from "../hooks/useBookingData";
 import useSeatStream from "../hooks/useSeatStream";
 import useSeatLocking from "../hooks/useSeatLocking";
 import useSeatSelection from "../hooks/useSeatSelection";
 import useBookingFlow from "../hooks/useBookingFlow";
+import { formatShowtime } from "../utils/bookingUtils";
 
 export default function Booking() {
   const { showingId } = useParams<{ showingId: string }>();
@@ -60,12 +62,17 @@ export default function Booking() {
         <div className="ch-booking-confirmed text-center">
           <div className="ch-success-icon mb-4">&#10003;</div>
           <h2 className="mb-3">Tack för din bokning!</h2>
-          {flow.bookingNumber && (
-            <p className="lead mb-4">
-              Ditt bokningsnummer: <strong>{flow.bookingNumber}</strong>
-            </p>
+          {flow.bookingReference && (
+            <>
+              <p className="lead mb-4">
+                Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
+              </p>
+              <Link to={`/booking/confirmation/${flow.bookingReference}`}>
+              <QRCodeSVG value={`${window.location.origin}/booking/confirmation/${flow.bookingReference}`} size={128} />
+              </Link>
+            </>
           )}
-          <p className="text-muted mb-4">
+          <p className="text-muted my-4">
             En bekräftelse har skickats till {email}
           </p>
           <button
@@ -82,12 +89,6 @@ export default function Booking() {
   return (
     <div className="ch-booking-page">
       <div className="ch-booking-left">
-        <button
-          className="btn ch-btn-outline ch-back-btn"
-          onClick={() => navigate(-1)}
-        >
-          &larr; Tillbaka
-        </button>
 
         {showing && (
           <MovieInfoCard
@@ -96,7 +97,7 @@ export default function Booking() {
             duration={showing.duration_minutes ? `${Math.floor(showing.duration_minutes / 60)}h ${showing.duration_minutes % 60}min` : undefined}
             genre={showing.genre}
             description={showing.film_description}
-            showtime={showing.start_time}
+            showtime={formatShowtime(showing.start_time)}
             salongName={showing.salong_name}
           />
         )}
@@ -148,8 +149,6 @@ export default function Booking() {
             }
           }}
           loading={flow.submitting}
-          bookingNumber={flow.bookingNumber}
-          error={flow.error}
         />
       )}
     </div>

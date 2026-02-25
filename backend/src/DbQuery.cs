@@ -194,6 +194,7 @@ public static class DbQuery
             -- Bookings
             CREATE TABLE IF NOT EXISTS Bookings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
+                booking_reference VARCHAR(10) NOT NULL UNIQUE,
                 email VARCHAR(255) NOT NULL,
                 showing_id INT NOT NULL,
                 booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -255,6 +256,45 @@ public static class DbQuery
         var command = db.CreateCommand();
         command.CommandText = createViewSql;
         command.ExecuteNonQuery();
+
+        var bookingDetailsViewSql = @"
+            CREATE OR REPLACE VIEW booking_details AS
+            SELECT
+                b.id AS booking_id,
+                b.booking_reference,
+                b.email,
+                b.booked_at,
+                s.start_time,
+                f.title AS film_title,
+                f.description AS film_description,
+                f.duration_minutes,
+                f.age_rating,
+                f.genre,
+                f.images AS film_images,
+                sa.name AS salong_name,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'row_num', se.row_num,
+                        'seat_number', se.seat_number,
+                        'ticket_type', tt.name,
+                        'ticket_price', tt.price
+                    )
+                ) AS seats
+            FROM Bookings b
+            JOIN Showings s ON b.showing_id = s.id
+            JOIN Films f ON s.film_id = f.id
+            JOIN Salongs sa ON s.salong_id = sa.id
+            JOIN Booked_Seats bs ON bs.booking_id = b.id
+            JOIN Seats se ON bs.seat_id = se.id
+            JOIN Ticket_Type tt ON bs.ticket_type_id = tt.id
+            GROUP BY b.id, b.booking_reference, b.email, b.booked_at,
+                     s.start_time, f.title, f.description, f.duration_minutes,
+                     f.age_rating, f.genre, f.images, sa.name
+        ";
+
+        var command2 = db.CreateCommand();
+        command2.CommandText = bookingDetailsViewSql;
+        command2.ExecuteNonQuery();
     }
 
     private static void SeedDataIfEmpty(MySqlConnection db)
@@ -277,6 +317,7 @@ public static class DbQuery
                 ('visitor,user,admin', 'GET', 'allow', '/api/films', 'true', 'Allow all to read films'),
                 ('visitor,user,admin', 'GET', 'allow', '/api/showings', 'true', 'Allow all to read showings'),
                 ('visitor,user,admin', 'GET', 'allow', '/api/seats', 'true', 'Allow all to read seats'),
+                ('visitor,user,admin', 'GET', 'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
                 ('user,admin', '*', 'allow', '/api/bookings', 'true', 'Allow logged-in users to manage bookings'),
                 ('admin', '*', 'allow', '/api', 'true', 'Admins can access all API routes'),
                 ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
@@ -430,7 +471,7 @@ public static class DbQuery
 
                 -- Showings
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2025-02-10 18:00:00', 'Engelska', 'Svenska'),
+                (1, 1, '2026-03-10 18:00:00', 'Engelska', 'Svenska'),
                 (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
                 (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
                 (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
@@ -449,15 +490,15 @@ public static class DbQuery
                 (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
                 (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
                 (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
-                (6, 2, '2025-02-16 20:00:00', 'Engelska', 'Svenska');
+                (6, 2, '2026-02-28 20:00:00', 'Engelska', 'Svenska');
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
                 --         rad7 p10-12 (id 67,68,69), rad8 p10-12 (id 79,80,81)
-                INSERT INTO Bookings (email, showing_id) VALUES
-                ('anna.svensson@email.se', 1),
-                ('erik.johansson@email.se', 1),
-                ('lisa.andersson@email.se', 1);
+                INSERT INTO Bookings (email, showing_id, booking_reference) VALUES
+                ('anna.svensson@email.se', 1, 'AB34CD'),
+                ('erik.johansson@email.se', 1, 'XY7K3M'),
+                ('lisa.andersson@email.se', 1, 'P9R2HW');
 
                 INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id) VALUES
                 -- Rad 1 (id 1-8): alla bokade
@@ -620,7 +661,8 @@ public static class DbQuery
         CREATE PROCEDURE CreateBookingWithSeats(
             IN customer_email VARCHAR(255),
             IN selected_showing_id INT,
-            IN selected_seats_json JSON
+            IN selected_seats_json JSON,
+            IN booking_ref VARCHAR(10)
         )
         BEGIN
             DECLARE v_booking_id INT;
@@ -628,11 +670,12 @@ public static class DbQuery
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
+                RESIGNAL;
             END;
 
             START TRANSACTION;
 
-            INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
+            INSERT INTO Bookings (email, showing_id, booking_reference) VALUES (customer_email, selected_showing_id, booking_ref);
             SET v_booking_id = LAST_INSERT_ID();
 
             INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id)
@@ -644,28 +687,31 @@ public static class DbQuery
 
             COMMIT;
 
-            SELECT v_booking_id AS bookingId;
+            SELECT v_booking_id AS bookingId, booking_ref AS booking_reference;
         END
         ";
         createCommand.ExecuteNonQuery();
 
         createCommand.CommandText = @"
         CREATE PROCEDURE DeleteBooking(
-            IN booking_id_param INT
+            IN booking_ref_param VARCHAR(10)
         )
         BEGIN
+            DECLARE v_booking_id INT;
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
             END;
 
+            SELECT id INTO v_booking_id FROM Bookings WHERE booking_reference = booking_ref_param;
+
             START TRANSACTION;
 
             DELETE FROM Booked_Seats
-            WHERE booking_id = booking_id_param;
+            WHERE booking_id = v_booking_id;
 
             DELETE FROM Bookings
-            WHERE id = booking_id_param;
+            WHERE id = v_booking_id;
 
             COMMIT;
         END

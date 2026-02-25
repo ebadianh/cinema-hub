@@ -10,6 +10,7 @@ import FilmDetails from "./pages/FilmDetails";
 import About from "./pages/About";
 import AiChatPage from "./pages/AiChatPage";
 import Booking from "./pages/Booking";
+import BookingConfirmation from "./pages/BookingConfirmation";
 
 
 function ProfileRedirect() {
@@ -41,6 +42,7 @@ const routes = [
       { path: "/about", element: <About /> },
       { path: '/chat', element: <AiChatPage/> },
       { path: '/booking/:showingId', element: <Booking/> },
+      { path: '/booking/confirmation/:reference', element: <BookingConfirmation /> },
       { path: "*", element: <h1>Page not found</h1> },
     ],
   },
