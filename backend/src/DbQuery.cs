@@ -471,7 +471,7 @@ public static class DbQuery
 
                 -- Showings
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2025-02-10 18:00:00', 'Engelska', 'Svenska'),
+                (1, 1, '2026-03-10 18:00:00', 'Engelska', 'Svenska'),
                 (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
                 (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
                 (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
@@ -490,7 +490,7 @@ public static class DbQuery
                 (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
                 (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
                 (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
-                (6, 2, '2025-02-16 20:00:00', 'Engelska', 'Svenska');
+                (6, 2, '2026-02-28 20:00:00', 'Engelska', 'Svenska');
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
