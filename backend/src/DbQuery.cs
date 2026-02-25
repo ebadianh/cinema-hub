@@ -694,21 +694,24 @@ public static class DbQuery
 
         createCommand.CommandText = @"
         CREATE PROCEDURE DeleteBooking(
-            IN booking_id_param INT
+            IN booking_ref_param VARCHAR(10)
         )
         BEGIN
+            DECLARE v_booking_id INT;
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
             END;
 
+            SELECT id INTO v_booking_id FROM Bookings WHERE booking_reference = booking_ref_param;
+
             START TRANSACTION;
 
             DELETE FROM Booked_Seats
-            WHERE booking_id = booking_id_param;
+            WHERE booking_id = v_booking_id;
 
             DELETE FROM Bookings
-            WHERE id = booking_id_param;
+            WHERE id = v_booking_id;
 
             COMMIT;
         END
