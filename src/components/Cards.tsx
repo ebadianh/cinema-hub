@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Filter from "./Filter.tsx";
+import DateFilter from "./DateFilter.tsx";
 
 type Film = {
   id: number;
@@ -37,6 +38,8 @@ export default function Cards() {
   const [error, setError] = useState<string | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>("all"); // filter
   const [selectedGenre, setSelectedGenre] = useState<string>("all"); // filter
+  const [selectedDate, setSelectedDate] = useState<string>("all");
+  const [showings, setShowings] = useState<any[]>([]);
 
   // Formaterar om till "X tim Y min"
   function formatDuration(minutes: number) {
@@ -74,6 +77,12 @@ export default function Cards() {
         setDirectors(directorsList);
         setActors(actorsList);
 
+        const res4 = await fetch("/api/showings", { signal: controller.signal });
+        if (!res4.ok) throw new Error(`Showings: ${res4.status} ${res4.statusText}`);
+        const showingData = await res4.json();
+        const showingList = Array.isArray(showingData) ? showingData : showingData.showings ?? [];
+        setShowings(showingList);
+
 
       } catch (e: any) {
         if (e.name !== "AbortError") {
@@ -103,6 +112,19 @@ export default function Cards() {
     if (selectedGenre !== "all" && film.genre !== selectedGenre) { // filter på genre
       return false;
     }
+
+    if (selectedDate !== "all") {
+      const hasShowingOnDate = showings.some((showing) =>
+        showing.film_id === film.id &&
+        showing.start_time.startsWith(selectedDate)
+      );
+
+      if (!hasShowingOnDate) {
+        return false;
+      }
+    }
+
+
     return true;
   });
 
@@ -112,6 +134,11 @@ export default function Cards() {
       <div className="text-center mb-4"> {/* titel med linjer */}
         <h2 className="section-title d-inline-block position-relative px-4">Filmer</h2>
       </div>
+
+      <DateFilter
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
 
       <Filter
         selectedAge={selectedAge}
