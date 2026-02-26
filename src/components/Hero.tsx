@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Carousel } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 type Film = {
   id: number;
@@ -65,7 +66,6 @@ export default function Hero() {
     );
   }
 
-  /* Huvudvy - karusell med filmer */
   return (
     <section className="py-4">
       <div className="container">
@@ -80,56 +80,78 @@ export default function Hero() {
             <Carousel.Item key={film.id}>
               <div className="ch-hero-slide">
                 <div className="ch-hero__overlay" />
-                <div className="ch-hero-layout d-none d-md-flex"> {/* elementet är gömt från 768px och neråt */}
-                  <div className="ch-hero-text"> {/* filminfo vänster */}
+
+                {/* Desktop layout */}
+                <div className="ch-hero-layout d-none d-md-flex">
+                  {/* Film info - vänster */}
+                  <div className="ch-hero-text">
                     <h1 className="display-4 fw-bold mb-3">{film.title}</h1>
-                    <p className="lead mb-3 ch-muted"> {/* beskrivning */}
+
+                    <p className="lead mb-3 ch-muted">
                       {film.description?.substring(0, 150)}
                       {film.description && film.description.length > 150 ? "..." : ""}
                     </p>
-                    <div className="d-flex gap-2 flex-wrap mb-4"> {/* badges */}
+
+                    <div className="d-flex gap-2 flex-wrap mb-4">
                       <span className="badge bg-secondary px-3 py-2">{film.genre}</span>
                       <span className="badge bg-dark px-3 py-2">{film.age_rating}+</span>
                       <span className="badge bg-dark px-3 py-2">
-                        {Math.floor(film.duration_minutes / 60)} tim {film.duration_minutes % 60} min
+                        {Math.floor(film.duration_minutes / 60)} tim{" "}
+                        {film.duration_minutes % 60} min
                       </span>
                     </div>
-                    <button className="btn ch-btn-primary btn-lg px-4"> {/* CTA */}
+
+                    {/* Route to movie by id */}
+                    <Link
+                      className="btn ch-btn-primary btn-lg px-4"
+                      to={`/films/${film.id}`}
+                    >
                       Boka biljetter
-                    </button>
+                    </Link>
                   </div>
 
-                  {/* Poster - Höger */}
+                  {/* Poster - höger */}
                   <div className="ch-hero-poster-section">
                     <div className="ch-hero-poster">
                       <img src={film.images[0]} alt={film.title} />
                     </div>
-                    <button className="btn btn-outline-light btn-lg mt-3 w-100">
+
+                    {/* Route to movie by id */}
+                    <Link
+                      className="btn btn-outline-light btn-lg mt-3 w-100"
+                      to={`/films/${film.id}`}
+                    >
                       Se mer
-                    </button>
+                    </Link>
                   </div>
                 </div>
 
                 {/* Mobile layout */}
                 <div className="ch-hero-mobile d-md-none text-center py-4">
-                  <div className="hero-mobile-poster-wrapper"> {/* poster */}
-                    <img src={film.images[0]}
+                  <div className="hero-mobile-poster-wrapper">
+                    <img
+                      src={film.images[0]}
                       alt={film.title}
                       className="hero-mobile-poster-img"
                     />
                   </div>
-                  <h2 className="display-6 fw-bold mb-2">{film.title}</h2> {/* filminfo */}
+
+                  <h2 className="display-6 fw-bold mb-2">{film.title}</h2>
+
                   <div className="d-flex gap-2 justify-content-center mb-3">
                     <span className="badge bg-secondary px-2 py-1">{film.genre}</span>
                     <span className="badge bg-dark px-2 py-1">{film.age_rating}+</span>
                   </div>
-                  <button className="btn ch-btn-primary px-4">Boka biljetter</button> {/* CTA */}
+
+                  <Link className="btn ch-btn-primary px-4" to={`/films/${film.id}`}>
+                    Boka biljetter
+                  </Link>
                 </div>
               </div>
             </Carousel.Item>
           ))}
         </Carousel>
       </div>
-    </section >
+    </section>
   );
 }
