@@ -17,8 +17,8 @@ export default function Seat({ seat, status, onClick, onMouseEnter, onMouseLeave
       onMouseLeave={onMouseLeave}
       disabled={status === "booked"}
       title={`Rad ${seat.row_num}, Plats ${seat.seat_number}`}
+      aria-label={`Rad ${seat.row_num}, Plats ${seat.seat_number}${status === "booked" ? ", upptagen" : status === "selected" ? ", vald" : ", ledig"}`}
     >
-      {seat.seat_number}
     </button>
   );
 }

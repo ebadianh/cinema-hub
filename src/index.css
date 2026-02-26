@@ -576,7 +576,7 @@ body {
 
 .ch-screen {
   width: 80%;
-  height: 8px;
+  height: 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
   border-radius: 4px 4px 0 0;
   box-shadow: 0 -4px 20px rgba(255, 255, 255, 0.15);
@@ -601,6 +601,18 @@ body {
 .ch-seats-container {
   display: flex;
   gap: 0.5rem;
+}
+
+.ch-seat-rows-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ch-seat-rows-scroll {
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .ch-seat {
@@ -874,11 +886,8 @@ body {
 /* 70-30 layout */
 .ch-booking-page {
   display: grid;
-  grid-template-columns: 70% 30%;
+  grid-template-columns: 1fr 320px;
   gap: 2rem;
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--ch-bg);
 }
 
 .ch-booking-page.ch-booking-loading,
@@ -886,12 +895,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 50vh;
 }
 
 .ch-booking-left {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .ch-back-btn {
@@ -900,11 +911,11 @@ body {
 
 /* Höger kolumn - sticky */
 .ch-booking-right {
-  
+  position: sticky;
   top: 2rem;
   align-self: flex-start;
   max-height: calc(100vh - 4rem);
-
+  overflow-y: auto;
 }
 
 /* Sätesrad */
@@ -918,7 +929,7 @@ body {
 /* Toggle-knapp för val-läge */
 .ch-seat-mode-toggle {
   align-self: flex-end;
-  padding: 0.4rem 1rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 20px;
   border: 1px solid var(--ch-border);
   background: var(--ch-surface);
@@ -1017,6 +1028,10 @@ body {
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ===============================
@@ -1177,9 +1192,8 @@ body {
 
 @media (max-width: 1024px) {
   .ch-booking-page {
-    grid-template-columns: 65% 35%;
+    grid-template-columns: 1fr 280px;
     gap: 1.5rem;
-    padding: 1.5rem;
   }
 
   .ch-movie-poster {
@@ -1198,12 +1212,11 @@ body {
 @media (max-width: 768px) {
   .ch-booking-page {
     grid-template-columns: 1fr;
-    padding: 1rem;
-    padding-bottom: 320px;
+    padding-bottom: 50vh;
   }
 
   .ch-booking-right {
-
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -1236,17 +1249,60 @@ body {
   }
 
   .ch-seat-map {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .ch-seat {
-    width: 28px;
-    height: 28px;
-    font-size: 0.65rem;
+    width: 36px;
+    height: 36px;
+    font-size: 0.7rem;
   }
 
   .ch-seats-container {
+    gap: 0.125rem;
+  }
+
+  .ch-seat-row {
+    margin-bottom: 0.125rem;
     gap: 0.25rem;
+  }
+
+  /* Fade-gradient på kanterna */
+  .ch-seat-rows-wrapper::before,
+  .ch-seat-rows-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .ch-seat-rows-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--ch-surface), transparent);
+  }
+
+  .ch-seat-rows-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--ch-surface), transparent);
+  }
+
+  /* Svep-indikator under sätesraderna */
+  .ch-seat-rows-scroll::after {
+    content: '\2190  svep \2192';
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--ch-text-muted);
+    padding-top: 0.75rem;
+    opacity: 0.5;
+  }
+
+  .ch-email-section .form-control {
+    min-height: 44px;
+    font-size: 16px;
   }
 
   .ch-seat-legend {

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { SelectedSeat, ShowingDetail } from '../../interfaces/Booking';
 import { generateTicketSummary, formatSeatList, formatShowtime } from '../../utils/bookingUtils';
 
@@ -20,12 +21,54 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const totalPrice = selectedSeats.reduce((sum, s) => sum + s.ticketType.price, 0);
   const ticketSummary = generateTicketSummary(selectedSeats);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel]);
+
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement;
+    const focusableEls = modalRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusableEls?.length) focusableEls[0].focus();
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !focusableEls?.length) return;
+      const first = focusableEls[0];
+      const last = focusableEls[focusableEls.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTab);
+    return () => {
+      document.removeEventListener("keydown", handleTab);
+      previousFocusRef.current?.focus();
+    };
+  }, []);
 
   return (
     <div className="ch-modal-overlay" onClick={onCancel}>
-      <div className="ch-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="ch-modal"
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
 
-        <h4 className="mb-4">Bekräfta din bokning</h4>
+        <h4 id="confirm-modal-title" className="mb-4">Bekräfta din bokning</h4>
 
         {showing && (
           <div className="mb-3 pb-3 border-bottom">
