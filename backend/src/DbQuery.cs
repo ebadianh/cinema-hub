@@ -471,26 +471,60 @@ public static class DbQuery
 
                 -- Showings
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2026-03-10 18:00:00', 'Engelska', 'Svenska'),
-                (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
-                (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
-                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
-                (4, 2, '2025-02-12 18:00:00', 'Engelska', 'Svenska'),
-                (5, 1, '2025-02-12 15:00:00', 'Japanska', 'Svenska'),
-                (7, 1, '2025-02-12 20:00:00', 'Engelska', 'Svenska'),
-                (8, 2, '2025-02-13 18:00:00', 'Engelska', 'Svenska'),
-                (9, 1, '2025-02-13 14:00:00', 'Engelska', 'Svenska'),
-                (10, 2, '2025-02-13 20:00:00', 'Engelska', 'Svenska'),
-                (11, 1, '2025-02-14 18:00:00', 'Engelska', 'Svenska'),
-                (12, 2, '2025-02-14 15:00:00', 'Engelska', 'Svenska'),
-                (13, 1, '2025-02-14 21:00:00', 'Engelska', 'Svenska'),
-                (14, 2, '2025-02-15 11:00:00', 'Engelska', 'Svenska'),
-                (15, 1, '2025-02-15 18:00:00', 'Engelska', 'Svenska'),
-                (16, 2, '2025-02-15 20:00:00', 'Engelska', 'Svenska'),
-                (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
-                (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
-                (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
-                (6, 2, '2026-02-28 20:00:00', 'Engelska', 'Svenska');
+                (1, 1, '2026-03-05 18:00:00', 'Engelska', 'Svenska'),
+                (1, 2, '2026-03-06 15:00:00', 'Engelska', 'Svenska'),
+                (1, 1, '2026-03-08 20:00:00', 'Engelska', 'Svenska'),
+
+                (2, 2, '2026-03-05 20:00:00', 'Koreanska', 'Svenska'),
+                (2, 1, '2026-03-07 18:30:00', 'Koreanska', 'Svenska'),
+                (2, 2, '2026-03-09 21:00:00', 'Koreanska', 'Svenska'),
+
+                (3, 1, '2026-03-06 14:00:00', 'Svenska', NULL),
+                (3, 2, '2026-03-10 17:00:00', 'Svenska', NULL),
+                (3, 1, '2026-03-12 19:30:00', 'Svenska', NULL),
+
+                (4, 2, '2026-03-07 18:00:00', 'Engelska', 'Svenska'),
+                (4, 1, '2026-03-11 20:00:00', 'Engelska', 'Svenska'),
+                (4, 2, '2026-03-14 16:00:00', 'Engelska', 'Svenska'),
+
+                (5, 1, '2026-03-08 15:00:00', 'Japanska', 'Svenska'),
+                (5, 2, '2026-03-13 18:00:00', 'Japanska', 'Svenska'),
+                (5, 1, '2026-03-15 20:30:00', 'Japanska', 'Svenska'),
+
+                (6, 2, '2026-03-09 19:00:00', 'Engelska', 'Svenska'),
+                (6, 1, '2026-03-16 21:00:00', 'Engelska', 'Svenska'),
+                (6, 2, '2026-03-18 18:00:00', 'Engelska', 'Svenska'),
+
+                (7, 1, '2026-03-10 20:00:00', 'Engelska', 'Svenska'),
+                (7, 2, '2026-03-17 18:00:00', 'Engelska', 'Svenska'),
+                (7, 1, '2026-03-19 21:00:00', 'Engelska', 'Svenska'),
+
+                (8, 2, '2026-03-11 18:00:00', 'Engelska', 'Svenska'),
+                (8, 1, '2026-03-20 20:00:00', 'Engelska', 'Svenska'),
+
+                (9, 1, '2026-03-12 14:00:00', 'Engelska', 'Svenska'),
+                (9, 2, '2026-03-21 18:00:00', 'Engelska', 'Svenska'),
+
+                (10, 2, '2026-03-13 20:00:00', 'Engelska', 'Svenska'),
+                (10, 1, '2026-03-22 17:30:00', 'Engelska', 'Svenska'),
+
+                (11, 1, '2026-03-14 18:00:00', 'Engelska', 'Svenska'),
+                (11, 2, '2026-03-23 20:00:00', 'Engelska', 'Svenska'),
+
+                (12, 2, '2026-03-15 15:00:00', 'Engelska', 'Svenska'),
+                (12, 1, '2026-03-24 18:30:00', 'Engelska', 'Svenska'),
+
+                (13, 1, '2026-03-16 21:00:00', 'Engelska', 'Svenska'),
+                (13, 2, '2026-03-25 19:00:00', 'Engelska', 'Svenska'),
+
+                (14, 2, '2026-03-17 11:00:00', 'Engelska', 'Svenska'),
+                (14, 1, '2026-03-26 18:00:00', 'Engelska', 'Svenska'),
+
+                (15, 1, '2026-03-18 18:00:00', 'Engelska', 'Svenska'),
+                (15, 2, '2026-03-27 20:00:00', 'Engelska', 'Svenska'),
+
+                (16, 2, '2026-03-19 20:00:00', 'Engelska', 'Svenska'),
+                (16, 1, '2026-03-28 17:00:00', 'Engelska', 'Svenska');
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
