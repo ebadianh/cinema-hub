@@ -10,11 +10,11 @@ export default function DateFilter({
   availableDates = [],
 }: DateFilterProps) {
 
-  const formatDateFull = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const formatDateFull = (dateString: string) => {
+    const date = new Date(dateString);
     const weekday = date.toLocaleDateString("sv-SE", { weekday: "long" });
     const day = date.getDate();
-    const month = date.toLocaleDateString("sv-SE", { weekday: "long" });
+    const month = date.toLocaleDateString("sv-SE", { month: "long" });
     return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day} ${month}`;
   };
 

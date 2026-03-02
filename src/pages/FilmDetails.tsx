@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 
 type Film = {
   id: number;
@@ -119,6 +119,9 @@ export default function FilmDetails() {
   const [searchParams] = useSearchParams();
   const dateFromURL = searchParams.get("date");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedShowing, setSelectedShowing] = useState<Showing | null>(null);
+
+  const navigate = useNavigate();
 
 
   function formatDuration(minutes: number) {
@@ -223,13 +226,15 @@ export default function FilmDetails() {
     return grouped;
   }, [showings]);
 
-  const formatDateShort = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const formatDateShort = (dateString: string) => {
+    const date = new Date(dateString);
     const weekday = date.toLocaleDateString("sv-SE", { weekday: "short" });
     const day = date.getDate();
-    return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day}`;
+    const month = date.getMonth() + 1;
+    return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day}/${month}`;
   };
 
+  /*
   const showtimes = useMemo(() => {
     if (!selectedDate || !showingsByDate[selectedDate]) return [];
     return showingsByDate[selectedDate].map((s) => {
@@ -237,6 +242,7 @@ export default function FilmDetails() {
       return time ? time.substring(0, 5) : "";
     }).filter(Boolean);
   }, [selectedDate, showingsByDate]);
+*/
 
   const availableDates = useMemo(() => {
     return Object.keys(showingsByDate).sort();
@@ -257,11 +263,17 @@ export default function FilmDetails() {
   const directorNames = directors.map((d) => d.name).join(", ") || "N/A";
   const actorNames = actors.map((a) => a.name).join(", ") || "N/A";
 
+  const showingsForSelectedDate = selectedDate && showingsByDate[selectedDate]
+    ? showingsByDate[selectedDate]
+    : [];
+
   // Thumbnail URL (maxres -> fallback hq)
   const ytId = trailerUrl ? getYouTubeId(trailerUrl) : null;
   const thumbPrimary = ytId ? `https://i.ytimg.com/vi/${ytId}/maxresdefault.jpg` : null;
   const thumbFallback = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : null;
   const thumbSrc = useThumbFallback ? thumbFallback : thumbPrimary;
+
+
 
   return <div className="container py-4">
     <div className="mb-3">
@@ -426,13 +438,23 @@ export default function FilmDetails() {
               ))}
             </div>
 
-            {showtimes.length > 0 ? (
+
+            {showingsForSelectedDate.length > 0 ? (
               <div className="d-flex flex-wrap gap-2">
-                {showtimes.map((t, idx) => (
-                  <span key={`${t}-${idx}`} className="badge text-bg-light border px-3 py-2">
-                    {t}
-                  </span>
-                ))}
+                {showingsForSelectedDate.map((s) => {
+                  const time = s.start_time.substring(11, 16);
+
+                  return (
+                    <button
+                      key={s.id}
+                      className={`btn btn-sm ${selectedShowing?.id === s.id ? "btn-primary" : "btn-outline-secondary"
+                        }`}
+                      onClick={() => setSelectedShowing(s)}
+                    >
+                      {time}
+                    </button>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-muted small">Inga visningar detta datum</p>
@@ -441,17 +463,23 @@ export default function FilmDetails() {
         </div>
 
         <div className="d-flex flex-wrap gap-2">
-          <button className="btn btn-danger fw-bold flex-grow-1 flex-md-grow-0">
+          <button
+            className="ch-btn-book flex-grow-1 flex-md-grow-0"
+            disabled={!selectedShowing}
+            onClick={() => {
+              if (selectedShowing) {
+                navigate(`/booking/${selectedShowing?.id}`);
+              }
+            }}
+          >
             Boka biljetter
-          </button>
-          <button className="btn btn-outline-secondary fw-bold flex-grow-1 flex-md-grow-0">
-            Välj platser
           </button>
         </div>
       </div>
     </div>
 
-    {/* ✅ Desktop/Tablet (md+): behåll din nuvarande layout (poster + info), trailer under */}
+
+    {/* Desktop/Tablet (md+): behåll din nuvarande layout (poster + info), trailer under */}
     <div className="d-none d-md-block">
       <div className="row g-4 align-items-stretch">
         <div className="col-12 col-md-4 col-lg-3">
@@ -505,13 +533,22 @@ export default function FilmDetails() {
                   ))}
                 </div>
 
-                {showtimes.length > 0 ? (
+                {showingsForSelectedDate.length > 0 ? (
                   <div className="d-flex flex-wrap gap-2">
-                    {showtimes.map((t, idx) => (
-                      <span key={`${t}-${idx}`} className="badge text-bg-light border px-3 py-2">
-                        {t}
-                      </span>
-                    ))}
+                    {showingsForSelectedDate.map((s) => {
+                      const time = s.start_time.substring(11, 16);
+
+                      return (
+                        <button
+                          key={s.id}
+                          className={`btn btn-sm ${selectedShowing?.id === s.id ? "btn-primary" : "btn-outline-secondary"
+                            }`}
+                          onClick={() => setSelectedShowing(s)}
+                        >
+                          {time}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-muted small">Inga visningar detta datum</p>
@@ -520,11 +557,16 @@ export default function FilmDetails() {
             </div>
 
             <div className="d-flex flex-wrap gap-2">
-              <button className="btn btn-danger fw-bold flex-grow-1 flex-md-grow-0">
+              <button
+                className="ch-btn-book flex-grow-1 flex-md-grow-0"
+                disabled={!selectedShowing}
+                onClick={() => {
+                  if (selectedShowing) {
+                    navigate(`/booking/${selectedShowing?.id}`);
+                  }
+                }}
+              >
                 Boka biljetter
-              </button>
-              <button className="btn btn-outline-secondary fw-bold flex-grow-1 flex-md-grow-0">
-                Välj platser
               </button>
             </div>
           </div>
