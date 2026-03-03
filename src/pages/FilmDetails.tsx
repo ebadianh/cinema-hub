@@ -478,8 +478,7 @@ export default function FilmDetails() {
       </div>
     </div>
 
-
-    {/* Desktop/Tablet (md+): behåll din nuvarande layout (poster + info), trailer under */}
+    {/* ======== Desktop/tablet ======== */}
     <div className="d-none d-md-block">
       <div className="row g-4 align-items-stretch">
         <div className="col-12 col-md-4 col-lg-3">
