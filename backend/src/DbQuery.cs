@@ -469,28 +469,21 @@ public static class DbQuery
                 (4, 'Expressen', 'Brando i toppform.', 4, 5);
                 -- Film 3, 5 och 6 har inga reviews
 
-                -- Showings
+
+                -- Showings (relative to current date)
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2026-03-10 18:00:00', 'Engelska', 'Svenska'),
-                (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
-                (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
-                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
-                (4, 2, '2025-02-12 18:00:00', 'Engelska', 'Svenska'),
-                (5, 1, '2025-02-12 15:00:00', 'Japanska', 'Svenska'),
-                (7, 1, '2025-02-12 20:00:00', 'Engelska', 'Svenska'),
-                (8, 2, '2025-02-13 18:00:00', 'Engelska', 'Svenska'),
-                (9, 1, '2025-02-13 14:00:00', 'Engelska', 'Svenska'),
-                (10, 2, '2025-02-13 20:00:00', 'Engelska', 'Svenska'),
-                (11, 1, '2025-02-14 18:00:00', 'Engelska', 'Svenska'),
-                (12, 2, '2025-02-14 15:00:00', 'Engelska', 'Svenska'),
-                (13, 1, '2025-02-14 21:00:00', 'Engelska', 'Svenska'),
-                (14, 2, '2025-02-15 11:00:00', 'Engelska', 'Svenska'),
-                (15, 1, '2025-02-15 18:00:00', 'Engelska', 'Svenska'),
-                (16, 2, '2025-02-15 20:00:00', 'Engelska', 'Svenska'),
-                (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
-                (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
-                (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
-                (6, 2, '2026-02-28 20:00:00', 'Engelska', 'Svenska');
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'),
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 14 HOUR, 'Svenska', NULL),
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
+                (10,2, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),
+                (12,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),
+                (11,1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
+                (13,1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska');
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
@@ -594,52 +587,67 @@ public static class DbQuery
     }
 
     // Run a query - rows are returned as an array of objects
-    public static Arr SQLQuery(
-        string sql, object parameters = null, HttpContext context = null
-    )
+public static Arr SQLQuery(
+    string sql, object parameters = null, HttpContext context = null
+)
+{
+    var paras = parameters == null ? Obj() : Obj(parameters);
+
+    using var db = new MySqlConnection(connectionString);
+    db.Open();
+
+    // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
+    var sqlTrimmed = (sql ?? "").Trim();
+
+    var command = db.CreateCommand();
+    command.CommandText = sqlTrimmed;
+
+    // Add parameters
+    var entries = (Arr)paras.GetEntries();
+    entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
+
+    if (context != null)
     {
-        var paras = parameters == null ? Obj() : Obj(parameters);
-        using var db = new MySqlConnection(connectionString);
-        db.Open();
-        var command = db.CreateCommand();
-        command.CommandText = @sql;
-        var entries = (Arr)paras.GetEntries();
-        entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
-        if (context != null)
+        DebugLog.Add(context, new
         {
-            DebugLog.Add(context, new
+            sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
+            sqlParams = paras
+        });
+    }
+
+    var rows = Arr();
+
+    try
+    {
+        // Robust detection (after Trim)
+        var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
+        var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
+        var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
+        var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
+        var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+
+        if (isSelect || isCall || isShow || isDescribe || isExplain)
+        {
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+                rows.Push(ObjFromReader(reader));
+        }
+        else
+        {
+            rows.Push(new
             {
-                sqlQuery = sql.Regplace(@"\s+", " "),
-                sqlParams = paras
+                command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
+                rowsAffected = command.ExecuteNonQuery()
             });
         }
-        var rows = Arr();
-        try
-        {
-            if (sql.StartsWith("SELECT ", true, null) || sql.StartsWith("CALL ", true, null))
-            {
-                var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    rows.Push(ObjFromReader(reader));
-                }
-                reader.Close();
-            }
-            else
-            {
-                rows.Push(new
-                {
-                    command = sql.Split(" ")[0].ToUpper(),
-                    rowsAffected = command.ExecuteNonQuery()
-                });
-            }
-        }
-        catch (Exception err)
-        {
-            rows.Push(new { error = err.Message });
-        }
-        return rows;
     }
+    catch (Exception err)
+    {
+        rows.Push(new { error = err.Message });
+    }
+
+    return rows;
+}
 
     // Run a query - only return the first row, as an object
     public static dynamic SQLQueryOne(
