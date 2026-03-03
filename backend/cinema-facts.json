@@ -1,0 +1,19 @@
+{
+  "openingHours": {
+    "monThu": "16:00–22:00",
+    "fri": "16:00–00:00",
+    "sat": "12:00–00:00",
+    "sun": "12:00–22:00"
+  },
+  "concept": "CinemaHub är en modern biograf där teknik möter filmupplevelse...",
+  "snacks": {
+    "classics": ["Smörpopcorn", "Salt popcorn", "Godis & choklad", "Nachos med ostsås"],
+    "drinks": ["Läsk & mineralvatten", "Juice", "Kaffe & te", "Energidrycker"],
+    "premium": ["Gourmetpopcorn", "Chokladpraliner", "Glass & desserter", "Säsongsbaserade snacks"]
+  },
+  "links": {
+    "about": "/about",
+    "films": "/",
+    "bookingPattern": "/booking/:showingId"
+  }
+}
