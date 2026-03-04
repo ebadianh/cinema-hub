@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import Filter from "./Filter.tsx";
-import DateFilter from "./DateFilter.tsx";
 
 type Film = {
   id: number;
@@ -40,6 +39,12 @@ export default function Cards() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<string>("all");
   const [showings, setShowings] = useState<any[]>([]);
+
+  const handleReset = () => {
+    setSelectedAge("all");
+    setSelectedGenre("all");
+    setSelectedDate("all");
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -145,35 +150,28 @@ export default function Cards() {
         </h2>
       </div>
 
-      <DateFilter
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        availableDates={availableDates}
-      />
-
       <Filter
         selectedAge={selectedAge}
         selectedGenre={selectedGenre}
+        selectedDate={selectedDate}
+        availableDates={availableDates}
         onAgeChange={setSelectedAge}
         onGenreChange={setSelectedGenre}
+        onDateChange={setSelectedDate}
+        onReset={handleReset}
         filteredCount={filteredFilms.length}
         totalCount={films.length}
       />
 
       <div className="row g-3">
-
         {filteredFilms.map((f) => (
-
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
-
             {/* HELA KORTET ÄR NU KLICKBART */}
             <Link
               to={`/films/${f.id}${selectedDate !== "all" ? `?date=${selectedDate}` : ""}`}
               className="text-decoration-none text-dark"
             >
-
               <div className="card h-100 shadow-sm p-0 overflow-hidden card-hover">
-
                 {/* Poster */}
                 <div className="poster-wrapper">
                   <img
@@ -189,34 +187,23 @@ export default function Cards() {
 
                 {/* Info */}
                 <div className="card-body text-center p-2">
-
                   <h5 className="card-title small mb-1">
                     {f.title}
                   </h5>
-
                   <div className="mb-2">
                     <span className="badge text-bg-secondary me-1">
                       {f.genre}
                     </span>
-
                     <span className="badge text-bg-light">
                       {f.distributor}
                     </span>
                   </div>
-
-
                 </div>
-
               </div>
-
             </Link>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
   );
 }
