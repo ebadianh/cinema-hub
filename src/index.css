@@ -1216,11 +1216,10 @@ body {
 @media (max-width: 768px) {
   .ch-booking-page {
     grid-template-columns: 1fr;
-    padding-bottom: 50vh;
   }
 
   .ch-booking-right {
-    position: fixed;
+    position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
@@ -1240,7 +1239,7 @@ body {
   }
 
   .ch-movie-info-layout {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
   }
 
