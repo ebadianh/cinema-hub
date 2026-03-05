@@ -175,8 +175,21 @@ export default function Filter({
         </div>
 
         {/* Endast antal filmer till höger */}
-        <div className="text-muted small">
-          {filteredCount} av {totalCount} filmer
+        <div className="d-flex align-items-center gap-3">
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            onClick={() => {
+              onReset();
+              setShowDatePicker(false);
+            }}
+            type="button"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            Reset
+          </button>
+          <span className="text-muted small">
+            {filteredCount} av {totalCount} filmer
+          </span>
         </div>
       </div>
 
