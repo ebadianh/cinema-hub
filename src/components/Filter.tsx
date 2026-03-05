@@ -120,17 +120,6 @@ export default function Filter({
                     >
                       Visa fler datum →
                     </button>
-
-                    <button
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={() => {
-                        onReset();
-                        setShowDatePicker(false);
-                      }}
-                      type="button"
-                    >
-                      Reset
-                    </button>
                   </div>
                 )}
               </div>
