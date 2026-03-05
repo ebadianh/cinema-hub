@@ -28,9 +28,6 @@ export default function Filter({
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const nextSevenDays = availableDates.slice(0, 7);
-  const hasMoreDates = availableDates.length > 7;
-
   const formatDateFull = (dateString: string) => {
     const date = new Date(dateString);
     const weekday = date.toLocaleDateString("sv-SE", { weekday: "long" });
@@ -42,11 +39,6 @@ export default function Filter({
   const handleDateChange = (value: string) => {
     onDateChange(value);
     setShowDatePicker(false);
-  };
-
-  const handleBackToDropdown = () => {
-    setShowDatePicker(false);
-    onDateChange("all");
   };
 
   return (
@@ -95,33 +87,28 @@ export default function Filter({
           </div>
 
           {/* Datum - toggle mellan dropdown och date picker */}
-          <div style={{ minWidth: '200px' }}>
+          <div style={{ minWidth: '200px', position: 'relative' }}>
             <label className="form-label small text-muted">Datum</label>
-
             {!showDatePicker ? (
-              <div>
-                <select
-                  id="dateFilterDesktop"
-                  className="form-select"
-                  value={selectedDate}
-                  onChange={(e) => handleDateChange(e.target.value)}>
-                  <option value="all">Alla datum</option>
-                  {nextSevenDays.map((d) => (
-                    <option key={d} value={d}>{formatDateFull(d)}</option>
-                  ))}
-                </select>
-
-                {hasMoreDates && (
-                  <div className="mt-2 d-flex gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-link btn-sm p-0"
-                      onClick={() => setShowDatePicker(true)}
-                    >
-                      Visa fler datum →
-                    </button>
-                  </div>
-                )}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className="form-select d-flex align-items-center justify-content-between"
+                  style={{ width: '100%', textAlign: 'left', paddingRight: '2.5rem' }}
+                  onClick={() => setShowDatePicker(true)}
+                >
+                  <span>
+                    {selectedDate === "all" ? "Alla datum" : formatDateFull(selectedDate)}
+                  </span>
+                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)' }}>
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                      <rect x="3" y="6" width="14" height="11" rx="2" fill="#888" />
+                      <rect x="3" y="3" width="14" height="3" rx="1" fill="#bbb" />
+                      <rect x="6" y="1" width="2" height="4" rx="1" fill="#888" />
+                      <rect x="12" y="1" width="2" height="4" rx="1" fill="#888" />
+                    </svg>
+                  </span>
+                </button>
               </div>
             ) : (
               <div>
@@ -137,33 +124,12 @@ export default function Filter({
                   min={availableDates[0]}
                   max={availableDates[availableDates.length - 1]}
                 />
-
-                <div className="mt-2 d-flex gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-link btn-sm p-0"
-                    onClick={handleBackToDropdown}
-                  >
-                    ← Tillbaka
-                  </button>
-
-                  <button
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() => {
-                      onReset();
-                      setShowDatePicker(false);
-                    }}
-                    type="button"
-                  >
-                    Reset
-                  </button>
-                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Endast antal filmer till höger */}
+        {/* Reset och antal filmer till höger */}
         <div className="d-flex align-items-center gap-3">
           <button
             className="btn btn-outline-secondary btn-sm"
@@ -174,7 +140,7 @@ export default function Filter({
             type="button"
             style={{ whiteSpace: 'nowrap' }}
           >
-            Reset
+            Rensa filter
           </button>
           <span className="text-muted small">
             {filteredCount} av {totalCount} filmer
@@ -223,31 +189,28 @@ export default function Filter({
           <label className="form-label small text-muted">Datum</label>
 
           {!showDatePicker ? (
-            <>
-              <select
-                id="dateFilterMobile"
-                className="form-select"
-                value={selectedDate}
-                onChange={(e) => handleDateChange(e.target.value)}
+            <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="form-select d-flex align-items-center justify-content-between"
+                style={{ width: '100%', textAlign: 'left', paddingRight: '2.5rem' }}
+                onClick={() => setShowDatePicker(true)}
               >
-                <option value="all">Alla datum</option>
-                {nextSevenDays.map((d) => (
-                  <option key={d} value={d}>{formatDateFull(d)}</option>
-                ))}
-              </select>
-
-              {hasMoreDates && (
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm p-0 mt-1 d-block"
-                  onClick={() => setShowDatePicker(true)}
-                >
-                  Visa fler datum →
-                </button>
-              )}
-            </>
+                <span>
+                  {selectedDate === "all" ? "Alla datum" : formatDateFull(selectedDate)}
+                </span>
+                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)' }}>
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <rect x="3" y="6" width="14" height="11" rx="2" fill="#888" />
+                    <rect x="3" y="3" width="14" height="3" rx="1" fill="#bbb" />
+                    <rect x="6" y="1" width="2" height="4" rx="1" fill="#888" />
+                    <rect x="12" y="1" width="2" height="4" rx="1" fill="#888" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           ) : (
-            <>
+            <div>
               <input
                 type="date"
                 className="form-control"
@@ -260,28 +223,7 @@ export default function Filter({
                 min={availableDates[0]}
                 max={availableDates[availableDates.length - 1]}
               />
-
-              <div className="mt-2 d-flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm p-0"
-                  onClick={handleBackToDropdown}
-                >
-                  ← Tillbaka
-                </button>
-
-                <button
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => {
-                    onReset();
-                    setShowDatePicker(false);
-                  }}
-                  type="button"
-                >
-                  Reset
-                </button>
-              </div>
-            </>
+            </div>
           )}
         </div>
 
@@ -294,7 +236,7 @@ export default function Filter({
           }}
           type="button"
         >
-          Reset
+          Rensa filter
         </button>
       </div>
     </>
