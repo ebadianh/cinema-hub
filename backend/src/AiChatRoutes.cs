@@ -161,338 +161,337 @@ public static class AiChatRoutes
     // - vi gör enkel intent-detektion på userText
     // - beroende på vad user frågar om hämtar vi bara relevant data
     // - resultatet blir en markdown som ai:n får använda som "enda källa"
-    private static string BuildCinemaContextMarkdown(string userText, HttpContext context)
+private static string BuildCinemaContextMarkdown(string userText, HttpContext context)
+{
+    var t = (userText ?? "").ToLowerInvariant().Trim();
+
+    // intent: visningar / filmer
+    bool wantsShowings =
+        t.Contains("vilka filmer") || t.Contains("vad går") || t.Contains("vad visas") ||
+        t.Contains("visas") || t.Contains("visning") || t.Contains("visningar") ||
+        t.Contains("föreställ") || t.Contains("föreställning") ||
+        t.Contains("idag") || t.Contains("imorgon") || LooksLikeDate(t);
+
+    // intent: priser
+    bool wantsPrices =
+        t.Contains("pris") || t.Contains("kostar") || t.Contains("biljett") ||
+        t.Contains("pension") || t.Contains("barn") || t.Contains("vuxen");
+
+    // intent: salonger / antal platser
+    bool wantsSalongs =
+        t.Contains("salong") || t.Contains("platser") || t.Contains("stora") || t.Contains("lilla") || t.Contains("storlek") ||
+        t.Contains("sammanlagt") || t.Contains("totalt");
+
+    // intent: öppettider
+    bool wantsHours =
+        t.Contains("öppet") || t.Contains("öppettid") || t.Contains("öppettider");
+
+    // intent: snacks
+    bool wantsSnacks =
+        t.Contains("snack") || t.Contains("kiosk") || t.Contains("popcorn") || t.Contains("godis") || t.Contains("utbud");
+
+    // intent: hur bokar man
+    bool wantsBooking =
+        t.Contains("boka") || t.Contains("bokar") || t.Contains("bokning") || (t.Contains("hur") && t.Contains("biljett"));
+
+    // intent: åldersgränser
+    bool wantsAge = WantsAgeRating(t);
+
+    // bara för riktigt generella "vad kan du göra?"-frågor
+    bool wantsCapabilities =
+        t.Contains("vad kan du göra") ||
+        t.Contains("hjälpa med") ||
+        t.Contains("vad hjälper du med") ||
+        t == "hej" || t == "hejsan" || t == "tjena";
+
+    var sb = new StringBuilder();
+
+    // -----------------------------
+    // fasta fakta från cinema-facts.json
+    // -----------------------------
+
+    if (cinemaFacts != null && (wantsHours || wantsCapabilities))
     {
-        var t = (userText ?? "").ToLowerInvariant();
-
-        // intent: visningar / filmer
-        bool wantsShowings =
-            t.Contains("vilka filmer") || t.Contains("visas") || t.Contains("visning") || t.Contains("visningar") ||
-            t.Contains("föreställ") || t.Contains("föreställning") ||
-            t.Contains("idag") || t.Contains("imorgon") || LooksLikeDate(t);
-
-        // intent: priser
-        bool wantsPrices =
-            t.Contains("pris") || t.Contains("kostar") || t.Contains("biljett") ||
-            t.Contains("pension") || t.Contains("barn") || t.Contains("vuxen");
-
-        // intent: salonger / antal platser
-        bool wantsSalongs =
-            t.Contains("salong") || t.Contains("platser") || t.Contains("stora") || t.Contains("lilla") || t.Contains("storlek") ||
-            t.Contains("sammanlagt") || t.Contains("totalt");
-
-        // intent: öppettider
-        bool wantsHours =
-            t.Contains("öppet") || t.Contains("öppettid") || t.Contains("öppettider");
-
-        // intent: snacks
-        bool wantsSnacks =
-            t.Contains("snack") || t.Contains("kiosk") || t.Contains("popcorn") || t.Contains("godis") || t.Contains("utbud");
-
-        // intent: hur bokar man
-        bool wantsBooking =
-            t.Contains("boka") || t.Contains("bokar") || t.Contains("bokning") || (t.Contains("hur") && t.Contains("biljett"));
-
-        // intent: åldersgränser (t.ex. "15+" eller "barnvänliga")
-        bool wantsAge = WantsAgeRating(t);
-
-        // om user frågar superbrett ("vad kan du göra" etc)
-        // då skickar vi lite av allt (men håll det kort)
-        bool includeGeneral = !(wantsShowings || wantsPrices || wantsSalongs || wantsHours || wantsSnacks || wantsBooking || wantsAge);
-
-        var sb = new StringBuilder();
-
-        // -----------------------------
-        // fasta fakta från cinema-facts.json
-        // (öppettider, koncept, snacks)
-        // -----------------------------
-
-        if (cinemaFacts != null && (wantsHours || includeGeneral))
+        try
         {
-            try
+            var oh = cinemaFacts.openingHours;
+            if (oh != null)
             {
-                var oh = cinemaFacts.openingHours;
-                if (oh != null)
-                {
-                    sb.AppendLine("### öppettider");
-                    sb.AppendLine($"- mån–tors: {oh.monThu}");
-                    sb.AppendLine($"- fre: {oh.fri}");
-                    sb.AppendLine($"- lör: {oh.sat}");
-                    sb.AppendLine($"- sön: {oh.sun}");
-                    sb.AppendLine();
-                }
-            }
-            catch { }
-        }
-
-        if (cinemaFacts != null && (t.Contains("inrikt") || t.Contains("vision") || t.Contains("om") || includeGeneral))
-        {
-            try
-            {
-                var concept = (string)cinemaFacts.concept;
-                if (!string.IsNullOrWhiteSpace(concept))
-                {
-                    sb.AppendLine("### inriktning");
-                    sb.AppendLine(concept.Trim());
-                    sb.AppendLine();
-                }
-            }
-            catch { }
-        }
-
-        if (cinemaFacts != null && (wantsSnacks || includeGeneral))
-        {
-            try
-            {
-                var snacks = cinemaFacts.snacks;
-                if (snacks != null)
-                {
-                    sb.AppendLine("### kiosk / snacks-utbud");
-                    AppendStringArray(sb, "klassiker", snacks.classics);
-                    AppendStringArray(sb, "dryck", snacks.drinks);
-                    AppendStringArray(sb, "premium", snacks.premium);
-                    sb.AppendLine();
-                }
-            }
-            catch { }
-        }
-
-        // -----------------------------
-        // db-fakta: biljettpriser
-        // -----------------------------
-        if (wantsPrices || includeGeneral)
-        {
-            var prices = DbQuery.SQLQuery(
-                "SELECT name, price FROM Ticket_Type ORDER BY price DESC",
-                null,
-                context
-            );
-
-            if (prices != null && prices.Length > 0)
-            {
-                sb.AppendLine("### biljettpriser");
-                for (int i = 0; i < prices.Length; i++)
-                {
-                    var p = prices[i];
-                    sb.AppendLine($"- {(string)p.name}: {(p.price)} kr");
-                }
+                sb.AppendLine("### öppettider");
+                sb.AppendLine($"- mån–tors: {oh.monThu}");
+                sb.AppendLine($"- fre: {oh.fri}");
+                sb.AppendLine($"- lör: {oh.sat}");
+                sb.AppendLine($"- sön: {oh.sun}");
                 sb.AppendLine();
             }
         }
+        catch { }
+    }
 
-        // -----------------------------
-        // db-fakta: salonger + antal platser
-        // -----------------------------
-        if (wantsSalongs || includeGeneral)
+    if (cinemaFacts != null && (t.Contains("inrikt") || t.Contains("vision") || t.Contains("om biografen") || wantsCapabilities))
+    {
+        try
         {
-            var salongsSql = @"
-                SELECT sa.id, sa.name, COUNT(se.id) AS seats
-                FROM Salongs sa
-                LEFT JOIN Seats se ON se.salong_id = sa.id
-                GROUP BY sa.id, sa.name
-                ORDER BY sa.id
+            var concept = (string)cinemaFacts.concept;
+            if (!string.IsNullOrWhiteSpace(concept))
+            {
+                sb.AppendLine("### inriktning");
+                sb.AppendLine(concept.Trim());
+                sb.AppendLine();
+            }
+        }
+        catch { }
+    }
+
+    if (cinemaFacts != null && wantsSnacks)
+    {
+        try
+        {
+            var snacks = cinemaFacts.snacks;
+            if (snacks != null)
+            {
+                sb.AppendLine("### kiosk / snacks-utbud");
+                AppendStringArray(sb, "klassiker", snacks.classics);
+                AppendStringArray(sb, "dryck", snacks.drinks);
+                AppendStringArray(sb, "premium", snacks.premium);
+                sb.AppendLine();
+            }
+        }
+        catch { }
+    }
+
+    // -----------------------------
+    // db-fakta: biljettpriser
+    // -----------------------------
+    if (wantsPrices)
+    {
+        var prices = DbQuery.SQLQuery(
+            "SELECT name, price FROM Ticket_Type ORDER BY price DESC",
+            null,
+            context
+        );
+
+        if (prices != null && prices.Length > 0)
+        {
+            sb.AppendLine("### biljettpriser");
+            for (int i = 0; i < prices.Length; i++)
+            {
+                var p = prices[i];
+                sb.AppendLine($"- {(string)p.name}: {(p.price)} kr");
+            }
+            sb.AppendLine();
+        }
+    }
+
+    // -----------------------------
+    // db-fakta: salonger + antal platser
+    // -----------------------------
+    if (wantsSalongs)
+    {
+        var salongsSql = @"
+            SELECT sa.id, sa.name, COUNT(se.id) AS seats
+            FROM Salongs sa
+            LEFT JOIN Seats se ON se.salong_id = sa.id
+            GROUP BY sa.id, sa.name
+            ORDER BY sa.id
+        ".Trim();
+
+        var salongs = DbQuery.SQLQuery(salongsSql, null, context);
+
+        sb.AppendLine("### salonger (antal platser)");
+
+        if (salongs != null && salongs.Length > 0)
+        {
+            int total = 0;
+
+            for (int i = 0; i < salongs.Length; i++)
+            {
+                var s = salongs[i];
+                int seats = 0;
+
+                int.TryParse(s.seats?.ToString() ?? "0", out seats);
+                total += seats;
+
+                sb.AppendLine($"- {(string)s.name}: {seats} platser");
+            }
+
+            if (t.Contains("sammanlagt") || t.Contains("totalt"))
+                sb.AppendLine($"- totalt: {total} platser");
+
+            sb.AppendLine();
+        }
+        else
+        {
+            sb.AppendLine("- inga salonger hittades i databasen.");
+            sb.AppendLine();
+        }
+    }
+
+    // -----------------------------
+    // db-fakta: visningar
+    // -----------------------------
+    if (wantsShowings || wantsAge)
+    {
+        DateTime? from = null;
+        DateTime? to = null;
+
+        if (t.Contains("imorgon"))
+        {
+            var d = DateTime.Today.AddDays(1);
+            from = d;
+            to = d.AddDays(1);
+        }
+        else if (t.Contains("idag"))
+        {
+            var d = DateTime.Today;
+            from = d;
+            to = d.AddDays(1);
+        }
+        else
+        {
+            var parsed = TryParseDateFromText(t);
+            if (parsed != null)
+            {
+                from = parsed.Value.Date;
+                to = parsed.Value.Date.AddDays(1);
+            }
+        }
+
+        string salongLike = null;
+        if (t.Contains("stora")) salongLike = "%Stora%";
+        else if (t.Contains("lilla")) salongLike = "%Lilla%";
+
+        string filmLike = TryExtractFilmQuery(t);
+
+        var where = new StringBuilder("WHERE 1=1 ");
+        var paramObj = Obj();
+
+        if (from != null && to != null)
+        {
+            where.Append("AND start_time >= @from AND start_time < @to ");
+            paramObj.from = from.Value.ToString("yyyy-MM-dd HH:mm:ss");
+            paramObj.to = to.Value.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        if (!string.IsNullOrWhiteSpace(salongLike))
+        {
+            where.Append("AND salong_name LIKE @salong ");
+            paramObj.salong = salongLike;
+        }
+
+        if (!string.IsNullOrWhiteSpace(filmLike))
+        {
+            where.Append("AND film_title LIKE @film ");
+            paramObj.film = $"%{filmLike}%";
+        }
+
+        try
+        {
+            var showingsSql = $@"
+                SELECT
+                    id,
+                    film_title,
+                    salong_name,
+                    start_time,
+                    language,
+                    subtitle,
+                    age_rating,
+                    genre
+                FROM showings_detail
+                {where}
+                ORDER BY start_time
+                LIMIT 25
             ".Trim();
 
-            var salongs = DbQuery.SQLQuery(salongsSql, null, context);
+            var showings = DbQuery.SQLQuery(showingsSql, paramObj, context);
 
-            sb.AppendLine("### salonger (antal platser)");
+            sb.AppendLine("### aktuella visningar");
 
-            if (salongs != null && salongs.Length > 0)
+            if (showings != null && showings.Length > 0)
             {
-                int total = 0;
-
-                for (int i = 0; i < salongs.Length; i++)
+                for (int i = 0; i < showings.Length; i++)
                 {
-                    var s = salongs[i];
-                    int seats = 0;
+                    var sh = showings[i];
+                    var ar = sh.age_rating == null ? "okänd" : sh.age_rating.ToString();
+                    var start = sh.start_time?.ToString() ?? "";
+                    var sub = sh.subtitle == null ? "ingen" : sh.subtitle.ToString();
 
-                    // seats kan komma som string/number beroende på din dyn-data
-                    int.TryParse(s.seats?.ToString() ?? "0", out seats);
-                    total += seats;
-
-                    sb.AppendLine($"- {(string)s.name}: {seats} platser");
+                    sb.AppendLine(
+                        $"- #{(sh.id)} — {(string)sh.film_title} — {(string)sh.salong_name} — {start} — språk: {(string)sh.language} — text: {sub} — åldersgräns: {ar}"
+                    );
                 }
 
-                // om user frågar "sammanlagt" eller "totalt" så hjälper detta extra mycket
-                if (t.Contains("sammanlagt") || t.Contains("totalt"))
-                    sb.AppendLine($"- totalt: {total} platser");
-
                 sb.AppendLine();
+                sb.AppendLine("bokningslänk: använd `/booking/<visnings-id>` (t.ex. `/booking/123`).");
+                sb.AppendLine();
+
+                AppendAgeFilteredHints(sb, showings, t);
             }
             else
             {
-                sb.AppendLine("- inga salonger hittades i databasen.");
+                sb.AppendLine("- inga visningar hittades med de filtren.");
                 sb.AppendLine();
             }
         }
-
-        // -----------------------------
-        // db-fakta: visningar (filmer när, vilken salong, språk, åldersgräns)
-        // -----------------------------
-        // här sker alltså "api-anropet" du letade efter:
-        // det är inte ett http-anrop till ett annat api.
-        // det är en direkt sql-fråga via DbQuery.SQLQuery(...)
-        if (wantsShowings || includeGeneral || wantsAge)
+        catch
         {
-            // steg 1: tolka datumfilter från text
-            DateTime? from = null;
-            DateTime? to = null;
+            sb.AppendLine("### aktuella visningar");
+            sb.AppendLine("- kunde inte hämta visningar just nu.");
+            sb.AppendLine();
+        }
+    }
 
-            if (t.Contains("imorgon"))
-            {
-                var d = DateTime.Today.AddDays(1);
-                from = d;
-                to = d.AddDays(1);
-            }
-            else if (t.Contains("idag"))
-            {
-                var d = DateTime.Today;
-                from = d;
-                to = d.AddDays(1);
-            }
-            else
-            {
-                var parsed = TryParseDateFromText(t);
-                if (parsed != null)
-                {
-                    from = parsed.Value.Date;
-                    to = parsed.Value.Date.AddDays(1);
-                }
-            }
+    // -----------------------------
+    // bokningsflöde
+    // -----------------------------
+    if (wantsBooking)
+    {
+        sb.AppendLine("### bokningsflöde (i appen)");
+        sb.AppendLine("1) gå till startsidan och välj en visning");
+        sb.AppendLine("2) öppna bokningssidan: /booking/<visnings-id>");
+        sb.AppendLine("3) välj platser");
+        sb.AppendLine("4) välj biljettyp och fyll i email");
+        sb.AppendLine("5) bekräfta i flödet i appen");
+        sb.AppendLine();
+    }
 
-            // steg 2: salongfilter (enkelt)
-            string salongLike = null;
-            if (t.Contains("stora")) salongLike = "%Stora%";
-            if (t.Contains("lilla")) salongLike = "%Lilla%";
+    return sb.ToString().Trim();
+}
+    // -----------------------------
+    // små helpers för snacks-listor
+    // -----------------------------
+ private static void AppendStringArray(StringBuilder sb, string title, dynamic arr)
+{
+    try
+    {
+        if (arr == null) return;
 
-            // steg 3: filmfilter (tar sista "rimliga" ordet)
-            string filmLike = TryExtractFilmQuery(t);
+        sb.AppendLine($"- {title}:");
 
-            // steg 4: bygg where + parametrar (för att slippa sql injection)
-            var where = new StringBuilder("WHERE 1=1 ");
-            var paramObj = Obj();
-
-            if (from != null && to != null)
-            {
-                where.Clear();
-                where.Append("WHERE start_time >= @from AND start_time < @to ");
-                paramObj.from = from.Value.ToString("yyyy-MM-dd HH:mm:ss");
-                paramObj.to = to.Value.ToString("yyyy-MM-dd HH:mm:ss");
-            }
-
-            if (!string.IsNullOrWhiteSpace(salongLike))
-            {
-                where.Append("AND salong_name LIKE @salong ");
-                paramObj.salong = salongLike;
-            }
-
-            if (!string.IsNullOrWhiteSpace(filmLike))
-            {
-                where.Append("AND film_title LIKE @film ");
-                paramObj.film = $"%{filmLike}%";
-            }
-
-            // steg 5: kör själva sql:en mot viewn showings_detail
-            // obs: vi tar med age_rating + genre så boten kan svara på "15+" och "barnvänligt"
+        foreach (var item in arr)
+        {
             try
             {
-                var showingsSql = $@"
-                    SELECT
-                        id,
-                        film_title,
-                        salong_name,
-                        start_time,
-                        language,
-                        subtitle,
-                        age_rating,
-                        genre
-                    FROM showings_detail
-                    {where}
-                    ORDER BY start_time
-                    LIMIT 25
-                ".Trim();
-
-                var showings = DbQuery.SQLQuery(showingsSql, paramObj, context);
-
-                sb.AppendLine("### aktuella visningar");
-
-                if (showings != null && showings.Length > 0)
+                if (item.name != null)
                 {
-                    for (int i = 0; i < showings.Length; i++)
-                    {
-                        var sh = showings[i];
-
-                        // age_rating kan vara null, så vi gör det safe
-                        var ar = sh.age_rating == null ? "okänd" : sh.age_rating.ToString();
-
-                        // start_time kommer ofta som iso-sträng från DbQuery (yyyy-mm-ddThh:mm:ss)
-                        var start = sh.start_time?.ToString() ?? "";
-
-                        // subtitle kan vara null (svenska dubbning etc)
-                        var sub = sh.subtitle == null ? "ingen" : sh.subtitle.ToString();
-
-                        sb.AppendLine(
-                            $"- #{(sh.id)} — {(string)sh.film_title} — {(string)sh.salong_name} — {start} — språk: {(string)sh.language} — text: {sub} — åldersgräns: {ar}"
-                        );
-                    }
-
-                    sb.AppendLine();
-                    sb.AppendLine("bokningslänk: använd `/booking/<visnings-id>` (t.ex. `/booking/123`).");
-                    sb.AppendLine();
-
-                    // om user frågar "barnvänliga" eller "15+" kan vi göra en extra lista
-                    // men fortfarande bara baserat på age_rating i källan
-                    AppendAgeFilteredHints(sb, showings, t);
+                    var priceText = item.price != null ? $" ({item.price} kr)" : "";
+                    sb.AppendLine($"  - {item.name}{priceText}");
                 }
                 else
                 {
-                    sb.AppendLine("- inga visningar hittades med de filtren.");
-                    sb.AppendLine();
+                    sb.AppendLine($"  - {item}");
                 }
             }
             catch
             {
-                sb.AppendLine("### aktuella visningar");
-                sb.AppendLine("- kunde inte hämta visningar just nu.");
-                sb.AppendLine();
+                sb.AppendLine($"  - {item}");
             }
         }
-
-        // -----------------------------
-        // bokningsflöde (ingen db, bara hur appen funkar)
-        // -----------------------------
-        if (wantsBooking || includeGeneral)
-        {
-            sb.AppendLine("### bokningsflöde (i appen)");
-            sb.AppendLine("1) gå till startsidan och välj en visning");
-            sb.AppendLine("2) öppna bokningssidan: /booking/<visnings-id>");
-            sb.AppendLine("3) välj platser");
-            sb.AppendLine("4) välj biljettyp och fyll i email");
-            sb.AppendLine("5) bekräfta i flödet i appen");
-            sb.AppendLine();
-        }
-
-        return sb.ToString().Trim();
     }
-
-    // -----------------------------
-    // små helpers för snacks-listor
-    // -----------------------------
-    private static void AppendStringArray(StringBuilder sb, string title, dynamic arr)
+    catch
     {
-        try
-        {
-            if (arr == null) return;
-
-            sb.AppendLine($"- {title}:");
-            foreach (var item in arr)
-                sb.AppendLine($"  - {item}");
-        }
-        catch
-        {
-            // om json-strukturen inte matchar: bara skippa
-        }
     }
+}
 
     // -----------------------------
     // datum/film parsing (enkelt med regex)
@@ -517,30 +516,54 @@ public static class AiChatRoutes
         return null;
     }
 
-    private static string TryExtractFilmQuery(string t)
+private static string TryExtractFilmQuery(string t)
+{
+    if (string.IsNullOrWhiteSpace(t)) return null;
+
+    t = t.ToLowerInvariant().Trim();
+
+    // Breda frågor = ingen titelgissning
+    var broadPhrases = new[]
     {
-        // tar sista ordet som inte är "stop-word".
-        // syftet: om user skriver "när går dune" ska vi få "dune".
-        var stop = new HashSet<string>(new[]
-        {
-            "visa","visas","visning","visningar","föreställning","föreställningar",
-            "idag","imorgon","salong","stora","lilla","pris","biljett","bokning","boka",
-            "öppettider","öppet","kiosk","snacks","film","filmer","när","vilka","som",
-            "åldersgräns","barnvänliga","barnvänlig","över","från","plus"
-        });
+        "vilka filmer",
+        "vad går",
+        "vad visas",
+        "vilka visningar",
+        "filmer idag",
+        "filmer imorgon",
+        "visningar idag",
+        "visningar imorgon",
+        "finns det för filmer",
+        "finns det några filmer"
+    };
 
-        var parts = (t ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        for (int i = parts.Length - 1; i >= 0; i--)
-        {
-            var w = parts[i].Trim().Trim(',', '.', '!', '?', ':', ';', '"', '\'');
-            if (w.Length >= 3 && !stop.Contains(w))
-                return w;
-        }
-
-        return null;
+    for (int i = 0; i < broadPhrases.Length; i++)
+    {
+        if (t.Contains(broadPhrases[i]))
+            return null;
     }
 
+    var stop = new HashSet<string>(new[]
+    {
+        "visa","visas","visning","visningar","föreställning","föreställningar",
+        "idag","imorgon","salong","stora","lilla","pris","priser","biljett","biljetter",
+        "bokning","boka","öppettider","öppet","kiosk","snacks","film","filmer","när",
+        "vilka","vad","som","det","den","de","finns","går","på","bio","är","kan",
+        "åldersgräns","barnvänliga","barnvänlig","över","från","plus","varför","hej","tjena",
+        "mig","du","hjälpa","med"
+    });
+
+    var parts = (t ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    for (int i = parts.Length - 1; i >= 0; i--)
+    {
+        var w = parts[i].Trim().Trim(',', '.', '!', '?', ':', ';', '"', '\'');
+        if (w.Length >= 3 && !stop.Contains(w))
+            return w;
+    }
+
+    return null;
+}
     // -----------------------------
     // åldersgräns-logik (endast urval, inget hittas på)
     // -----------------------------
