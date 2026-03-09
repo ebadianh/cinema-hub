@@ -44,7 +44,7 @@ export default function ContactForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Kunde inte skicka meddelandet");
+        throw new Error("Något gick fel, Familjen kunde inte ta emot ditt meddelande.");
       }
 
       setStatus("success");
@@ -69,11 +69,11 @@ export default function ContactForm() {
   return (
     <div className="card bg-dark text-light border-0 shadow">
       <div className="card-body p-4 p-md-5">
-        <h3 className="mb-4">Skicka ett meddelande</h3>
+        <h3 className="mb-4">Skicka ett meddelande till Familjen</h3>
 
         {status === "success" && (
           <div className="alert alert-success mb-4">
-            Tack! Ditt meddelande har skickats. Vi återkommer så snart vi kan.
+            Tack. Familjen har tagit emot ditt meddelande. Vi hör av oss när tiden är rätt.
           </div>
         )}
 
