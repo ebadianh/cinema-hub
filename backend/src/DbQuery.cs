@@ -67,6 +67,7 @@ public static class DbQuery
         DROP TABLE IF EXISTS Directors;
         DROP TABLE IF EXISTS Actors;
         DROP TABLE IF EXISTS Reviews;
+        DROP TABLE IF EXISTS Contacts;
         SET FOREIGN_KEY_CHECKS = 1; 
         ";
 
@@ -213,6 +214,16 @@ public static class DbQuery
                 FOREIGN KEY (showing_id) REFERENCES Showings(id),
                 FOREIGN KEY (booking_id) REFERENCES Bookings(id),
                 FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
+            );
+
+            -- Contacts
+            CREATE TABLE IF NOT EXISTS Contacts (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                subject VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         ";
 
