@@ -1,5 +1,4 @@
 import { Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
 
 export default function Contact() {
   return (
@@ -17,14 +16,12 @@ export default function Contact() {
       <div className="card bg-dark text-light border-0 shadow mb-5">
         <div className="card-body p-4 p-md-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
           <div className="mb-3 mb-md-0">
-            <p className="mb-0">För snabbast hjälp kan du prata direkt med vår AI‑Gudfader. Han kommer ge dig ett erbjudande du inte kan tacka nej till.</p>
+            <p className="mb-3">För snabbast hjälp kan du prata direkt med vår AI‑Gudfader. Han kommer ge dig ett erbjudande du inte kan tacka nej till.</p>
 
             <Button
               variant="btn btn-primary"
               onClick={() => window.dispatchEvent(new Event("open-ai-chat"))}>Prata med gudfadern</Button>
           </div>
-
-          <Link to="/chat" className="btn btn-primary mt-3 mt-md-0">Starta samtalet</Link>
         </div>
       </div>
 
