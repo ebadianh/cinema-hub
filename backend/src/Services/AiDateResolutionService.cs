@@ -9,73 +9,96 @@ public static class AiDateResolutionService
         var mode = (filters.date_mode ?? "").Trim().ToLowerInvariant();
         var raw = (filters.specific_date ?? "").Trim().ToLowerInvariant();
 
-        if (mode == "today" || mode == "tomorrow" || mode == "tonight" || mode == "specific_date")
-            return;
-
-        // explicit relative words
-        if (raw == "idag")
+        // Resolve natural-language phrases first, even if date_mode == specific_date
+        if (!string.IsNullOrWhiteSpace(raw))
         {
-            filters.date_mode = "today";
-            filters.specific_date = "";
-            return;
-        }
-
-        if (raw == "imorgon" || raw == "imorn")
-        {
-            filters.date_mode = "tomorrow";
-            filters.specific_date = "";
-            return;
-        }
-
-        if (raw == "överimorgon")
-        {
-            filters.date_mode = "specific_date";
-            filters.specific_date = DateTime.Today.AddDays(2).ToString("yyyy-MM-dd");
-            return;
-        }
-
-        if (raw == "ikväll")
-        {
-            filters.date_mode = "tonight";
-            filters.time_of_day = "evening";
-            filters.specific_date = "";
-            return;
-        }
-
-        if (raw == "i helgen")
-        {
-            var saturday = NextWeekday(DateTime.Today, DayOfWeek.Saturday, includeToday: true);
-            var monday = saturday.AddDays(2);
-
-            filters.date_mode = "range";
-            filters.range_start = saturday.ToString("yyyy-MM-dd");
-            filters.range_end = monday.ToString("yyyy-MM-dd");
-            filters.specific_date = "";
-            return;
-        }
-
-        // weekday parsing like "måndag nästa vecka"
-        var weekday = ParseSwedishWeekday(raw);
-        if (weekday != null)
-        {
-            var baseDate = DateTime.Today;
-            bool nextWeek = raw.Contains("nästa vecka");
-
-            var target = NextWeekday(baseDate, weekday.Value, includeToday: true);
-
-            if (nextWeek)
+            if (raw == "idag")
             {
-                // move base date to next week first, then resolve weekday
-                var nextWeekBase = StartOfWeek(baseDate).AddDays(7);
-                target = NextWeekday(nextWeekBase, weekday.Value, includeToday: true);
+                filters.date_mode = "today";
+                filters.specific_date = "";
+                return;
             }
 
-            filters.date_mode = "specific_date";
-            filters.specific_date = target.ToString("yyyy-MM-dd");
+            if (raw == "imorgon" || raw == "imorn")
+            {
+                filters.date_mode = "tomorrow";
+                filters.specific_date = "";
+                return;
+            }
+
+            if (raw == "överimorgon")
+            {
+                filters.date_mode = "specific_date";
+                filters.specific_date = DateTime.Today.AddDays(2).ToString("yyyy-MM-dd");
+                return;
+            }
+
+            if (raw == "ikväll")
+            {
+                filters.date_mode = "tonight";
+                filters.time_of_day = "evening";
+                filters.specific_date = "";
+                return;
+            }
+
+            if (raw == "i helgen")
+            {
+                var saturday = NextWeekday(DateTime.Today, DayOfWeek.Saturday, true);
+                var sunday = saturday.AddDays(1);
+
+                filters.date_mode = "range";
+                filters.range_start = saturday.ToString("yyyy-MM-dd");
+                filters.range_end = sunday.ToString("yyyy-MM-dd");
+                filters.specific_date = "";
+                return;
+            }
+
+            var weekday = ParseSwedishWeekday(raw);
+            if (weekday != null)
+            {
+                var baseDate = DateTime.Today;
+                bool nextWeek = raw.Contains("nästa vecka");
+
+                if (nextWeek)
+                {
+                    var startNextWeek = StartOfWeek(baseDate).AddDays(7);
+                    var target = NextWeekday(startNextWeek, weekday.Value, true);
+                    filters.date_mode = "specific_date";
+                    filters.specific_date = target.ToString("yyyy-MM-dd");
+                    return;
+                }
+                else
+                {
+                    var target = NextWeekday(baseDate, weekday.Value, true);
+                    filters.date_mode = "specific_date";
+                    filters.specific_date = target.ToString("yyyy-MM-dd");
+                    return;
+                }
+            }
+        }
+
+        // Clean machine-resolved modes
+        if (mode == "today" || mode == "tomorrow" || mode == "tonight")
+            return;
+
+        // Literal yyyy-MM-dd is already fine
+        DateTime parsed;
+        if (mode == "specific_date" &&
+            !string.IsNullOrWhiteSpace(filters.specific_date) &&
+            DateTime.TryParse(filters.specific_date, out parsed))
+        {
+            filters.specific_date = parsed.ToString("yyyy-MM-dd");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(filters.date_mode))
+        if (mode == "range" &&
+            !string.IsNullOrWhiteSpace(filters.range_start) &&
+            !string.IsNullOrWhiteSpace(filters.range_end))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(filters.date_mode) || mode == "none")
             filters.date_mode = "upcoming";
     }
 

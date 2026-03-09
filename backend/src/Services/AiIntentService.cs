@@ -72,6 +72,7 @@ Output shape:
   }
 }
 """;
+
         var userPrompt = $"""
 Analyze this conversation and extract the latest user intent.
 
@@ -86,7 +87,7 @@ Conversation:
 
         var raw = await AiProxyService.GetAssistantTextAsync(promptMessages);
         var result = ParseIntentJson(raw);
-return PostProcessIntent(result, messages);
+        return PostProcessIntent(result, messages);
     }
 
     private static string BuildRecentConversation(List<AiChatMessage> messages)
@@ -95,9 +96,7 @@ return PostProcessIntent(result, messages);
         var lines = new List<string>();
 
         foreach (var m in relevant)
-        {
             lines.Add($"{m.role}: {m.content}");
-        }
 
         return string.Join("\n", lines);
     }
@@ -109,7 +108,6 @@ return PostProcessIntent(result, messages);
 
         raw = raw.Trim();
 
-        // Try to extract JSON object if model wrapped it
         int first = raw.IndexOf('{');
         int last = raw.LastIndexOf('}');
         if (first >= 0 && last > first)
@@ -131,37 +129,20 @@ return PostProcessIntent(result, messages);
     }
 
     private static AiIntentResult PostProcessIntent(AiIntentResult result, List<AiChatMessage> messages)
-{
-    if (result == null) result = new AiIntentResult();
-    if (result.filters == null) result.filters = new AiIntentFilters();
-
-    var latestUser = messages.LastOrDefault(x => x.role == "user")?.content ?? "";
-    var latestLower = latestUser.ToLowerInvariant().Trim();
-
-    // handle title-only prompts like "dune?" or "inception?"
-    bool looksLikeBareTitle =
-        !string.IsNullOrWhiteSpace(latestUser) &&
-        latestUser.Length <= 40 &&
-        !latestLower.Contains("pris") &&
-        !latestLower.Contains("öppet") &&
-        !latestLower.Contains("salong") &&
-        !latestLower.Contains("boka") &&
-        !latestLower.Contains("kiosk");
-
-    if ((result.intent == "unknown" || result.intent == "showings.search") &&
-        string.IsNullOrWhiteSpace(result.filters.film_title) &&
-        looksLikeBareTitle)
     {
-        var candidate = AiTitleNormalizationService.ExtractLikelyTitleFromPrompt(latestUser);
-        if (!string.IsNullOrWhiteSpace(candidate))
-        {
-            result.intent = "showings.search";
-            result.filters.film_title = candidate;
+        if (result == null) result = new AiIntentResult();
+        if (result.filters == null) result.filters = new AiIntentFilters();
 
-            if (string.IsNullOrWhiteSpace(result.filters.date_mode))
-                result.filters.date_mode = "upcoming";
+        var latestUser = messages.LastOrDefault(x => x.role == "user")?.content ?? "";
+        var latestLower = latestUser.ToLowerInvariant().Trim();
+        var tinyPrompt = latestLower.Trim();
+
+        if (tinyPrompt == "när" || tinyPrompt == "var" || tinyPrompt == "hur")
+        {
+            result.needs_clarification = true;
+            result.clarification_question = "Menar du en specifik film eller visning?";
+            return result;
         }
-    }
 
         if (latestLower.Contains("väder") ||
             latestLower.Contains("champions league") ||
@@ -174,29 +155,127 @@ return PostProcessIntent(result, messages);
             return result;
         }
 
-    // normalize explicit title filter if present
-    if (!string.IsNullOrWhiteSpace(result.filters.film_title))
-        result.filters.film_title = AiTitleNormalizationService.NormalizeTitleCandidate(result.filters.film_title);
+    bool looksLikeBroadShowingsPrompt =
+     latestLower.Contains("vilka filmer") ||
+     latestLower.Contains("film visas") ||
+     latestLower.Contains("filmer visas") ||
+     latestLower.Contains("vad går") ||
+     latestLower.Contains("vad visas") ||
+     latestLower.Contains("visa visningar") ||
+     latestLower.Contains("vilka visningar") ||
+     latestLower.Contains("visningar") ||
+     latestLower.Contains("salongen") ||
+     latestLower.Contains("salong") ||
+     latestLower.Contains("idag") ||
+     latestLower.Contains("imorgon") ||
+     latestLower.Contains("ikväll") ||
+     latestLower.Contains("i helgen");
 
-    // soft date normalization from raw latest prompt
-    if (string.IsNullOrWhiteSpace(result.filters.specific_date))
-    {
+    bool looksLikeBareTitle =
+    !string.IsNullOrWhiteSpace(latestUser) &&
+    latestUser.Length <= 40 &&
+    !looksLikeBroadShowingsPrompt &&
+    !latestLower.Contains("pris") &&
+    !latestLower.Contains("öppet") &&
+    !latestLower.Contains("salong") &&
+    !latestLower.Contains("boka") &&
+    !latestLower.Contains("kiosk") &&
+    !latestLower.Contains("hjälp") &&
+    !latestLower.Contains("vad kan du") &&
+    !latestLower.Contains("öppettider");
+
+        if ((result.intent == "unknown" || result.intent == "showings.search") &&
+            string.IsNullOrWhiteSpace(result.filters.film_title) &&
+            looksLikeBareTitle)
+        {
+            var candidate = AiTitleNormalizationService.ExtractLikelyTitleFromPrompt(latestUser);
+            if (!string.IsNullOrWhiteSpace(candidate))
+            {
+                result.intent = "showings.search";
+                result.filters.film_title = candidate;
+
+                if (string.IsNullOrWhiteSpace(result.filters.date_mode))
+                    result.filters.date_mode = "upcoming";
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.filters.film_title))
+            result.filters.film_title = AiTitleNormalizationService.NormalizeTitleCandidate(result.filters.film_title);
+
+        var filmTitleLower = (result.filters.film_title ?? "").Trim().ToLowerInvariant();
+
+        bool invalidBroadFilmTitle =
+        filmTitleLower.Contains("vilka filmer") ||
+        filmTitleLower.Contains("vad går") ||
+        filmTitleLower.Contains("vad visas") ||
+        filmTitleLower.Contains("visningar") ||
+        filmTitleLower.Contains("salong") ||
+        filmTitleLower.Contains("idag") ||
+        filmTitleLower.Contains("imorgon") ||
+        filmTitleLower.Contains("ikväll");
+
+        if (invalidBroadFilmTitle)
+        {
+            result.filters.film_title = "";
+        }
+        
+        // Stronger raw date phrase extraction from latest prompt
+        var detectedRawDatePhrase = "";
+
         if (latestLower.Contains("överimorgon"))
-            result.filters.specific_date = "överimorgon";
+            detectedRawDatePhrase = "överimorgon";
         else if (latestLower.Contains("i helgen"))
-            result.filters.specific_date = "i helgen";
+            detectedRawDatePhrase = "i helgen";
         else if (latestLower.Contains("nästa vecka"))
         {
-            if (latestLower.Contains("måndag")) result.filters.specific_date = "måndag nästa vecka";
-            else if (latestLower.Contains("tisdag")) result.filters.specific_date = "tisdag nästa vecka";
-            else if (latestLower.Contains("onsdag")) result.filters.specific_date = "onsdag nästa vecka";
-            else if (latestLower.Contains("torsdag")) result.filters.specific_date = "torsdag nästa vecka";
-            else if (latestLower.Contains("fredag")) result.filters.specific_date = "fredag nästa vecka";
-            else if (latestLower.Contains("lördag")) result.filters.specific_date = "lördag nästa vecka";
-            else if (latestLower.Contains("söndag")) result.filters.specific_date = "söndag nästa vecka";
+            if (latestLower.Contains("måndag")) detectedRawDatePhrase = "måndag nästa vecka";
+            else if (latestLower.Contains("tisdag")) detectedRawDatePhrase = "tisdag nästa vecka";
+            else if (latestLower.Contains("onsdag")) detectedRawDatePhrase = "onsdag nästa vecka";
+            else if (latestLower.Contains("torsdag")) detectedRawDatePhrase = "torsdag nästa vecka";
+            else if (latestLower.Contains("fredag")) detectedRawDatePhrase = "fredag nästa vecka";
+            else if (latestLower.Contains("lördag")) detectedRawDatePhrase = "lördag nästa vecka";
+            else if (latestLower.Contains("söndag")) detectedRawDatePhrase = "söndag nästa vecka";
         }
-    }
+        else
+        {
+            if (latestLower.Contains("måndag")) detectedRawDatePhrase = "måndag";
+            else if (latestLower.Contains("tisdag")) detectedRawDatePhrase = "tisdag";
+            else if (latestLower.Contains("onsdag")) detectedRawDatePhrase = "onsdag";
+            else if (latestLower.Contains("torsdag")) detectedRawDatePhrase = "torsdag";
+            else if (latestLower.Contains("fredag")) detectedRawDatePhrase = "fredag";
+            else if (latestLower.Contains("lördag")) detectedRawDatePhrase = "lördag";
+            else if (latestLower.Contains("söndag")) detectedRawDatePhrase = "söndag";
+        }
 
-    return result;
-}
+        if (!string.IsNullOrWhiteSpace(detectedRawDatePhrase))
+        {
+            if (result.intent == "unknown")
+                result.intent = "showings.search";
+
+            result.filters.date_mode = "specific_date";
+            result.filters.specific_date = detectedRawDatePhrase;
+        }
+
+        // Fallback: obvious showings prompts should still search showings
+        bool looksLikeShowingsPrompt =
+            latestLower.Contains("film") ||
+            latestLower.Contains("filmer") ||
+            latestLower.Contains("visning") ||
+            latestLower.Contains("visningar") ||
+            latestLower.Contains("går") ||
+            latestLower.Contains("visas") ||
+            latestLower.Contains("showing") ||
+            latestLower.Contains("imorgon") ||
+            latestLower.Contains("idag") ||
+            latestLower.Contains("ikväll");
+
+        if (result.intent == "unknown" && looksLikeShowingsPrompt)
+        {
+            result.intent = "showings.search";
+            if (string.IsNullOrWhiteSpace(result.filters.date_mode))
+                result.filters.date_mode = "upcoming";
+        }
+
+        return result;
+    }
 }

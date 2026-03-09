@@ -20,35 +20,35 @@ public static class AiOrchestratorService
             }));
         }
 
-     fullMessages.Push(Obj(new
-{
-    role = "system",
-    content =
-        """
-        Du är Cinema-Bot för CinemaHub.
-
-        Svara endast utifrån de grundade uppgifterna i "GROUNDING".
-
-        Viktiga regler:
-        - Hitta aldrig på specifika produkter, filmer, tider eller priser.
-        - Om en användare frågar om en specifik snack-produkt och den inte finns som matched_item i grounding:
-          säg att du inte har exakt information om just den produkten.
-        - Om grounding bara säger en kategori, till exempel "läsk", får du inte påstå en specifik variant som Cola Zero.
-        - Om inga visningar hittas:
-          säg att du inte hittar några matchande visningar, inte att du saknar tillgång till data.
-        - Om frågan är utanför biografens område:
-          säg kort att du främst hjälper till med biografens information och funktioner.
-        - Om användaren vill boka:
-          förklara stegen, men påstå aldrig att bokningen redan är gjord.
-        """.Trim()
-}));
-
         fullMessages.Push(Obj(new
         {
             role = "system",
             content =
-                "## GROUNDING\n" +
-                JSON.Stringify(groundedFacts)
+                """
+                Du är Cinema-Bot för CinemaHub.
+
+                Svara endast utifrån de grundade uppgifterna i "GROUNDING".
+
+                Regler:
+                - Hitta aldrig på specifika produkter, filmer, tider eller priser.
+                - Om en användare frågar om en specifik snack-produkt och matched_item är null:
+                  säg att du inte har exakt information om just den produkten.
+                - Om grounding bara innehåller en kategori, som "läsk & mineralvatten",
+                  får du inte nämna specifika märken eller varianter som Cola Zero eller Pepsi Max.
+                - Om inga visningar hittas:
+                  säg att du inte hittar några matchande visningar.
+                - Om frågan är utanför biografens område, använd out_of_scope_reply om den finns.
+                - Om användaren vill boka:
+                  förklara stegen, men påstå aldrig att bokningen redan är gjord.
+                - Om needs_clarification är true och clarification_question finns:
+                  ställ den frågan kort istället för att gissa.
+                """.Trim()
+        }));
+
+        fullMessages.Push(Obj(new
+        {
+            role = "system",
+            content = "## GROUNDING\n" + JSON.Stringify(groundedFacts)
         }));
 
         foreach (var m in messages)
@@ -65,6 +65,9 @@ public static class AiOrchestratorService
 
     private static dynamic BuildGroundedFacts(AiIntentResult intent, HttpContext context)
     {
+        if (intent == null) intent = new AiIntentResult();
+        if (intent.filters == null) intent.filters = new AiIntentFilters();
+
         var payload = Obj(new
         {
             intent = intent.intent,
@@ -82,7 +85,8 @@ public static class AiOrchestratorService
                 {
                     showings = showings,
                     showings_found = showings != null && showings.Length > 0,
-                    requested_scope = intent.filters
+                    requested_scope = intent.filters,
+                    no_results_message = "Jag hittar inga matchande visningar med de filtren."
                 });
                 break;
 
@@ -96,15 +100,24 @@ public static class AiOrchestratorService
             case "snacks.menu":
                 payload.data = Obj(new
                 {
-                    snack_menu = AiSnackService.GetSnackMenu()
+                    snack_menu = AiSnackService.GetSnackMenu(),
+                    exact_products_only = true,
+                    note = "Om en specifik produkt inte finns uttryckligen i snack_menu får den inte påstås finnas."
                 });
                 break;
 
             case "snacks.price":
+                var matchedSnack = AiSnackService.FindSnackByName(intent.filters.snack_item);
                 payload.data = Obj(new
                 {
                     snack_menu = AiSnackService.GetSnackMenu(),
-                    matched_item = AiSnackService.FindSnackByName(intent.filters?.snack_item)
+                    matched_item = matchedSnack,
+                    snack_item_requested = intent.filters.snack_item,
+                    snack_item_found = matchedSnack != null,
+                    is_known_category = AiSnackService.IsKnownSnackCategory(intent.filters.snack_item),
+                    is_specific_brand_request = AiSnackService.LooksLikeSpecificBrandRequest(intent.filters.snack_item),
+                    exact_products_only = true,
+                    note = "Om matched_item är null får modellen inte säga att den specifika produkten finns."
                 });
                 break;
 
@@ -162,11 +175,12 @@ public static class AiOrchestratorService
                         "salongernas storlek",
                         "aktuella visningar"
                     ),
-                    scope_note = "Cinema-Bot hjälper främst till med biografens information och funktioner."
+                    scope_note = "Cinema-Bot hjälper främst till med biografens information och funktioner.",
+                    out_of_scope_reply = "Jag hjälper främst till med biografens visningar, priser, öppettider, snacks, salonger och bokning."
                 });
                 break;
-                    }
+        }
 
-                    return payload;
+        return payload;
     }
 }

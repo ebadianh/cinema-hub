@@ -74,4 +74,24 @@ public static class AiSnackService
                s.Contains("glass") ||
                s.Contains("dessert");
     }
+
+    public static bool LooksLikeSpecificBrandRequest(string snackItem)
+{
+    if (string.IsNullOrWhiteSpace(snackItem))
+        return false;
+
+    var s = snackItem.Trim().ToLowerInvariant();
+
+    // brand / specific product signals
+    return
+        s.Contains("cola zero") ||
+        s.Contains("pepsi max") ||
+        s.Contains("coca cola") ||
+        s.Contains("fanta") ||
+        s.Contains("sprite") ||
+        s.Contains("red bull") ||
+        s.Contains("monster") ||
+        s.Contains("loka") ||
+        s.Contains("ramlösa");
+}
 }

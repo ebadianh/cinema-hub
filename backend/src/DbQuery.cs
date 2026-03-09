@@ -470,20 +470,69 @@ public static class DbQuery
                 -- Film 3, 5 och 6 har inga reviews
 
 
-                -- Showings (relative to current date)
+                -- Showings (relative to current date, richer seed for AI testing)
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (2, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'),
-                (3, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 14 HOUR, 'Svenska', NULL),
-                (6, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),
-                (5, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),
-                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
-                (7, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),
-                (9, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),
-                (8, 2, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
-                (10,2, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),
-                (12,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),
-                (11,1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),
-                (13,1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska');
+                
+                -- TODAY
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 14 HOUR), 'Svenska', NULL),                -- Toy Story 4
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 20 HOUR), 'Koreanska', 'Svenska'),         -- Parasite
+                
+                -- TOMORROW
+                (10, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- The Grand Budapest Hotel
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Dune
+                
+                -- DAY AFTER TOMORROW
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+                
+                -- +3 DAYS
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Godfather
+                
+                -- +4 DAYS
+                (11, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Arrival
+                (13, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+                
+                -- +5 DAYS
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 12 HOUR, 'Svenska', NULL),        -- Toy Story 4
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Dune
+                (14,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),  -- Paddington 2
+                
+                -- +6 DAYS
+                (15,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Her
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Knives Out
+                (12,1, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 16 HOUR, 'Engelska', 'Svenska'),  -- The Pursuit of Happyness
+                
+                -- +7 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Inception
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'), -- Parasite
+                
+                -- +8 DAYS
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+                (10,2, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Grand Budapest Hotel
+                
+                -- +9 DAYS
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 14 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 17 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+                
+                -- +10 DAYS
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Dune
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'), -- The Godfather
+                
+                -- +11 DAYS
+                (14,1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 13 HOUR, 'Engelska', 'Svenska'), -- Paddington 2
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR, 'Svenska', NULL),       -- Toy Story 4
+                (11,2, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Arrival
+                
+                -- +12 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Inception
+                (13,1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+                
+                -- +13 DAYS
+                (12,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'), -- The Pursuit of Happyness
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'); -- Knives Out
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
