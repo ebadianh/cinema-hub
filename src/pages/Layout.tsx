@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import type User from "../interfaces/Users";
 import AiChatWidget from "./AiChatWidget";
+import ScrollToTop from "../components/ScrollToTop";
 
 // pages/Layout.tsx
 export default function Layout() {
@@ -23,6 +24,8 @@ export default function Layout() {
 
   return (
     <div className="min-vh-100 d-flex flex-column">       {/* added min viewport for all pages */}
+
+      <ScrollToTop />
 
       <Navbar user={user} setUser={setUser} />
       <main className="flex-grow-1">       {/* Added flex for body */}
