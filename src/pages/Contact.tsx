@@ -1,4 +1,5 @@
 import { Button } from "react-bootstrap";
+import ContactForm from "../components/ContactForm";
 
 export default function Contact() {
   return (
@@ -76,9 +77,12 @@ export default function Contact() {
           </div>
         </div>
       </div>
+      <div className="row g-4 mt-4">
+        <div className="col-12 col-lg-8 mx-auto">
+          <ContactForm />
+        </div>
+      </div>
     </div>
-
-
 
 
   );
