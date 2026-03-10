@@ -1,5 +1,5 @@
-import { useState } from "react";
 import DatePicker from "react-datepicker";
+import { format, parseISO } from "date-fns";
 import { sv } from "date-fns/locale";
 
 type FilterProps = {
@@ -27,20 +27,10 @@ export default function Filter({
   filteredCount,
   totalCount,
 }: FilterProps) {
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const formatDateFull = (dateString: string) => {
-    const date = new Date(dateString);
-    const weekday = date.toLocaleDateString("sv-SE", { weekday: "long" });
-    const day = date.getDate();
-    const month = date.toLocaleDateString("sv-SE", { month: "long" });
-    return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day} ${month}`;
-  };
+  const parseDateValue = (value: string) => parseISO(value);
 
   const handleDateChange = (value: string) => {
     onDateChange(value);
-    setShowDatePicker(false);
   };
 
   return (
@@ -94,10 +84,10 @@ export default function Filter({
               Datum
             </label>
             <DatePicker
-              selected={selectedDate !== "all" ? new Date(selectedDate) : null}
+              selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
               onChange={(date: Date | null) => {
                 if (date) {
-                  const dateString = date.toISOString().split("T")[0];
+                  const dateString = format(date, "yyyy-MM-dd");
                   handleDateChange(dateString);
                 } else {
                   handleDateChange("all");
@@ -108,7 +98,8 @@ export default function Filter({
               placeholderText="Alla datum"
               className="form-control form-select"
               wrapperClassName="d-block"
-              includeDates={availableDates.map(d => new Date(d))}
+              popperClassName="filter-datepicker-popper"
+              includeDates={availableDates.map(parseDateValue)}
               popperPlacement="bottom"
             />
           </div>
@@ -118,10 +109,7 @@ export default function Filter({
         <div className="d-flex align-items-center gap-3">
           <button
             className="btn btn-outline-secondary btn-sm"
-            onClick={() => {
-              onReset();
-              setShowDatePicker(false);
-            }}
+            onClick={onReset}
             type="button"
             style={{ whiteSpace: 'nowrap' }}
           >
@@ -175,10 +163,10 @@ export default function Filter({
             Datum
           </label>
           <DatePicker
-            selected={selectedDate !== "all" ? new Date(selectedDate) : null}
+            selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
             onChange={(date: Date | null) => {
               if (date) {
-                const dateString = date.toISOString().split("T")[0];
+                const dateString = format(date, "yyyy-MM-dd");
                 handleDateChange(dateString);
               } else {
                 handleDateChange("all");
@@ -189,18 +177,16 @@ export default function Filter({
             placeholderText="Alla datum"
             className="form-control form-select"
             wrapperClassName="d-block"
-            includeDates={availableDates.map(d => new Date(d))}
-            popperPlacement="bottom-start"
+            popperClassName="filter-datepicker-popper"
+            includeDates={availableDates.map(parseDateValue)}
+            popperPlacement="bottom"
           />
         </div>
 
         {/* Reset-knapp för mobil */}
         <button
           className="btn btn-outline-secondary btn-sm w-100"
-          onClick={() => {
-            onReset();
-            setShowDatePicker(false);
-          }}
+          onClick={onReset}
           type="button"
         >
           Rensa filter

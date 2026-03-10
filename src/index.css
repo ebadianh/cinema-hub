@@ -1453,40 +1453,45 @@ body {
 
 /* Datepicker - React - Mobile */
 @media (max-width: 991px) {
-  .react-datepicker-popper {
+  .filter-datepicker-popper {
     width: calc(100% - 2rem);
-    left: 1rem;
+    inset: auto auto auto 50% !important;
+    transform: translateX(-50%) !important;
   }
 
-  .react-datepicker {
+  .filter-datepicker-popper .react-datepicker {
     width: 100%;
   }
 
-  .react-datepicker__month-container {
+  .filter-datepicker-popper .react-datepicker__month-container {
     width: 100%;
   }
 
-  .react-datepicker__month {
+  .filter-datepicker-popper .react-datepicker__month {
     margin: 0.8rem;
   }
 
-  .react-datepicker__day,
-  .react-datepicker__day-name {
+  .filter-datepicker-popper .react-datepicker__day,
+  .filter-datepicker-popper .react-datepicker__day-name {
     width: 2.5rem;
     line-height: 2.5rem;
     margin: 0.2rem;
   }
 
-  .react-datepicker__header {
+  .filter-datepicker-popper .react-datepicker__header {
     padding: 1rem 0;
   }
 
-  .react-datepicker__current-month {
+  .filter-datepicker-popper .react-datepicker__current-month {
     font-size: 1rem;
     padding-bottom: 0.5rem§;
   }
 
-  .react-datepicker__triangle {
+  .filter-datepicker-popper .react-datepicker__triangle {
     display: none;
+  }
+
+  .filter-datepicker-popper .react-datepicker__current-month {
+    padding-bottom: 0.5rem;
   }
 }
