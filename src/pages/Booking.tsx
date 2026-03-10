@@ -30,111 +30,127 @@ export default function Booking() {
 
   if (loading) {
     return (
-      <div className="ch-booking-page ch-booking-loading">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Laddar...</span>
+      <section className="py-4">
+        <div className="container">
+          <div className="ch-booking-page ch-booking-loading">
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Laddar...</span>
+              </div>
+              <p className="mt-3 text-muted">Laddar visning...</p>
+            </div>
           </div>
-          <p className="mt-3 text-muted">Laddar visning...</p>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (dataError && !showing) {
     return (
-      <div className="ch-booking-page">
-        <div className="ch-booking-error">
-          <div className="alert alert-danger" role="alert">
-            {dataError}
+      <section className="py-4">
+        <div className="container">
+          <div className="ch-booking-page">
+            <div className="ch-booking-error">
+              <div className="alert alert-danger" role="alert">
+                {dataError}
+              </div>
+              <button className="btn ch-btn-outline" onClick={() => navigate(-1)}>
+                Gå tillbaka
+              </button>
+            </div>
           </div>
-          <button className="btn ch-btn-outline" onClick={() => navigate(-1)}>
-            Gå tillbaka
-          </button>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (flow.bookingConfirmed) {
     return (
-      <div className="ch-booking-page ch-booking-confirmed-page">
-        <div className="ch-booking-confirmed text-center">
-          <div className="ch-success-icon mb-4">&#10003;</div>
-          <h2 className="mb-3">Tack för din bokning!</h2>
-          {flow.bookingReference && (
-            <>
-              <p className="lead mb-4">
-                Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
+      <section className="py-4">
+        <div className="container">
+          <div className="ch-booking-page ch-booking-confirmed-page">
+            <div className="ch-booking-confirmed text-center">
+              <div className="ch-success-icon mb-4">&#10003;</div>
+              <h2 className="mb-3">Tack för din bokning!</h2>
+              {flow.bookingReference && (
+                <>
+                  <p className="lead mb-4">
+                    Ditt bokningsnummer: <strong>{flow.bookingReference}</strong>
+                  </p>
+                  <Link to={`/booking/confirmation/${flow.bookingReference}`}>
+                  <QRCodeSVG value={`${window.location.origin}/booking/confirmation/${flow.bookingReference}`} size={128} />
+                  </Link>
+                </>
+              )}
+              <p className="text-muted my-4">
+                En bekräftelse har skickats till {email}
               </p>
-              <Link to={`/booking/confirmation/${flow.bookingReference}`}>
-              <QRCodeSVG value={`${window.location.origin}/booking/confirmation/${flow.bookingReference}`} size={128} />
-              </Link>
-            </>
-          )}
-          <p className="text-muted my-4">
-            En bekräftelse har skickats till {email}
-          </p>
-          <button
-            className="btn ch-btn-primary"
-            onClick={() => navigate('/')}
-          >
-            Tillbaka till startsidan
-          </button>
+              <button
+                className="btn ch-btn-primary"
+                onClick={() => navigate('/')}
+              >
+                Tillbaka till startsidan
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="ch-booking-page">
-      <div className="ch-booking-left">
+    <section className="py-4">
+      <div className="container">
+        <div className="ch-booking-page">
+          <div className="ch-booking-left">
 
-        {showing && (
-          <MovieInfoCard
-            title={showing.film_title || ""}
-            posterUrl={showing.film_images?.[0]}
-            duration={showing.duration_minutes ? `${Math.floor(showing.duration_minutes / 60)}h ${showing.duration_minutes % 60}min` : undefined}
-            genre={showing.genre}
-            description={showing.film_description}
-            showtime={formatShowtime(showing.start_time)}
-            salongName={showing.salong_name}
-          />
-        )}
+            {showing && (
+              <MovieInfoCard
+                title={showing.film_title || ""}
+                posterUrl={showing.film_images?.[0]}
+                duration={showing.duration_minutes ? `${Math.floor(showing.duration_minutes / 60)}h ${showing.duration_minutes % 60}min` : undefined}
+                genre={showing.genre}
+                description={showing.film_description}
+                showtime={formatShowtime(showing.start_time)}
+                salongName={showing.salong_name}
+              />
+            )}
 
-        {flow.error && (
-          <div className="alert alert-danger mb-4" role="alert">
-            {flow.error}
+            {flow.error && (
+              <div className="alert alert-danger mb-4" role="alert">
+                {flow.error}
+              </div>
+            )}
+
+            <SeatMap
+              seats={seats}
+              bookedSeatIds={unavailableSeatIds}
+              selectedSeats={selection.selectedSeats}
+              onSeatClick={selection.handleSeatClick}
+              manualMode={selection.manualMode}
+              onToggleMode={() => selection.setManualMode(prev => !prev)}
+              previewSeatIds={selection.previewSeatIds}
+              onSeatHover={selection.handleSeatHover}
+              onSeatLeave={selection.handleSeatLeave}
+              lockedByMe={lockedByMe}
+            />
           </div>
-        )}
 
-        <SeatMap
-          seats={seats}
-          bookedSeatIds={unavailableSeatIds}
-          selectedSeats={selection.selectedSeats}
-          onSeatClick={selection.handleSeatClick}
-          manualMode={selection.manualMode}
-          onToggleMode={() => selection.setManualMode(prev => !prev)}
-          previewSeatIds={selection.previewSeatIds}
-          onSeatHover={selection.handleSeatHover}
-          onSeatLeave={selection.handleSeatLeave}
-          lockedByMe={lockedByMe}
-        />
+          <BookingSummary
+            showing={showing}
+            selectedSeats={selection.selectedSeats}
+            ticketTypes={ticketTypes}
+            ticketCounts={selection.ticketCounts}
+            onCountChange={selection.handleCountChange}
+            email={email}
+            onEmailChange={setEmail}
+            onConfirm={flow.handleConfirmClick}
+            isLoggedIn={!!user}
+            loading={flow.submitting}
+            maxAvailable={seats.length - unavailableSeatIds.size}
+          />
+        </div>
       </div>
-
-      <BookingSummary
-        showing={showing}
-        selectedSeats={selection.selectedSeats}
-        ticketTypes={ticketTypes}
-        ticketCounts={selection.ticketCounts}
-        onCountChange={selection.handleCountChange}
-        email={email}
-        onEmailChange={setEmail}
-        onConfirm={flow.handleConfirmClick}
-        isLoggedIn={!!user}
-        loading={flow.submitting}
-        maxAvailable={seats.length - unavailableSeatIds.size}
-      />
 
       {flow.showModal && (
         <ConfirmationModal
@@ -151,6 +167,6 @@ export default function Booking() {
           loading={flow.submitting}
         />
       )}
-    </div>
+    </section>
   );
 }

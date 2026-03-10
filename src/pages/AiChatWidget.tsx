@@ -54,11 +54,22 @@ export default function AiChatWidget() {
     }
   }, [messages, hasLoaded]);
 
+  // 3) För att trigga öppning med ny knapp
+  useEffect(() => {
+    const openChat = () => setOpen(true);
+
+    window.addEventListener("open-ai-chat", openChat);
+
+    return () => {
+      window.removeEventListener("open-ai-chat", openChat);
+    };
+  }, []);
+
   const clearChat = () => {
     setMessages([]);
     try {
       localStorage.removeItem(STORAGE_KEY);
-    } catch {}
+    } catch { }
   };
 
   return (
