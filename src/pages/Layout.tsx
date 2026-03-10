@@ -24,10 +24,9 @@ export default function Layout() {
 
   return (
     <div className="min-vh-100 d-flex flex-column">
-    <div className="min-vh-100 d-flex flex-column">       {/* added min viewport for all pages */}
-
+      {" "}
+      {/* added min viewport for all pages */}
       <ScrollToTop />
-
       <Navbar user={user} setUser={setUser} />
       <main className="flex-grow-1">
         <Outlet context={{ user, setUser }} />
