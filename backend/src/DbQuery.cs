@@ -321,18 +321,26 @@ public static class DbQuery
             // Basic rules: allow login + registration, allow GET on public api,
             // admin can do everything under /api
             var aclData = @"
-                INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
-                ('visitor,user,admin', '*', 'allow', '/api/login', 'true', 'Allow login routes'),
-                ('visitor', 'POST', 'allow', '/api/users', 'true', 'Allow registration for visitors'),
-                ('visitor,user,admin', 'GET', 'allow', '/api', 'false', 'Allow GET for non-API routes, deny elsewhere by app logic'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/films', 'true', 'Allow all to read films'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/showings', 'true', 'Allow all to read showings'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/seats', 'true', 'Allow all to read seats'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
-                ('user,admin', '*', 'allow', '/api/bookings', 'true', 'Allow logged-in users to manage bookings'),
-                ('admin', '*', 'allow', '/api', 'true', 'Admins can access all API routes'),
-                ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
-                ('admin', '*', 'allow', '/api/sessions', 'true', 'Allow admins to manage sessions');
+            INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
+            ('visitor,user,admin', '*',    'allow', '/api/login',           'true', 'Allow login/session routes'),
+            ('visitor',            'POST', 'allow', '/api/users',           'true', 'Allow visitor registration'),
+            
+            ('visitor,user,admin', 'POST', 'allow', '/api/chat',            'true', 'Allow AI chat for all'),
+            
+            ('visitor,user,admin', 'GET',  'allow', '/api/films',           'true', 'Allow all to read films'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors',       'true', 'Allow all to read directors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors',          'true', 'Allow all to read actors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings',        'true', 'Allow all to read showings'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats',           'true', 'Allow all to read seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings',  'true', 'Allow debug showings during development'),
+            
+            ('visitor,user,admin', 'POST', 'allow', '/api/bookings',        'true', 'Allow anyone to create bookings'),
+            ('user,admin',         '*',    'allow', '/api/bookings',        'true', 'Allow logged-in users to manage bookings'),
+            
+            ('admin',              '*',    'allow', '/api/acl',             'true', 'Allow admins to manage ACL'),
+            ('admin',              '*',    'allow', '/api/sessions',        'true', 'Allow admins to manage sessions'),
+            ('admin',              '*',    'allow', '/api',                 'true', 'Admins can access all API routes');
             ";
             command.CommandText = aclData;
             command.ExecuteNonQuery();
@@ -480,62 +488,70 @@ public static class DbQuery
                 (4, 'Expressen', 'Brando i toppform.', 4, 5);
                 -- Film 3, 5 och 6 har inga reviews
 
-                -- Showings
+
+                -- Showings (relative to current date, richer seed for AI testing)
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2026-03-05 18:00:00', 'Engelska', 'Svenska'),
-                (1, 2, '2026-03-06 15:00:00', 'Engelska', 'Svenska'),
-                (1, 1, '2026-03-08 20:00:00', 'Engelska', 'Svenska'),
 
-                (2, 2, '2026-03-05 20:00:00', 'Koreanska', 'Svenska'),
-                (2, 1, '2026-03-07 18:30:00', 'Koreanska', 'Svenska'),
-                (2, 2, '2026-03-09 21:00:00', 'Koreanska', 'Svenska'),
+                -- TODAY
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 14 HOUR), 'Svenska', NULL),                -- Toy Story 4
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 20 HOUR), 'Koreanska', 'Svenska'),         -- Parasite
 
-                (3, 1, '2026-03-06 14:00:00', 'Svenska', NULL),
-                (3, 2, '2026-03-10 17:00:00', 'Svenska', NULL),
-                (3, 1, '2026-03-12 19:30:00', 'Svenska', NULL),
+                -- TOMORROW
+                (10, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- The Grand Budapest Hotel
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Dune
 
-                (4, 2, '2026-03-07 18:00:00', 'Engelska', 'Svenska'),
-                (4, 1, '2026-03-11 20:00:00', 'Engelska', 'Svenska'),
-                (4, 2, '2026-03-14 16:00:00', 'Engelska', 'Svenska'),
+                -- DAY AFTER TOMORROW
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
 
-                (5, 1, '2026-03-08 15:00:00', 'Japanska', 'Svenska'),
-                (5, 2, '2026-03-13 18:00:00', 'Japanska', 'Svenska'),
-                (5, 1, '2026-03-15 20:30:00', 'Japanska', 'Svenska'),
+                -- +3 DAYS
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Godfather
 
-                (6, 2, '2026-03-09 19:00:00', 'Engelska', 'Svenska'),
-                (6, 1, '2026-03-16 21:00:00', 'Engelska', 'Svenska'),
-                (6, 2, '2026-03-18 18:00:00', 'Engelska', 'Svenska'),
+                -- +4 DAYS
+                (11, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Arrival
+                (13, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
 
-                (7, 1, '2026-03-10 20:00:00', 'Engelska', 'Svenska'),
-                (7, 2, '2026-03-17 18:00:00', 'Engelska', 'Svenska'),
-                (7, 1, '2026-03-19 21:00:00', 'Engelska', 'Svenska'),
+                -- +5 DAYS
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 12 HOUR, 'Svenska', NULL),        -- Toy Story 4
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Dune
+                (14,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),  -- Paddington 2
 
-                (8, 2, '2026-03-11 18:00:00', 'Engelska', 'Svenska'),
-                (8, 1, '2026-03-20 20:00:00', 'Engelska', 'Svenska'),
+                -- +6 DAYS
+                (15,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Her
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Knives Out
+                (12,1, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 16 HOUR, 'Engelska', 'Svenska'),  -- The Pursuit of Happyness
 
-                (9, 1, '2026-03-12 14:00:00', 'Engelska', 'Svenska'),
-                (9, 2, '2026-03-21 18:00:00', 'Engelska', 'Svenska'),
+                -- +7 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Inception
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'), -- Parasite
 
-                (10, 2, '2026-03-13 20:00:00', 'Engelska', 'Svenska'),
-                (10, 1, '2026-03-22 17:30:00', 'Engelska', 'Svenska'),
+                -- +8 DAYS
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+                (10,2, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Grand Budapest Hotel
 
-                (11, 1, '2026-03-14 18:00:00', 'Engelska', 'Svenska'),
-                (11, 2, '2026-03-23 20:00:00', 'Engelska', 'Svenska'),
+                -- +9 DAYS
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 14 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 17 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
 
-                (12, 2, '2026-03-15 15:00:00', 'Engelska', 'Svenska'),
-                (12, 1, '2026-03-24 18:30:00', 'Engelska', 'Svenska'),
+                -- +10 DAYS
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Dune
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'), -- The Godfather
 
-                (13, 1, '2026-03-16 21:00:00', 'Engelska', 'Svenska'),
-                (13, 2, '2026-03-25 19:00:00', 'Engelska', 'Svenska'),
+                -- +11 DAYS
+                (14,1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 13 HOUR, 'Engelska', 'Svenska'), -- Paddington 2
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR, 'Svenska', NULL),       -- Toy Story 4
+                (11,2, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Arrival
 
-                (14, 2, '2026-03-17 11:00:00', 'Engelska', 'Svenska'),
-                (14, 1, '2026-03-26 18:00:00', 'Engelska', 'Svenska'),
+                -- +12 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Inception
+                (13,1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
 
-                (15, 1, '2026-03-18 18:00:00', 'Engelska', 'Svenska'),
-                (15, 2, '2026-03-27 20:00:00', 'Engelska', 'Svenska'),
-
-                (16, 2, '2026-03-19 20:00:00', 'Engelska', 'Svenska'),
-                (16, 1, '2026-03-28 17:00:00', 'Engelska', 'Svenska');
+                -- +13 DAYS
+                (12,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'), -- The Pursuit of Happyness
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'); -- Knives Out
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
@@ -639,52 +655,67 @@ public static class DbQuery
     }
 
     // Run a query - rows are returned as an array of objects
-    public static Arr SQLQuery(
-        string sql, object parameters = null, HttpContext context = null
-    )
+public static Arr SQLQuery(
+    string sql, object parameters = null, HttpContext context = null
+)
+{
+    var paras = parameters == null ? Obj() : Obj(parameters);
+
+    using var db = new MySqlConnection(connectionString);
+    db.Open();
+
+    // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
+    var sqlTrimmed = (sql ?? "").Trim();
+
+    var command = db.CreateCommand();
+    command.CommandText = sqlTrimmed;
+
+    // Add parameters
+    var entries = (Arr)paras.GetEntries();
+    entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
+
+    if (context != null)
     {
-        var paras = parameters == null ? Obj() : Obj(parameters);
-        using var db = new MySqlConnection(connectionString);
-        db.Open();
-        var command = db.CreateCommand();
-        command.CommandText = @sql;
-        var entries = (Arr)paras.GetEntries();
-        entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
-        if (context != null)
+        DebugLog.Add(context, new
         {
-            DebugLog.Add(context, new
+            sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
+            sqlParams = paras
+        });
+    }
+
+    var rows = Arr();
+
+    try
+    {
+        // Robust detection (after Trim)
+        var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
+        var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
+        var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
+        var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
+        var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+
+        if (isSelect || isCall || isShow || isDescribe || isExplain)
+        {
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+                rows.Push(ObjFromReader(reader));
+        }
+        else
+        {
+            rows.Push(new
             {
-                sqlQuery = sql.Regplace(@"\s+", " "),
-                sqlParams = paras
+                command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
+                rowsAffected = command.ExecuteNonQuery()
             });
         }
-        var rows = Arr();
-        try
-        {
-            if (sql.StartsWith("SELECT ", true, null) || sql.StartsWith("CALL ", true, null))
-            {
-                var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    rows.Push(ObjFromReader(reader));
-                }
-                reader.Close();
-            }
-            else
-            {
-                rows.Push(new
-                {
-                    command = sql.Split(" ")[0].ToUpper(),
-                    rowsAffected = command.ExecuteNonQuery()
-                });
-            }
-        }
-        catch (Exception err)
-        {
-            rows.Push(new { error = err.Message });
-        }
-        return rows;
     }
+    catch (Exception err)
+    {
+        rows.Push(new { error = err.Message });
+    }
+
+    return rows;
+}
 
     // Run a query - only return the first row, as an object
     public static dynamic SQLQueryOne(
