@@ -109,7 +109,7 @@ export default function Filter({
               className="form-control form-select"
               wrapperClassName="d-block"
               includeDates={availableDates.map(d => new Date(d))}
-              popperPlacement="bottom-start"
+              popperPlacement="bottom"
             />
           </div>
         </div>
