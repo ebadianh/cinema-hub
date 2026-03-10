@@ -1441,3 +1441,47 @@ body {
   box-shadow: none;
   opacity: 0.6;
 }
+
+/* Datepicker - React */
+.react-datepicker__input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.849);
+}
+
+.react-datepicker__input-container input {
+  color: rgba(255, 255, 255, 0.849);
+}
+
+/* Datepicker - React - Mobile */
+@media (max-width: 991px) {
+  .react-datepicker-popper {
+    width: 100% !important;
+  }
+
+  .react-datepicker {
+    width: 100% !important;
+  }
+
+  .react-datepicker__month-container {
+    width: 100% !important;
+  }
+
+  .react-datepicker__month {
+    margin: 0.8rem !important;
+  }
+
+  .react-datepicker__day,
+  .react-datepicker__day-name {
+    width: 2.5rem !important;
+    line-height: 2.5rem !important;
+    margin: 0.2rem !important;
+  }
+
+  .react-datepicker__header {
+    padding: 1rem 0 !important;
+  }
+
+  .react-datepicker__current-month {
+    font-size: 1rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}

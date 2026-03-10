@@ -1,4 +1,6 @@
 import { useState } from "react";
+import DatePicker from "react-datepicker";
+import { sv } from "date-fns/locale";
 
 type FilterProps = {
   selectedAge: string;
@@ -86,46 +88,29 @@ export default function Filter({
             </select>
           </div>
 
-          {/* Datum - toggle mellan dropdown och date picker */}
-          <div style={{ minWidth: '200px', position: 'relative' }}>
-            <label className="form-label small text-muted">Datum</label>
-            {!showDatePicker ? (
-              <div style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  className="form-select d-flex align-items-center justify-content-between"
-                  style={{ width: '100%', textAlign: 'left', paddingRight: '2.5rem' }}
-                  onClick={() => setShowDatePicker(true)}
-                >
-                  <span>
-                    {selectedDate === "all" ? "Alla datum" : formatDateFull(selectedDate)}
-                  </span>
-                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)' }}>
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                      <rect x="3" y="6" width="14" height="11" rx="2" fill="#888" />
-                      <rect x="3" y="3" width="14" height="3" rx="1" fill="#bbb" />
-                      <rect x="6" y="1" width="2" height="4" rx="1" fill="#888" />
-                      <rect x="12" y="1" width="2" height="4" rx="1" fill="#888" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            ) : (
-              <div>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={selectedDate !== "all" ? selectedDate : ""}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      handleDateChange(e.target.value);
-                    }
-                  }}
-                  min={availableDates[0]}
-                  max={availableDates[availableDates.length - 1]}
-                />
-              </div>
-            )}
+          {/* Datum - date picker */}
+          <div style={{ minWidth: "200px" }}>
+            <label htmlFor="dateFilter" className="form-label small text-muted">
+              Datum
+            </label>
+            <DatePicker
+              selected={selectedDate !== "all" ? new Date(selectedDate) : null}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const dateString = date.toISOString().split("T")[0];
+                  handleDateChange(dateString);
+                } else {
+                  handleDateChange("all");
+                }
+              }}
+              dateFormat="EEE d MMMM"
+              locale={sv}
+              placeholderText="Alla datum"
+              className="form-control form-select"
+              wrapperClassName="d-block"
+              includeDates={availableDates.map(d => new Date(d))}
+              popperPlacement="bottom-start"
+            />
           </div>
         </div>
 
@@ -148,7 +133,7 @@ export default function Filter({
         </div>
       </div>
 
-      {/* Mobile and tablet */}
+      {/* Mobile */}
       <div className="d-lg-none mb-4">
         <div className="mb-3">
           <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
@@ -186,45 +171,27 @@ export default function Filter({
         </div>
 
         <div className="mb-3">
-          <label className="form-label small text-muted">Datum</label>
-
-          {!showDatePicker ? (
-            <div style={{ position: 'relative' }}>
-              <button
-                type="button"
-                className="form-select d-flex align-items-center justify-content-between"
-                style={{ width: '100%', textAlign: 'left', paddingRight: '2.5rem' }}
-                onClick={() => setShowDatePicker(true)}
-              >
-                <span>
-                  {selectedDate === "all" ? "Alla datum" : formatDateFull(selectedDate)}
-                </span>
-                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)' }}>
-                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                    <rect x="3" y="6" width="14" height="11" rx="2" fill="#888" />
-                    <rect x="3" y="3" width="14" height="3" rx="1" fill="#bbb" />
-                    <rect x="6" y="1" width="2" height="4" rx="1" fill="#888" />
-                    <rect x="12" y="1" width="2" height="4" rx="1" fill="#888" />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          ) : (
-            <div>
-              <input
-                type="date"
-                className="form-control"
-                value={selectedDate !== "all" ? selectedDate : ""}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleDateChange(e.target.value);
-                  }
-                }}
-                min={availableDates[0]}
-                max={availableDates[availableDates.length - 1]}
-              />
-            </div>
-          )}
+          <label htmlFor="datumFilterMobile" className="form-label small text-muted">
+            Datum
+          </label>
+          <DatePicker
+            selected={selectedDate !== "all" ? new Date(selectedDate) : null}
+            onChange={(date: Date | null) => {
+              if (date) {
+                const dateString = date.toISOString().split("T")[0];
+                handleDateChange(dateString);
+              } else {
+                handleDateChange("all");
+              }
+            }}
+            dateFormat="EEE d MMMM"
+            locale={sv}
+            placeholderText="Alla datum"
+            className="form-control form-select"
+            wrapperClassName="d-block"
+            includeDates={availableDates.map(d => new Date(d))}
+            popperPlacement="bottom-start"
+          />
         </div>
 
         {/* Reset-knapp för mobil */}
