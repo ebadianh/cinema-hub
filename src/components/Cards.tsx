@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import Filter from "./Filter.tsx";
 
@@ -37,6 +37,14 @@ export default function Cards() {
   const [error, setError] = useState<string | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>("all");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [selectedDate, setSelectedDate] = useState<string>("all");
+  const [showings, setShowings] = useState<any[]>([]);
+
+  const handleReset = () => {
+    setSelectedAge("all");
+    setSelectedGenre("all");
+    setSelectedDate("all");
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,6 +80,13 @@ export default function Cards() {
         setFilms(filmsList);
         setDirectors(directorsList);
         setActors(actorsList);
+
+        const res4 = await fetch("/api/showings", { signal: controller.signal });
+        if (!res4.ok) throw new Error(`Showings: ${res4.status} ${res4.statusText}`);
+        const showingsData = await res4.json();
+        const showingsList = Array.isArray(showingsData) ? showingsData : showingsData.showings ?? [];
+        setShowings(showingsList);
+
       } catch (e: any) {
         if (e.name !== "AbortError") {
           setError(e.message ?? "Failed to load");
@@ -84,6 +99,15 @@ export default function Cards() {
     return () => controller.abort();
   }, []);
 
+  const availableDates = useMemo(() => {
+    const dates = new Set<string>();
+    showings.forEach((s) => {
+      const date = s.start_time.split("T")[0];
+      dates.add(date);
+    });
+    return Array.from(dates).sort();
+  }, [showings]);
+
   if (loading)
     return <div className="container mt-4">Laddar filmer…</div>;
 
@@ -95,12 +119,25 @@ export default function Cards() {
   const filteredFilms = films.filter((film) => {
     if (selectedAge !== "all") {
       const maxAge = parseInt(selectedAge);
-      if (film.age_rating > maxAge) return false;
+      if (film.age_rating > maxAge)
+        return false;
     }
 
-    if (selectedGenre !== "all" && film.genre !== selectedGenre)
+    if (selectedGenre !== "all" && film.genre !== selectedGenre) {
       return false;
+    }
 
+    if (selectedDate !== "all") {
+      const hasShowingOnDate = showings.some(
+        (showing) =>
+          showing.film_id === film.id &&
+          showing.start_time.startsWith(selectedDate)
+      );
+
+      if (!hasShowingOnDate) {
+        return false;
+      }
+    }
     return true;
   });
 
@@ -116,26 +153,25 @@ export default function Cards() {
       <Filter
         selectedAge={selectedAge}
         selectedGenre={selectedGenre}
+        selectedDate={selectedDate}
+        availableDates={availableDates}
         onAgeChange={setSelectedAge}
         onGenreChange={setSelectedGenre}
+        onDateChange={setSelectedDate}
+        onReset={handleReset}
         filteredCount={filteredFilms.length}
         totalCount={films.length}
       />
 
       <div className="row g-3">
-
         {filteredFilms.map((f) => (
-
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
-
             {/* HELA KORTET ÄR NU KLICKBART */}
             <Link
-              to={`/films/${f.id}`}
+              to={`/films/${f.id}${selectedDate !== "all" ? `?date=${selectedDate}` : ""}`}
               className="text-decoration-none text-dark"
             >
-
               <div className="card h-100 shadow-sm p-0 overflow-hidden card-hover">
-
                 {/* Poster */}
                 <div className="poster-wrapper">
                   <img
@@ -151,34 +187,23 @@ export default function Cards() {
 
                 {/* Info */}
                 <div className="card-body text-center p-2">
-
                   <h5 className="card-title small mb-1">
                     {f.title}
                   </h5>
-
                   <div className="mb-2">
                     <span className="badge text-bg-secondary me-1">
                       {f.genre}
                     </span>
-
                     <span className="badge text-bg-light">
                       {f.distributor}
                     </span>
                   </div>
-
-
                 </div>
-
               </div>
-
             </Link>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
   );
 }
