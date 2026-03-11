@@ -223,6 +223,7 @@ public static class DbQuery
                 email VARCHAR(255) NOT NULL,
                 subject VARCHAR(255) NOT NULL,
                 message TEXT NOT NULL,
+                status ENUM('unread', 'read') DEFAULT 'unread' NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         ";
@@ -655,67 +656,67 @@ public static class DbQuery
     }
 
     // Run a query - rows are returned as an array of objects
-public static Arr SQLQuery(
-    string sql, object parameters = null, HttpContext context = null
-)
-{
-    var paras = parameters == null ? Obj() : Obj(parameters);
-
-    using var db = new MySqlConnection(connectionString);
-    db.Open();
-
-    // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
-    var sqlTrimmed = (sql ?? "").Trim();
-
-    var command = db.CreateCommand();
-    command.CommandText = sqlTrimmed;
-
-    // Add parameters
-    var entries = (Arr)paras.GetEntries();
-    entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
-
-    if (context != null)
+    public static Arr SQLQuery(
+        string sql, object parameters = null, HttpContext context = null
+    )
     {
-        DebugLog.Add(context, new
-        {
-            sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
-            sqlParams = paras
-        });
-    }
+        var paras = parameters == null ? Obj() : Obj(parameters);
 
-    var rows = Arr();
+        using var db = new MySqlConnection(connectionString);
+        db.Open();
 
-    try
-    {
-        // Robust detection (after Trim)
-        var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
-        var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
-        var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
-        var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
-        var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+        // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
+        var sqlTrimmed = (sql ?? "").Trim();
 
-        if (isSelect || isCall || isShow || isDescribe || isExplain)
+        var command = db.CreateCommand();
+        command.CommandText = sqlTrimmed;
+
+        // Add parameters
+        var entries = (Arr)paras.GetEntries();
+        entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
+
+        if (context != null)
         {
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-                rows.Push(ObjFromReader(reader));
-        }
-        else
-        {
-            rows.Push(new
+            DebugLog.Add(context, new
             {
-                command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
-                rowsAffected = command.ExecuteNonQuery()
+                sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
+                sqlParams = paras
             });
         }
-    }
-    catch (Exception err)
-    {
-        rows.Push(new { error = err.Message });
-    }
 
-    return rows;
-}
+        var rows = Arr();
+
+        try
+        {
+            // Robust detection (after Trim)
+            var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
+            var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
+            var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
+            var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
+            var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+
+            if (isSelect || isCall || isShow || isDescribe || isExplain)
+            {
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                    rows.Push(ObjFromReader(reader));
+            }
+            else
+            {
+                rows.Push(new
+                {
+                    command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
+                    rowsAffected = command.ExecuteNonQuery()
+                });
+            }
+        }
+        catch (Exception err)
+        {
+            rows.Push(new { error = err.Message });
+        }
+
+        return rows;
+    }
 
     // Run a query - only return the first row, as an object
     public static dynamic SQLQueryOne(
