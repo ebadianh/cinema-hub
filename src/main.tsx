@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "react-datepicker/dist/react-datepicker.css";
 import "./index.css";
 
 import React from "react";

@@ -138,7 +138,10 @@ export default function ContactForm() {
           {/* Meddelande */}
           <div className="mb-4">
             <label htmlFor="message" className="form-label">
-              Meddelande <span className="text-danger">*</span>
+              Meddelande <span className="text-danger">* </span>
+              <span className="text-muted-ms-2 small">
+                ({formData.message.length}/200 tecken)
+              </span>
             </label>
             <textarea
               id="message"
@@ -149,6 +152,7 @@ export default function ContactForm() {
               onChange={handleChange}
               required
               disabled={status === "sending"}
+              maxLength={200}
             />
           </div>
 

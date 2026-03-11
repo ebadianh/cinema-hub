@@ -1441,3 +1441,57 @@ body {
   box-shadow: none;
   opacity: 0.6;
 }
+
+/* Datepicker - React */
+.react-datepicker__input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.849);
+}
+
+.react-datepicker__input-container input {
+  color: rgba(255, 255, 255, 0.849);
+}
+
+/* Datepicker - React - Mobile */
+@media (max-width: 991px) {
+  .filter-datepicker-popper {
+    width: calc(100% - 2rem);
+    inset: auto auto auto 50% !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .filter-datepicker-popper .react-datepicker {
+    width: 100%;
+  }
+
+  .filter-datepicker-popper .react-datepicker__month-container {
+    width: 100%;
+  }
+
+  .filter-datepicker-popper .react-datepicker__month {
+    margin: 0.8rem;
+  }
+
+  .filter-datepicker-popper .react-datepicker__day,
+  .filter-datepicker-popper .react-datepicker__day-name {
+    width: 2.5rem;
+    line-height: 2.5rem;
+    margin: 0.2rem;
+  }
+
+  .filter-datepicker-popper .react-datepicker__header {
+    padding: 1rem 0;
+  }
+
+  .filter-datepicker-popper .react-datepicker__current-month {
+    font-size: 1rem;
+    padding-bottom: 0.5rem§;
+  }
+
+  .filter-datepicker-popper .react-datepicker__triangle {
+    display: none;
+  }
+
+  .filter-datepicker-popper .react-datepicker__current-month {
+    padding-bottom: 0.5rem;
+  }
+}
