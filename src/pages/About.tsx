@@ -1,13 +1,13 @@
 export default function About() {
   return (
     <section className="container py-5">
-      
+
       <div className="mb-5 text-center">
-        <h1 className="fw-bold mb-3">Om CinemaHub</h1>
+        <h1 className="fw-bold mb-3">Om CinemaMob</h1>
         <p className="ch-muted mx-auto" style={{ maxWidth: "700px" }}>
-          Fem kompisar från Södra Sandby med en dröm: att skapa den perfekta 
-          biografupplevelsen. Efter år av filmkvällar och diskussioner om vad 
-          som saknades i biovärlden, flyttade vi till Malmö 2024 och gjorde 
+          Fem kompisar från Södra Sandby med en dröm: att skapa den perfekta
+          biografupplevelsen. Efter år av filmkvällar och diskussioner om vad
+          som saknades i biovärlden, flyttade vi till Malmö 2024 och gjorde
           verklighet av visionen.
         </p>
       </div>
@@ -20,8 +20,8 @@ export default function About() {
               <div className="card-body text-center">
                 <h3 className="mb-3">2023 - Södra Sandby</h3>
                 <p className="ch-muted">
-                  Det började med fem kompisar som försökte boka biljetter 
-                  till Dune. Hemsidan kraschade, biljetterna tog slut. 
+                  Det började med fem kompisar som försökte boka biljetter
+                  till Dune. Hemsidan kraschade, biljetterna tog slut.
                   "Vi kan göra bättre själva", sa någon. Skämtet blev verklighet.
                 </p>
               </div>
@@ -33,8 +33,8 @@ export default function About() {
               <div className="card-body text-center">
                 <h3 className="mb-3">2024 - Flytten</h3>
                 <p className="ch-muted">
-                  Skämtet blev allvar. Efter månader av kodande, planering 
-                  och mer kaffe än vad som är hälsosamt, packade vi väskorna 
+                  Skämtet blev allvar. Efter månader av kodande, planering
+                  och mer kaffe än vad som är hälsosamt, packade vi väskorna
                   och flyttade till Malmö med en vision.
                 </p>
               </div>
@@ -44,10 +44,10 @@ export default function About() {
           <div className="col-md-4">
             <div className="card ch-card h-100">
               <div className="card-body text-center">
-                <h3 className="mb-3">Idag - CinemaHub</h3>
+                <h3 className="mb-3">Idag - CinemaMob</h3>
                 <p className="ch-muted">
-                  Två salonger, ett bokningssystem som faktiskt fungerar, 
-                  och en passion för att göra biobesök roligare, enklare 
+                  Två salonger, ett bokningssystem som faktiskt fungerar,
+                  och en passion för att göra biobesök roligare, enklare
                   och mer minnesvärt. Sandby till Malmö — vi gjorde det.
                 </p>
               </div>
@@ -183,7 +183,7 @@ export default function About() {
         <h2 className="fw-bold mb-3">Kontakta oss</h2>
         <div className="ch-muted mx-auto" style={{ maxWidth: "500px" }}>
           <p className="mb-2">📍 Biografgatan 1, Malmö</p>
-          <p className="mb-2">📧 info@cinemahub.se</p>
+          <p className="mb-2">📧 info@cinemamob.se</p>
           <p className="mb-2">📞 010-123 45 67</p>
           <p className="mt-3 small">Öppettider: Vardagar 17:00-23:00, Helger 13:00-23:00</p>
         </div>
@@ -192,9 +192,9 @@ export default function About() {
       <div className="text-center">
         <h2 className="fw-bold mb-3">Vår mission</h2>
         <p className="ch-muted mx-auto" style={{ maxWidth: "700px" }}>
-          Vi är fortfarande samma fem killar från Sandby, fast nu med en 
-          biograf i Malmö och en mission: att bevisa att småstadsgrabbar kan 
-          skapa något stort. Varje visning, varje besökare påminner oss om 
+          Vi är fortfarande samma fem killar från Sandby, fast nu med en
+          biograf i Malmö och en mission: att bevisa att småstadsgrabbar kan
+          skapa något stort. Varje visning, varje besökare påminner oss om
           varför vi började — för kärleken till film och gemenskapen den skapar.
         </p>
       </div>
