@@ -1,7 +1,8 @@
 namespace WebApp;
+
 public static class Acl
 {
-    private static Arr rules;
+    private static Arr rules = Arr();
 
     public static async void Start()
     {
@@ -15,16 +16,46 @@ public static class Acl
 
     public static void UnpackRules(Arr allRules)
     {
-        // Skip if query returned an error
         if (allRules.Length == 0 || allRules[0].error != null) { return; }
 
-        // Unpack db response -> routes to regexps and userRoles to arrays
         rules = allRules.Map(x => new
         {
             ___ = x,
-            regexPattern = @"^" + x.route.Replace("/", @"\/") + @"\/",
-            userRoles = ((Arr)Arr(x.userRoles.Split(','))).Map(x => x.Trim())
+            regexPattern = BuildRegexPattern((string)x.route),
+            userRoles = ((Arr)Arr(x.userRoles.Split(','))).Map(role => role.Trim())
         });
+
+        // TEMP DEBUG - remove when everything works
+        Console.WriteLine("=== ACL RULES LOADED ===");
+        foreach (var rule in rules)
+        {
+            Console.WriteLine($"{rule.id} | {rule.method} | {rule.route} | {rule.regexPattern}");
+        }
+    }
+
+    private static string BuildRegexPattern(string route)
+    {
+        var parts = route.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        var regexParts = parts.Select(part =>
+        {
+            // Route params like {id}, {showingId}
+            if (part.StartsWith("{") && part.EndsWith("}"))
+            {
+                return @"[^/]+";
+            }
+
+            // Wildcard support
+            if (part == "*")
+            {
+                return @".*";
+            }
+
+            // Normal literal segment
+            return Regex.Escape(part);
+        });
+
+        return "^/" + string.Join("/", regexParts) + @"/?$";
     }
 
     public static bool Allow(
@@ -36,57 +67,77 @@ public static class Acl
 
         // Get info about the requested route and logged in user
         method = method != "" ? method : context.Request.Method;
-        path = path != "" ? path : context.Request.Path;
-        var user = Session.Get(context, "user");
-        var userRole = user == null ? "visitor" : user.role;
-        var userEmail = user == null ? "" : user.email;
+        path = path != "" ? path : context.Request.Path.ToString();
 
-        // Go through all acl rules to and set allowed accordingly!
+        var user = Session.Get(context, "user");
+        var userRole = user == null ? "visitor" : (string)user.role;
+        var userEmail = user == null ? "" : (string)user.email;
+
+        // Go through all acl rules and set allowed accordingly
         var allowed = false;
         Obj appliedAllowRule = null;
         Obj appliedDisallowRule = null;
+
         foreach (var rule in rules)
         {
-            // Get the properties of the rule as variables
-            var ruleMethod = rule.method;
-            var ruleRegexPattern = rule.regexPattern;
+            var ruleMethod = (string)rule.method;
+            var ruleRegexPattern = (string)rule.regexPattern;
             var ruleRoles = (Arr)rule.userRoles;
-            var ruleMatch = rule.match == "true";
-            var ruleAllow = rule.allow == "allow";
+            var ruleMatch = ((string)rule.match) == "true";
+            var ruleAllow = ((string)rule.allow) == "allow";
+            var ruleRoute = (string)rule.route;
 
-            // Check if role, method and path is allowed according to the rule
             var roleOk = ruleRoles.Includes(userRole);
             var methodOk = method == ruleMethod || ruleMethod == "*";
-            var pathOk = Regex.IsMatch(path + "/", ruleRegexPattern);
-            // Note: "match" can be false - in that case we negate pathOk!
+            var pathOk = Regex.IsMatch(path, ruleRegexPattern);
+
+            // If match is false, negate pathOk
             pathOk = ruleMatch ? pathOk : !pathOk;
 
-            // Is everything ok?
             var allOk = roleOk && methodOk && pathOk;
 
-            // Note: We whitelist first (check all allow rules) - ORDER BY allow
-            // and then we blacklist on top of that (check all disallow rules)
+            // TEMP DEBUG - remove when everything works
+            if (
+                path.StartsWith("/api/films/") ||
+                path.StartsWith("/api/users/") ||
+                path.StartsWith("/api/showings/")
+            )
+            {
+                Console.WriteLine(
+                    $"ACL CHECK | path={path} | method={method} | " +
+                    $"rule={ruleRoute} | regex={ruleRegexPattern} | " +
+                    $"roleOk={roleOk} methodOk={methodOk} pathOk={pathOk} allOk={allOk}"
+                );
+            }
+
+            // Whitelist first, blacklist on top
             var oldAllowed = allowed;
             allowed = ruleAllow ? allowed || allOk : allOk ? false : allowed;
+
             if (oldAllowed != allowed)
             {
                 if (ruleAllow) { appliedAllowRule = rule; }
                 else { appliedDisallowRule = rule; }
             }
         }
+
         // Collect info for debug log
         var toLog = Obj(new { userRole, userEmail, aclAllowed = allowed });
+
         if (Globals.detailedAclDebug && appliedAllowRule != null)
         {
             toLog.aclAppliedAllowRule = appliedAllowRule;
         }
+
         if (Globals.detailedAclDebug && appliedDisallowRule != null)
         {
             toLog.aclAppliedDisallowRule = appliedDisallowRule;
         }
+
         if (userEmail == "") { toLog.Delete("userEmail"); }
+
         DebugLog.Add(context, toLog);
-        // Return if allowed or not
+
         return allowed;
     }
 }

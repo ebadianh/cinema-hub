@@ -315,35 +315,65 @@ public static class DbQuery
         // -------------------------
         // Seed ACL rules
         // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM acl";
+      command.CommandText = "SELECT COUNT(*) FROM acl";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
-            // Basic rules: allow login + registration, allow GET on public api,
-            // admin can do everything under /api
             var aclData = @"
             INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
-            ('visitor,user,admin', '*',    'allow', '/api/login',           'true', 'Allow login/session routes'),
-            ('visitor',            'POST', 'allow', '/api/users',           'true', 'Allow visitor registration'),
-            
-            ('visitor,user,admin', 'POST', 'allow', '/api/chat',            'true', 'Allow AI chat for all'),
-            
-            ('visitor,user,admin', 'GET',  'allow', '/api/films',           'true', 'Allow all to read films'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/directors',       'true', 'Allow all to read directors'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/actors',          'true', 'Allow all to read actors'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/showings',        'true', 'Allow all to read showings'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/seats',           'true', 'Allow all to read seats'),
+            ('visitor,user,admin', '*',    'allow', '/api/login', 'true', 'Allow login/session routes'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/users', 'true', 'Allow registration for all roles'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/chat', 'true', 'Allow AI chat for all'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/films', 'true', 'Allow all to read films'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/films/{id}', 'true', 'Allow all to read single film'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors', 'true', 'Allow all to read directors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors/{id}', 'true', 'Allow all to read single director'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors', 'true', 'Allow all to read actors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors/{id}', 'true', 'Allow all to read single actor'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings', 'true', 'Allow all to read showings'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{id}', 'true', 'Allow all to read single showing'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats', 'true', 'Allow all to read seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats/{id}', 'true', 'Allow all to read single seat'),
+
             ('visitor,user,admin', 'GET',  'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings',  'true', 'Allow debug showings during development'),
-            
-            ('visitor,user,admin', 'POST', 'allow', '/api/bookings',        'true', 'Allow anyone to create bookings'),
-            ('user,admin',         '*',    'allow', '/api/bookings',        'true', 'Allow logged-in users to manage bookings'),
-            
-            ('admin',              '*',    'allow', '/api/acl',             'true', 'Allow admins to manage ACL'),
-            ('admin',              '*',    'allow', '/api/sessions',        'true', 'Allow admins to manage sessions'),
-            ('admin',              '*',    'allow', '/api',                 'true', 'Admins can access all API routes');
+            ('visitor,user,admin', 'GET',  'allow', '/api/booking_details/{id}', 'true', 'Allow all to read single booking detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail', 'true', 'Allow all to read showing details'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail/{id}', 'true', 'Allow all to read single showing detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type', 'true', 'Allow all to read ticket types'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type/{id}', 'true', 'Allow all to read single ticket type'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{showingId}/seats/stream', 'true', 'Allow all to receive seat availability stream'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/lock', 'true', 'Allow all to lock seats during booking'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/release', 'true', 'Allow all to release seat locks during booking'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/bookings', 'true', 'Allow anyone to create bookings'),
+            ('user,admin',         'GET',  'allow', '/api/bookings', 'true', 'Allow logged-in users to view bookings where backend permits'),
+            ('user,admin',         'GET',  'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to view booking detail'),
+            ('user,admin',         'DELETE', 'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to cancel booking'),
+
+            ('user,admin',         'GET',  'allow', '/api/users/{id}', 'true', 'Allow profile read'),
+            ('user,admin',         'PUT',  'allow', '/api/users/{id}', 'true', 'Allow profile update'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/contacts', 'true', 'Allow all to send contact messages'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings', 'true', 'Allow debug showings during development'),
+
+            ('admin',              '*',    'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
+            ('admin',              '*',    'allow', '/api/sessions', 'true', 'Allow admins to manage sessions'),
+            ('admin',              '*',    'allow', '/api', 'true', 'Admins can access all API routes');
             ";
+
             command.CommandText = aclData;
             command.ExecuteNonQuery();
+            
+            // DEBUG ACL RULES
+            command.CommandText = "SELECT COUNT(*) FROM acl";
+            Console.WriteLine("ACL rows after seed: " + Convert.ToInt32(command.ExecuteScalar()));
         }
 
         // -------------------------
