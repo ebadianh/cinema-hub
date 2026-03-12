@@ -52,7 +52,7 @@ export default function ContactList() {
     try {
       const newStatus = currentStatus === "read" ? "unread" : "read";
 
-      const res = await fetch(`/api/contact/${id}`, {
+      const res = await fetch(`/api/contacts/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -188,9 +188,12 @@ export default function ContactList() {
                             {contact.status === "unread" ? "Markera läst" : "Markera oläst"}
                           </button>
 
-                          <a href={`mailto:${contact.email}?subject=Re: ${contact.subject}`}
+                          <a
+                            href={`mailto:${contact.email}?subject=Re: ${contact.subject}`}
                             className="btn btn-sm btn-primary"
                             onClick={(e) => e.stopPropagation()}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
                             Svara
                           </a>
