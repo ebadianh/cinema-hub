@@ -14,7 +14,7 @@ public static class AdminRoutes
 
     private static IResult GetFilms(HttpContext context)
     {
-        var result = SQLQuery("SELECT * FROM Films ORDER BY id DESC", null, context);
+        var result = SQLQuery("SELECT * FROM Films ORDER BY id ASC", null, context);
         return RestResult.Parse(context, result);
     }
 

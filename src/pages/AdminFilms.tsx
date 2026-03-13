@@ -58,8 +58,6 @@ export default function AdminFilms() {
               <th>Genre</th>
               <th>Åldersgräns</th>
               <th>Längd (min)</th>
-              <th>Antal bilder</th>
-              <th>Antal trailers</th>
             </tr>
           </thead>
           <tbody>
@@ -70,8 +68,6 @@ export default function AdminFilms() {
                 <td>{film.genre}</td>
                 <td>{film.age_rating}</td>
                 <td>{film.duration_minutes}</td>
-                <td>{film.images?.length ?? 0}</td>
-                <td>{film.trailers?.length ?? 0}</td>
               </tr>
             ))}
           </tbody>
