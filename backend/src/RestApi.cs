@@ -123,6 +123,9 @@ public static class RestApi
             SeatLockManager.ReleaseLocks(holderId, showingId);
             var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
             await SseManager.BroadcastToShowing(showingId, unavailable);
+
+            // Best-effort: send booking confirmation email without blocking booking success
+            TrySendBookingConfirmationEmail(result, context);
             return RestResult.Parse(context, result);
         }
 
@@ -130,5 +133,41 @@ public static class RestApi
         {
             error = "Unable to generate unique booking reference. Please try again."
         }));
+    }
+
+    private static void TrySendBookingConfirmationEmail(dynamic bookingInsertResult, HttpContext context)
+    {
+        try
+        {
+            if (bookingInsertResult == null || !bookingInsertResult.HasKey("booking_reference"))
+            {
+                return;
+            }
+
+            var bookingReference = (string)bookingInsertResult.booking_reference;
+            var bookingDetails = SQLQueryOne(
+                @"SELECT booking_reference, email, film_title, start_time, salong_name, seats
+                  FROM booking_details
+                  WHERE booking_reference = @bookingReference
+                  LIMIT 1",
+                new { bookingReference },
+                context
+            );
+
+            if (bookingDetails == null)
+            {
+                return;
+            }
+
+            string emailError;
+            if (!EmailService.TrySendBookingConfirmation(bookingDetails, out emailError) && !string.IsNullOrWhiteSpace(emailError))
+            {
+                Log("Booking confirmation email failed:", emailError);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log("Booking confirmation email failed:", ex.Message);
+        }
     }
 }

@@ -26,11 +26,11 @@ public static class Acl
         });
 
         // TEMP DEBUG - remove when everything works
-        Console.WriteLine("=== ACL RULES LOADED ===");
+   /*      Console.WriteLine("=== ACL RULES LOADED ===");
         foreach (var rule in rules)
         {
             Console.WriteLine($"{rule.id} | {rule.method} | {rule.route} | {rule.regexPattern}");
-        }
+        } */
     }
 
     private static string BuildRegexPattern(string route)
