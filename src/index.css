@@ -4,8 +4,8 @@
 
 :root {
   /* === PRIMÄRFÄRG === */
-  --primary-color: #16213e;
-  --primary-hover: #1f2d52;
+  --primary-color: #2a4073;
+  --primary-hover: #16213e;
 
   /* === BAKGRUNDER === */
   --ch-bg: #090b14;
@@ -25,6 +25,31 @@
   --ch-danger: #dc3545;
   --ch-danger-hover: #bb2d3b;
   --ch-success: #2ecc71;
+}
+
+/* Override Bootstrap's primary color below "Föreställningar" */
+.btn-primary {
+  background: var(--ch-accent) !important;
+  border: 2px solid var(--ch-accent-hover) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background: var(--ch-accent-hover) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(22, 33, 62, 0.5) !important;
+  transform: translateY(-1px);
+  color: white !important;
+}
+
+.btn-primary:disabled {
+  background: #75a7e7 !important;
+  border-color: #75a7e7 !important;
+  opacity: 0.6;
 }
 
 /* ===============================
@@ -127,38 +152,49 @@ body {
 
 .ch-btn-primary {
   background: var(--ch-accent);
-  border: none;
+  border: 2px solid var(--ch-accent-hover);
   color: white;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
 }
 
 .ch-btn-primary:hover {
   background: var(--ch-accent-hover);
   color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(22, 33, 62, 0.5);
+  transform: translateY(-1px);
 }
 
 .ch-btn-outline {
-  border: 1px solid var(--ch-border);
+  border: 2px solid var(--ch-border);
   color: var(--ch-text);
   background: transparent;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .ch-btn-outline:hover {
   background: var(--ch-surface-strong);
   border-color: var(--ch-accent);
   color: var(--ch-text);
+  box-shadow: 0 4px 10px rgba(22, 33, 62, 0.4);
+  transform: translateY(-1px);
 }
 
 .ch-btn-danger {
   background: var(--ch-danger);
-  border: none;
+  border: 2px solid var(--ch-danger-hover);
   color: white;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .ch-btn-danger:hover {
   background: var(--ch-danger-hover);
+  border-color: var(--ch-danger);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5);
+  transform: translateY(-1px);
 }
 
 .ch-btn-logout {
@@ -168,7 +204,7 @@ body {
 
 .ch-btn-book {
   background: linear-gradient(135deg, var(--ch-accent), var(--ch-accent-hover));
-  border: none;
+  border: 2px solid var(--ch-accent-hover);
   color: white;
   font-weight: 700;
   padding: 0.65rem 1.4rem;
@@ -182,6 +218,7 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(22, 33, 62, 0.55);
   filter: brightness(1.1);
+  border-color: var(--primary-color);
 }
 
 .ch-btn-book:active {
@@ -195,6 +232,7 @@ body {
   box-shadow: none;
   opacity: 0.6;
   transform: none;
+  border-color: #75a7e7;
 }
 
 /* ===============================
