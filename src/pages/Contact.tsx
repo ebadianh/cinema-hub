@@ -42,12 +42,16 @@ export default function Contact() {
 
               <p className="mb-2">
                 <strong>E-post</strong><br />
-                support@cinemamob.com
+                <a href="mailto:support@cinemamob.com" className="text-decoration-none" style={{ color: 'var(--ch-accent)' }}>
+                  support@cinemamob.com
+                </a>
               </p>
 
               <p className="mb-0">
                 <strong>Telefon</strong><br />
-                +46 70 111 11 11
+                <a href="tel:+46 70 111 11 11" className="text-decoration-none" style={{ color: 'var(--ch-accent)' }}>
+                  +46 70 111 11 11
+                </a>
               </p>
             </div>
           </div>
@@ -66,12 +70,16 @@ export default function Contact() {
 
               <p className="mb-2">
                 <strong>E-post</strong><br />
-                business@cinemamob.com
+                <a href="mailto:business@cinemamob.com" className="text-decoration-none" style={{ color: 'var(--ch-accent)' }}>
+                  business@cinemamob.com
+                </a>
               </p>
 
               <p className="mb-0">
                 <strong>Telefon</strong><br />
-                +46 70 222 22 22
+                <a href="tel:+46 70 222 22 22" className="text-decoration-none" style={{ color: 'var(--ch-accent)' }}>
+                  +46 70 222 22 22
+                </a>
               </p>
             </div>
           </div>

@@ -1,27 +1,70 @@
 /* ===============================
-   CINEMAHUB GLOBAL THEME
+   CINEMAMOB GLOBAL THEME
 ================================ */
 
 :root {
+  /* === PRIMÄRFÄRG === */
+  --primary-color: #2a4073;
+  --primary-hover: #16213e;
+
+  /* === BAKGRUNDER === */
   --ch-bg: #090b14;
   --ch-surface: rgba(255, 255, 255, 0.04);
   --ch-surface-strong: rgba(255, 255, 255, 0.08);
   --ch-border: rgba(255, 255, 255, 0.12);
 
+  /* === TEXT === */
   --ch-text: #ffffff;
   --ch-text-muted: rgba(255, 255, 255, 0.65);
 
-  --ch-accent: #2f6fff;
-  --ch-accent-hover: #4d82ff;
+  /* === ACCENT (ANVÄNDER NU PRIMARY) === */
+  --ch-accent: var(--primary-color);
+  --ch-accent-hover: var(--primary-hover);
 
+  /* === ALERT-FÄRGER === */
   --ch-danger: #dc3545;
   --ch-danger-hover: #bb2d3b;
+  --ch-success: #2ecc71;
 }
 
-/* Global page */
+/* Override Bootstrap's primary color below "Föreställningar" */
+.btn-primary {
+  background: var(--ch-accent) !important;
+  border: 2px solid var(--ch-accent-hover) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background: var(--ch-accent-hover) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(22, 33, 62, 0.5) !important;
+  transform: translateY(-1px);
+  color: white !important;
+}
+
+.btn-primary:disabled {
+  background: #75a7e7 !important;
+  border-color: #75a7e7 !important;
+  opacity: 0.6;
+}
+
+/* ===============================
+   GLOBAL PAGE
+================================ */
+
 body {
   background: var(--ch-bg);
   color: var(--ch-text);
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ===============================
@@ -35,59 +78,14 @@ body {
 
 .ch-navbar .nav-link {
   color: var(--ch-text-muted);
-  transition: 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .ch-navbar .nav-link:hover {
   color: var(--ch-text);
 }
 
-/* ===============================
-   BUTTONS
-================================ */
-
-.ch-btn-primary {
-  background: var(--ch-accent);
-  border: none;
-  color: white;
-  transition: 0.2s ease;
-}
-
-.ch-btn-primary:hover {
-  background: var(--ch-accent-hover);
-}
-
-.ch-btn-outline {
-  border: 1px solid var(--ch-border);
-  color: var(--ch-text);
-  background: transparent;
-}
-
-.ch-btn-outline:hover {
-  background: var(--ch-surface-strong);
-  border-color: var(--ch-accent);
-}
-
-.ch-btn-danger {
-  background: var(--ch-danger);
-  border: none;
-  color: white;
-  transition: background 0.2s ease;
-}
-
-.ch-btn-danger:hover {
-  background: var(--ch-danger-hover);
-}
-
-.ch-btn-logout {
-  min-width: 95px;
-  /* Säkerställer samma storlek för båda texterna */
-  text-align: center;
-}
-
-
-/* Navbar toggler fix for dark theme */
-
+/* Navbar toggler (hamburger) */
 .custom-hamburger {
   width: 22px;
   height: 2px;
@@ -116,25 +114,17 @@ body {
   top: 6px;
 }
 
-
-.collapse {
-  border-radius: 5rm;
-}
-
 .navbar-toggler {
   width: 40px;
   height: 40px;
-
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-
   background: rgba(255, 255, 255, 0.05);
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .navbar-toggler:hover {
@@ -146,12 +136,109 @@ body {
   box-shadow: none;
 }
 
+@media (max-width: 991.98px) {
+
+  .ch-navbar .ch-btn-primary,
+  .ch-navbar .ch-btn-outline {
+    width: 100%;
+    display: block;
+    margin: 2px 0;
+  }
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+
+.ch-btn-primary {
+  background: var(--ch-accent);
+  border: 2px solid var(--ch-accent-hover);
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
+}
+
+.ch-btn-primary:hover {
+  background: var(--ch-accent-hover);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(22, 33, 62, 0.5);
+  transform: translateY(-1px);
+}
+
+.ch-btn-outline {
+  border: 2px solid var(--ch-border);
+  color: var(--ch-text);
+  background: transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.ch-btn-outline:hover {
+  background: var(--ch-surface-strong);
+  border-color: var(--ch-accent);
+  color: var(--ch-text);
+  box-shadow: 0 4px 10px rgba(22, 33, 62, 0.4);
+  transform: translateY(-1px);
+}
+
+.ch-btn-danger {
+  background: var(--ch-danger);
+  border: 2px solid var(--ch-danger-hover);
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.ch-btn-danger:hover {
+  background: var(--ch-danger-hover);
+  border-color: var(--ch-danger);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5);
+  transform: translateY(-1px);
+}
+
+.ch-btn-logout {
+  min-width: 95px;
+  text-align: center;
+}
+
+.ch-btn-book {
+  background: linear-gradient(135deg, var(--ch-accent), var(--ch-accent-hover));
+  border: 2px solid var(--ch-accent-hover);
+  color: white;
+  font-weight: 700;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(22, 33, 62, 0.4);
+}
+
+.ch-btn-book:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(22, 33, 62, 0.55);
+  filter: brightness(1.1);
+  border-color: var(--primary-color);
+}
+
+.ch-btn-book:active {
+  transform: translateY(0px);
+  box-shadow: 0 4px 12px rgba(22, 33, 62, 0.4);
+}
+
+.ch-btn-book:disabled {
+  background: #75a7e7;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+  transform: none;
+  border-color: #75a7e7;
+}
 
 /* ===============================
    HERO CAROUSEL
 ================================ */
 
-/* ROTEN */
 .ch-hero-carousel {
   border-radius: 12px;
   overflow: hidden;
@@ -162,9 +249,8 @@ body {
   transition: transform 0.8s ease-in-out;
 }
 
-/* STAM-huvudbehållare för varje slide */
 .ch-hero-slide {
-  background-image: url(https://images.pexels.com/photos/7991489/pexels-photo-7991489.jpeg?_gl=1*19xada0*_ga*MjA5MjY2NDYyNi4xNzY4MTI4MTg4*_ga_8JE65Q40S6*czE3NzA3MzExNzQkbzQkZzEkdDE3NzA3MzEzMjckajM1JGwwJGgw);
+  background-image: url(https://images.pexels.com/photos/7991489/pexels-photo-7991489.jpeg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -176,7 +262,6 @@ body {
   padding: 3rem 2rem;
 }
 
-/* GREN-dark-background */
 .ch-hero__overlay {
   position: absolute;
   inset: 0;
@@ -186,7 +271,6 @@ body {
   z-index: 1;
 }
 
-/* GREN-desktoplayout */
 .ch-hero-layout {
   display: flex;
   gap: 4rem;
@@ -197,7 +281,6 @@ body {
   position: relative;
 }
 
-/* GREN-mobilelayout */
 .ch-hero-mobile {
   position: relative;
   z-index: 2;
@@ -209,14 +292,12 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* LÖV-textblock-vänster */
 .ch-hero-text {
   flex: 1;
   text-align: left;
   padding: 4rem;
 }
 
-/* LÖV-poster-höger */
 .ch-hero-poster-section {
   flex-shrink: 0;
   width: 280px;
@@ -235,7 +316,7 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* KONTROLLER - Pilarna */
+/* Carousel controls */
 .ch-hero-carousel .carousel-control-prev,
 .ch-hero-carousel .carousel-control-next {
   width: 60px;
@@ -257,7 +338,7 @@ body {
   padding: 8px;
 }
 
-/* KONTROLLER - Indikationer */
+/* Carousel indicators */
 .ch-hero-carousel .carousel-indicators {
   margin-bottom: 1.5rem;
 }
@@ -269,22 +350,11 @@ body {
   background-color: rgba(255, 255, 255, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
-  transform: none;
 }
 
 .ch-hero-carousel .carousel-indicators button.active {
   background-color: var(--ch-accent);
   border-color: var(--ch-accent);
-  transform: none;
-}
-
-.ch-hero-carousel .carousel-indicators {
-  transform: none;
-}
-
-.ch-hero-carousel .carousel-indicators button,
-.ch-hero-carousel .carousel-indicators button.active {
-  transform: none;
 }
 
 .ch-hero-content {
@@ -306,8 +376,7 @@ body {
   font-weight: 500;
 }
 
-/* === RESPONSIVE === */
-/* Mobile and tablet */
+/* Hero responsive */
 @media (max-width: 768px) {
   .ch-hero-slide {
     min-height: 380px;
@@ -350,37 +419,34 @@ body {
   .ch-hero-mobile-poster {
     width: 160px;
     border-radius: 12px;
-    box-shadow: 0 6px 20 px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   }
 }
 
-/* Tablet */
 @media (min-width: 768px) and (max-width: 1199px) {
   .ch-hero-slide {
     min-height: 600px;
   }
 }
 
-/* Desktop */
 @media (min-width: 1200px) {
   .ch-hero-slide {
     min-height: 600px;
   }
 }
 
-/* CARDS/FILMS-SEKTION */
-/* linjer på sidorna om "Filmer" */
+/* ===============================
+   FILM CARDS
+================================ */
+
 .section-title {
   font-size: 2rem;
   font-weight: 600;
   color: var(--ch-text);
   overflow: hidden;
   max-width: 100%;
-
-
 }
 
-/* före och efter titel */
 .section-title::before,
 .section-title::after {
   content: "";
@@ -404,19 +470,27 @@ body {
   margin-left: 1rem;
 }
 
-/* kontrollerar bildförhållandet */
 .poster-wrapper {
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
 }
 
-/* säkerställer att bilden passar kortet */
 .poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 @media (min-width: 1200px) {
@@ -426,401 +500,9 @@ body {
   }
 }
 
-/* FilmDetails.css */
-/* 
-.filmDetailsPage {
-  min-height: 100vh;
-  padding: 28px 0 60px;
-  color: rgba(255, 255, 255, 0.92);
-
-  background:
-    radial-gradient(1000px 500px at 20% 15%, rgba(90, 120, 200, 0.20), transparent 60%),
-    radial-gradient(900px 500px at 70% 40%, rgba(60, 90, 170, 0.16), transparent 60%),
-    linear-gradient(180deg, #050a14, #070e1b 45%, #050a14);
-}
-
-.filmDetailsContainer {
-  max-width: 1200px;
-}
-
-.filmDetailsTopBar {
-  margin-bottom: 18px;
-}
-
-.filmBackLink {
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  font-weight: 600;
-}
-.filmBackLink:hover {
-  color: rgba(255, 255, 255, 0.95);
-  text-decoration: underline;
-}
-
-.posterCard {
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.45),
-    0 2px 0 rgba(255, 255, 255, 0.04) inset;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.posterImg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.infoPanel {
-  border-radius: 14px;
-  padding: 22px 22px 18px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.35),
-    0 2px 0 rgba(255, 255, 255, 0.04) inset;
-  backdrop-filter: blur(10px);
-}
-
-.filmTitle {
-  font-size: 2.2rem;
-  margin: 0 0 8px;
-  letter-spacing: 0.2px;
-}
-
-.metaRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.70);
-  font-weight: 600;
-}
-
-.dot {
-  opacity: 0.55;
-}
-
-.divider {
-  height: 1px;
-  margin: 16px 0;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.filmDesc {
-  margin: 0;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.78);
-  max-width: 72ch;
-}
-
-.kvRow {
-  display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 10px;
-  padding: 7px 0;
-}
-
-.kvKey {
-  color: rgba(255, 255, 255, 0.70);
-  font-weight: 700;
-}
-
-.kvVal {
-  color: rgba(255, 255, 255, 0.88);
-  font-weight: 600;
-}
-
-.showtimePills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.showtimePill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-*/
-
 /* ===============================
-   SEAT MAP / BOOKING
+   FILM DETAILS PAGE
 ================================ */
-
-.ch-seat-map {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1.5rem;
-  background: var(--ch-surface);
-  border: 1px solid var(--ch-border);
-  border-radius: 12px;
-}
-
-.ch-screen-label {
-  font-size: 0.85rem;
-  color: var(--ch-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.ch-screen {
-  width: 80%;
-  height: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
-  border-radius: 4px 4px 0 0;
-  box-shadow: 0 -4px 20px rgba(255, 255, 255, 0.15);
-  margin-bottom: 2rem;
-}
-
-.ch-seat-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.ch-row-label {
-  width: 24px;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--ch-text-muted);
-  font-weight: 600;
-}
-
-.ch-seats-container {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ch-seat-rows-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.ch-seat-rows-scroll {
-  overflow-x: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ch-seat {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  border: 2px solid transparent;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ch-text);
-}
-
-.ch-seat:hover:not(:disabled) {
-  transform: scale(1.1);
-}
-
-.ch-seat--available {
-  background: rgba(46, 204, 113, 0.25);
-  border-color: #2ecc71;
-}
-
-.ch-seat--available:hover {
-  background: rgba(46, 204, 113, 0.4);
-}
-
-.ch-seat--selected {
-  background: var(--ch-accent);
-  border-color: var(--ch-accent-hover);
-}
-
-.ch-seat--preview {
-  background: rgba(47, 111, 255, 0.3);
-  border-color: rgba(77, 130, 255, 0.6);
-  transform: scale(1.05);
-}
-
-.ch-seat--booked {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: var(--ch-text-muted);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.ch-seat-legend {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ch-border);
-}
-
-.ch-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--ch-text-muted);
-}
-
-.ch-legend-box {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  border: 2px solid transparent;
-}
-
-.ch-legend-box--available {
-  background: rgba(46, 204, 113, 0.25);
-  border-color: #2ecc71;
-}
-
-.ch-legend-box--selected {
-  background: var(--ch-accent);
-  border-color: var(--ch-accent-hover);
-}
-
-.ch-legend-box--booked {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-/* Booking Summary */
-.ch-booking-summary {
-  background: var(--ch-surface);
-  border: 1px solid var(--ch-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-
-.ch-summary-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  color: var(--ch-text-muted);
-}
-
-.ch-total-row {
-  border-top: 1px solid var(--ch-border);
-  margin-top: 0.5rem;
-  padding-top: 1rem;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--ch-text);
-}
-
-/* Ticket Selector */
-.ch-ticket-selector {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.ch-ticket-btn {
-  font-size: 0.8rem;
-  padding: 0.35rem 0.75rem;
-}
-
-.ch-ticket-btn--active {
-  background: var(--ch-accent) !important;
-  border-color: var(--ch-accent) !important;
-  color: white !important;
-}
-
-/* Confirmation Modal */
-.ch-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-  padding: 1rem;
-}
-
-.ch-seat-toggle-container {
-  display: flex;
-  justify-content: center;
-  /* Centrerar horisontellt */
-  width: 100%;
-  padding: 20px 0;
-  /* Valfritt: ger lite luft */
-}
-
-.ch-modal {
-  background: var(--ch-bg);
-  border: 1px solid var(--ch-border);
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 450px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.ch-modal-total {
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem;
-  background: var(--ch-surface-strong);
-  border-radius: 8px;
-  font-size: 1.1rem;
-}
-
-/* Booking Confirmed */
-.ch-booking-confirmed {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  background: var(--ch-surface);
-  border: 1px solid var(--ch-border);
-  border-radius: 12px;
-}
-
-.ch-success-icon {
-  width: 80px;
-  height: 80px;
-  background: rgba(46, 204, 113, 0.2);
-  border: 3px solid #2ecc71;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: #2ecc71;
-  margin: 0 auto;
-}
-
-.ch-error-icon {
-  width: 80px;
-  height: 80px;
-  background: rgba(231, 76, 60, 0.2);
-  border: 3px solid #e74c3c;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: #e74c3c;
-  margin: 0 auto;
-}
 
 .actionRow {
   display: flex;
@@ -884,10 +566,162 @@ body {
 }
 
 /* ===============================
-   BOOKING PAGE - NY DESIGN
+   SEAT MAP / BOOKING
 ================================ */
 
-/* 70-30 layout */
+.ch-seat-map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--ch-surface);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+}
+
+.ch-screen-label {
+  font-size: 0.85rem;
+  color: var(--ch-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.ch-screen {
+  width: 80%;
+  height: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 -4px 20px rgba(255, 255, 255, 0.15);
+  margin-bottom: 2rem;
+}
+
+.ch-seat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: default;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  margin: 0 -0.5rem;
+}
+
+.ch-row-label {
+  width: 24px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ch-text-muted);
+  font-weight: 600;
+}
+
+.ch-seats-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ch-seat-rows-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ch-seat-rows-scroll {
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ch-seat {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ch-text);
+}
+
+.ch-seat:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.ch-seat--available {
+  background: rgba(46, 204, 113, 0.25);
+  border-color: var(--ch-success);
+}
+
+.ch-seat--available:hover {
+  background: rgba(46, 204, 113, 0.4);
+}
+
+.ch-seat--selected {
+  background: var(--ch-accent);
+  border-color: var(--ch-accent-hover);
+}
+
+.ch-seat--preview {
+  background: rgba(22, 33, 62, 0.3);
+  border-color: rgba(31, 45, 82, 0.6);
+  transform: scale(1.05);
+}
+
+.ch-seat--booked {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--ch-text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Seat legend */
+.ch-seat-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ch-border);
+}
+
+.ch-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+}
+
+.ch-legend-box--available {
+  background: rgba(46, 204, 113, 0.25);
+  border-color: var(--ch-success);
+}
+
+.ch-legend-box--selected {
+  background: var(--ch-accent);
+  border-color: var(--ch-accent-hover);
+}
+
+.ch-legend-box--booked {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ===============================
+   BOOKING PAGE LAYOUT
+================================ */
+
 .ch-booking-page {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -913,7 +747,6 @@ body {
   align-self: flex-start;
 }
 
-/* Höger kolumn - sticky */
 .ch-booking-right {
   position: sticky;
   top: 2rem;
@@ -922,15 +755,13 @@ body {
   overflow-y: auto;
 }
 
-/* Sätesrad */
-.ch-seat-row {
-  cursor: default;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
-  margin: 0 -0.5rem;
+.ch-seat-toggle-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 20px 0;
 }
 
-/* Toggle-knapp för val-läge */
 .ch-seat-mode-toggle {
   align-self: flex-end;
   padding: 0.625rem 1.25rem;
@@ -1039,6 +870,87 @@ body {
 }
 
 /* ===============================
+   BOOKING SUMMARY
+================================ */
+
+.ch-booking-summary {
+  background: var(--ch-surface);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.ch-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: var(--ch-text-muted);
+}
+
+.ch-total-row {
+  border-top: 1px solid var(--ch-border);
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ch-text);
+}
+
+.ch-booking-divider {
+  height: 1px;
+  background: var(--ch-border);
+  margin: 1rem 0;
+}
+
+.ch-selected-seats-section h6 {
+  margin-bottom: 0.5rem;
+  color: var(--ch-text);
+}
+
+.ch-selected-seats-list {
+  color: var(--ch-text-muted);
+  font-size: 0.95rem;
+}
+
+.ch-booking-price-section {
+  margin-top: 0.5rem;
+}
+
+.ch-email-section {
+  margin-top: 0.5rem;
+}
+
+.ch-email-section .form-control {
+  background: var(--ch-surface-strong);
+  border: 1px solid var(--ch-border);
+  color: var(--ch-text);
+}
+
+.ch-email-section .form-control:focus {
+  border-color: var(--ch-accent);
+  box-shadow: 0 0 0 3px rgba(22, 33, 62, 0.15);
+}
+
+.ch-email-section .form-control::placeholder {
+  color: var(--ch-text-muted);
+}
+
+.ch-no-selection {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--ch-text-muted);
+}
+
+.ch-no-selection p {
+  margin: 0;
+}
+
+.ch-confirm-btn {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* ===============================
    TICKET COUNTER
 ================================ */
 
@@ -1118,8 +1030,8 @@ body {
 .ch-ticket-counter-instruction {
   margin-top: 1rem;
   padding: 0.75rem;
-  background: rgba(47, 111, 255, 0.1);
-  border: 1px solid rgba(47, 111, 255, 0.3);
+  background: rgba(22, 33, 62, 0.1);
+  border: 1px solid rgba(22, 33, 62, 0.3);
   border-radius: 8px;
   text-align: center;
   color: var(--ch-accent);
@@ -1132,62 +1044,203 @@ body {
   color: var(--ch-text-muted);
 }
 
+.ch-ticket-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ch-ticket-btn {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+}
+
+.ch-ticket-btn--active {
+  background: var(--ch-accent) !important;
+  border-color: var(--ch-accent) !important;
+  color: white !important;
+}
+
 /* ===============================
-   BOOKING SUMMARY (HÖGER KOLUMN)
+   MODALS
 ================================ */
 
-.ch-booking-divider {
-  height: 1px;
-  background: var(--ch-border);
-  margin: 1rem 0;
+.ch-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
 }
 
-.ch-selected-seats-section h6 {
-  margin-bottom: 0.5rem;
+.ch-modal {
+  background: var(--ch-bg);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.ch-modal-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--ch-surface-strong);
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+/* ===============================
+   BOOKING CONFIRMATION
+================================ */
+
+.ch-booking-confirmed {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: var(--ch-surface);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+}
+
+.ch-success-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(46, 204, 113, 0.2);
+  border: 3px solid var(--ch-success);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--ch-success);
+  margin: 0 auto;
+}
+
+.ch-error-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(231, 76, 60, 0.2);
+  border: 3px solid #e74c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #e74c3c;
+  margin: 0 auto;
+}
+
+.ch-confirmation-page {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--ch-bg);
+}
+
+.ch-confirmation-card {
+  max-width: 600px;
+  width: 100%;
+  background: var(--ch-surface);
+  border: 1px solid var(--ch-border);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+}
+
+.ch-ref-code {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ch-accent);
+  letter-spacing: 0.15em;
+  margin: 0.5rem 0 1rem;
+}
+
+.ch-confirmation-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ch-border);
+}
+
+.ch-confirmation-section h5 {
+  margin-bottom: 0.75rem;
   color: var(--ch-text);
 }
 
-.ch-selected-seats-list {
-  color: var(--ch-text-muted);
-  font-size: 0.95rem;
+.ch-seat-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.ch-booking-price-section {
-  margin-top: 0.5rem;
-}
-
-.ch-email-section {
-  margin-top: 0.5rem;
-}
-
-.ch-email-section .form-control {
+.ch-seat-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
   background: var(--ch-surface-strong);
   border: 1px solid var(--ch-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
   color: var(--ch-text);
 }
 
-.ch-email-section .form-control:focus {
-  border-color: var(--ch-accent);
-  box-shadow: 0 0 0 3px rgba(47, 111, 255, 0.15);
+/* ===============================
+   REACT DATEPICKER
+================================ */
+
+.react-datepicker__input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.849);
 }
 
-.ch-email-section .form-control::placeholder {
-  color: var(--ch-text-muted);
+.react-datepicker__input-container input {
+  color: rgba(255, 255, 255, 0.849);
 }
 
-.ch-no-selection {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--ch-text-muted);
-}
+/* Mobile datepicker */
+@media (max-width: 991px) {
+  .filter-datepicker-popper {
+    width: calc(100% - 2rem);
+    inset: auto auto auto 50% !important;
+    transform: translateX(-50%) !important;
+  }
 
-.ch-no-selection p {
-  margin: 0;
-}
+  .filter-datepicker-popper .react-datepicker {
+    width: 100%;
+  }
 
-.ch-confirm-btn {
-  font-weight: 600;
-  font-size: 1rem;
+  .filter-datepicker-popper .react-datepicker__month-container {
+    width: 100%;
+  }
+
+  .filter-datepicker-popper .react-datepicker__month {
+    margin: 0.8rem;
+  }
+
+  .filter-datepicker-popper .react-datepicker__day,
+  .filter-datepicker-popper .react-datepicker__day-name {
+    width: 2.5rem;
+    line-height: 2.5rem;
+    margin: 0.2rem;
+  }
+
+  .filter-datepicker-popper .react-datepicker__header {
+    padding: 1rem 0;
+  }
+
+  .filter-datepicker-popper .react-datepicker__current-month {
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .filter-datepicker-popper .react-datepicker__triangle {
+    display: none;
+  }
 }
 
 /* ===============================
@@ -1210,7 +1263,7 @@ body {
 }
 
 /* ===============================
-   RESPONSIVE - MOBIL
+   RESPONSIVE - MOBILE
 ================================ */
 
 @media (max-width: 768px) {
@@ -1270,7 +1323,6 @@ body {
     gap: 0.25rem;
   }
 
-  /* Fade-gradient på kanterna */
   .ch-seat-rows-wrapper::before,
   .ch-seat-rows-wrapper::after {
     content: '';
@@ -1292,7 +1344,6 @@ body {
     background: linear-gradient(to left, var(--ch-surface), transparent);
   }
 
-  /* Svep-indikator under sätesraderna */
   .ch-seat-rows-scroll::after {
     content: '\2190  svep \2192';
     display: block;
@@ -1314,78 +1365,6 @@ body {
     justify-content: center;
   }
 
-  /* Navbar fix i responsivt läge */
-
-  @media (max-width: 991.98px) {
-
-    .ch-navbar .ch-btn-primary,
-    .ch-navbar .ch-btn-outline {
-      width: 100%;
-      display: block;
-      margin: 2px 0;
-    }
-
-  }
-}
-
-/* ===============================
-   BOOKING CONFIRMATION PAGE
-================================ */
-
-.ch-confirmation-page {
-  min-height: 100vh;
-  padding: 3rem 1.5rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  background: var(--ch-bg);
-}
-
-.ch-confirmation-card {
-  max-width: 600px;
-  width: 100%;
-  background: var(--ch-surface);
-  border: 1px solid var(--ch-border);
-  border-radius: 12px;
-  padding: 2.5rem 2rem;
-}
-
-.ch-ref-code {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--ch-accent);
-  letter-spacing: 0.15em;
-  margin: 0.5rem 0 1rem;
-}
-
-.ch-confirmation-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--ch-border);
-}
-
-.ch-confirmation-section h5 {
-  margin-bottom: 0.75rem;
-  color: var(--ch-text);
-}
-
-.ch-seat-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.ch-seat-badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  background: var(--ch-surface-strong);
-  border: 1px solid var(--ch-border);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--ch-text);
-}
-
-@media (max-width: 768px) {
   .ch-confirmation-page {
     padding: 1.5rem 1rem;
   }
@@ -1396,102 +1375,5 @@ body {
 
   .ch-ref-code {
     font-size: 1.5rem;
-  }
-}
-
-
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-}
-
-.card-hover:hover {
-  transform: scale(1.04);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-}
-
-/* --------------------------------------------------------- */
-
-.ch-btn-book {
-  background: linear-gradient(135deg, #0a2ece, #0a2ece);
-  border: none;
-  color: white;
-  font-weight: 700;
-  padding: 0.65rem 1.4rem;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(21, 5, 161, 0.4);
-}
-
-.ch-btn-book:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(15, 12, 236, 0.55);
-  background: linear-gradient(135deg, #0a2ecea1, #0a2ecea1);
-}
-
-.ch-btn-book:active {
-  transform: translateY(0px);
-  box-shadow: 0 4px 12px rgba(30, 18, 134, 0.4);
-}
-
-.ch-btn-book:disabled {
-  background: #75a7e7;
-  cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.6;
-}
-
-/* Datepicker - React */
-.react-datepicker__input-container input::placeholder {
-  color: rgba(255, 255, 255, 0.849);
-}
-
-.react-datepicker__input-container input {
-  color: rgba(255, 255, 255, 0.849);
-}
-
-/* Datepicker - React - Mobile */
-@media (max-width: 991px) {
-  .filter-datepicker-popper {
-    width: calc(100% - 2rem);
-    inset: auto auto auto 50% !important;
-    transform: translateX(-50%) !important;
-  }
-
-  .filter-datepicker-popper .react-datepicker {
-    width: 100%;
-  }
-
-  .filter-datepicker-popper .react-datepicker__month-container {
-    width: 100%;
-  }
-
-  .filter-datepicker-popper .react-datepicker__month {
-    margin: 0.8rem;
-  }
-
-  .filter-datepicker-popper .react-datepicker__day,
-  .filter-datepicker-popper .react-datepicker__day-name {
-    width: 2.5rem;
-    line-height: 2.5rem;
-    margin: 0.2rem;
-  }
-
-  .filter-datepicker-popper .react-datepicker__header {
-    padding: 1rem 0;
-  }
-
-  .filter-datepicker-popper .react-datepicker__current-month {
-    font-size: 1rem;
-    padding-bottom: 0.5rem§;
-  }
-
-  .filter-datepicker-popper .react-datepicker__triangle {
-    display: none;
-  }
-
-  .filter-datepicker-popper .react-datepicker__current-month {
-    padding-bottom: 0.5rem;
   }
 }

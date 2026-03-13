@@ -9,7 +9,7 @@ export default function Footer() {
 
           {/* Brand / Description */}
           <div className="col-md-4 mb-4">
-            <h5 className="fw-bold">CinemaHub</h5>
+            <h5 className="fw-bold">CinemaMob</h5>
             <p className="text-secondary small">
               Upptäck nya filmer, boka dina platser och upplev bio som aldrig förr.
             </p>
@@ -57,7 +57,7 @@ export default function Footer() {
 
         {/* Bottom row */}
         <div className="text-center text-secondary small">
-          © {new Date().getFullYear()} CinemaHub. All rights reserved.
+          © {new Date().getFullYear()} CinemaMob. All rights reserved.
         </div>
 
       </div>

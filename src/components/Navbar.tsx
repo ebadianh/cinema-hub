@@ -42,8 +42,8 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           className="navbar-brand d-flex align-items-center gap-2 text-white"
           to="/"
         >
-          <img src={logo} alt="CinemaHub" width={40} height={40} />
-          <span className="fw-semibold">CinemaHub</span>
+          <img src={logo} alt="CinemaMob" width={40} height={40} />
+          <span className="fw-semibold">CinemaMob</span>
         </Link>
 
         <button
@@ -102,9 +102,8 @@ export default function Navbar({ user, setUser }: NavbarProps) {
 
                 <li className="nav-item mt-2 mt-lg-0">
                   <button
-                    className={`btn w-100 w-lg-auto ch-btn-logout ${
-                      confirmingLogout ? "ch-btn-danger" : "ch-btn-primary"
-                    }`}
+                    className={`btn w-100 w-lg-auto ch-btn-logout ${confirmingLogout ? "ch-btn-danger" : "ch-btn-primary"
+                      }`}
                     onClick={handleLogoutClick}
                   >
                     {confirmingLogout ? "Bekräfta" : "Logga ut"}
