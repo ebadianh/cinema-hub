@@ -12,6 +12,7 @@ public static class Server
         FileServer.Start();
         LoginRoutes.Start();
         AiChatRoutes.Start(); 
+        AdminRoutes.Start(); // separate admin routes for ACL
         RestApi.Start();
         SeatLockRoutes.Start();
         SeatLockManager.Start();

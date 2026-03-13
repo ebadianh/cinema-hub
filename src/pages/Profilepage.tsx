@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import type User from '../interfaces/Users';
+import { formatShowtime } from '../utils/bookingUtils';
 
 interface OutletContextType {
     user: User | null;
@@ -9,6 +10,7 @@ interface OutletContextType {
 
 type Booking = {
     id: number;
+    booking_reference: string;
     email: string;
     showing_id: number;
     booked_at: string;
@@ -108,19 +110,19 @@ export default function Profile() {
         return () => controller.abort();
     }, [profile]);
 
-    const handleCancel = async (bookingId: number, startTime: string) => {
+    const handleCancel = async (bookingRef: string, startTime: string) => {
         const isUpcoming = new Date(startTime) > new Date();
         if (!isUpcoming) return;
 
         const confirmed = window.confirm('Är du säker på att du vill avboka?');
         if (!confirmed) return;
 
-        await fetch(`/api/bookings/${bookingId}`, {
+        await fetch(`/api/bookings/${bookingRef}`, {
             method: 'DELETE',
             credentials: 'include'
         });
 
-        setBookings(prev => prev.filter(b => b.id !== bookingId));
+        setBookings(prev => prev.filter(b => b.booking_reference !== bookingRef));
     };
 
     const isOwnProfile = loggedInUser?.id === parseInt(id || '0');
@@ -184,16 +186,16 @@ export default function Profile() {
                                             <strong>{booking.film?.title ?? 'Okänd film'}</strong>
                                             <p className="text-muted mb-0 small">
                                                 {booking.showing
-                                                    ? new Date(booking.showing.start_time).toLocaleString('sv-SE')
+                                                    ? formatShowtime(booking.showing.start_time)
                                                     : 'Okänt datum'}
                                             </p>
                                             <p className="text-muted mb-0 small">
-                                                Bokningsnr: #{booking.id}
+                                                Bokningsref: {booking.booking_reference}
                                             </p>
                                         </div>
                                         <button
                                             className="btn btn-outline-danger btn-sm"
-                                            onClick={() => handleCancel(booking.id, booking.showing!.start_time)}
+                                            onClick={() => handleCancel(booking.booking_reference, booking.showing!.start_time)}
                                         >
                                             Avboka
                                         </button>
@@ -219,11 +221,11 @@ export default function Profile() {
                                             <strong>{booking.film?.title ?? 'Okänd film'}</strong>
                                             <p className="text-muted mb-0 small">
                                                 {booking.showing
-                                                    ? new Date(booking.showing.start_time).toLocaleString('sv-SE')
+                                                    ? formatShowtime(booking.showing.start_time)
                                                     : 'Okänt datum'}
                                             </p>
                                             <p className="text-muted mb-0 small">
-                                                Bokningsnr: #{booking.id}
+                                                Bokningsref: {booking.booking_reference}
                                             </p>
                                         </div>
                                         <span className="badge bg-secondary">Genomförd</span>

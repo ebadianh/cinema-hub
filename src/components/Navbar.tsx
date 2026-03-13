@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type User from "../interfaces/Users";
 import { useState, useEffect } from "react";
 
@@ -12,6 +12,7 @@ interface NavbarProps {
 export default function Navbar({ user, setUser }: NavbarProps) {
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,11 +25,12 @@ export default function Navbar({ user, setUser }: NavbarProps) {
 
   const logout = async () => {
     try {
-      await fetch('/api/login', {
-        method: 'DELETE',
-        credentials: 'include'
+      await fetch("/api/login", {
+        method: "DELETE",
+        credentials: "include",
       });
       setUser(null);
+      navigate("/");
     } catch (error) {
       console.error("Logout misslyckades:", error);
     }
@@ -46,7 +48,10 @@ export default function Navbar({ user, setUser }: NavbarProps) {
   return (
     <nav className={`navbar navbar-expand-lg ch-navbar ${scrolled ? 'ch-navbar-scrolled' : ''}`}>
       <div className="container py-2">
-        <Link className="navbar-brand d-flex align-items-center gap-2 text-white" to="/">
+        <Link
+          className="navbar-brand d-flex align-items-center gap-2 text-white"
+          to="/"
+        >
           <img src={logo} alt="CinemaHub" width={40} height={40} />
           <span className="fw-semibold">CinemaHub</span>
         </Link>
@@ -71,28 +76,50 @@ export default function Navbar({ user, setUser }: NavbarProps) {
               </Link>
             </li>
 
+            <li className="nav-item">
+              <Link className="nav-link" to="/contact">
+                Kontakt
+              </Link>
+            </li>
+
             {user ? (
               <>
-                {user.role === 'admin' && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/admin">
-                      Admin
+                {user.role === "user" && (
+                  <li className="nav-item mt-2 mt-lg-0">
+                    <Link
+                      className="btn ch-btn-outline"
+                      to={`/profile/${user.id}`}
+                    >
+                      Profil ({user.firstName})
                     </Link>
                   </li>
                 )}
-                <li className="nav-item mt-2 mt-lg-0">
-                  <Link className="btn ch-btn-outline" to="/profile">
-                    Profil ({user.firstName})
-                  </Link>
-                </li>
+
+                {user.role === "admin" && (
+                  <>
+                    <li className="nav-item mt-2 mt-lg-0">
+                      <Link
+                        className="btn ch-btn-outline"
+                        to={`/profile/${user.id}`}
+                      >
+                        Profil ({user.firstName})
+                      </Link>
+                    </li>
+                    <li className="nav-item mt-2 mt-lg-0">
+                      <Link className="btn ch-btn-outline" to="/admin/films">
+                        Adminpanel
+                      </Link>
+                    </li>
+                  </>
+                )}
+
                 <li className="nav-item mt-2 mt-lg-0">
                   <button
-                    className={`btn w-100 w-lg-auto ch-btn-logout ${
-                      confirmingLogout ? 'ch-btn-danger' : 'ch-btn-primary'
-                    }`}
+                    className={`btn w-100 w-lg-auto ch-btn-logout ${confirmingLogout ? "ch-btn-danger" : "ch-btn-primary"
+                      }`}
                     onClick={handleLogoutClick}
                   >
-                    {confirmingLogout ? 'Bekräfta' : 'Logga ut'}
+                    {confirmingLogout ? "Bekräfta" : "Logga ut"}
                   </button>
                 </li>
               </>

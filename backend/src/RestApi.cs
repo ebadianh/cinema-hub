@@ -4,13 +4,13 @@ public static class RestApi
     public static void Start()
     {
 
-        App.MapPost("/api/{table}", (
+        App.MapPost("/api/{table}", async (
             HttpContext context, string table, JsonElement bodyJson
         ) =>
         {
             if (table == "bookings")
             {
-                return PostBooking(context, bodyJson);
+                return await PostBooking(context, bodyJson);
             }
             var body = JSON.Parse(bodyJson.ToString());
             body.Delete("id");
@@ -95,21 +95,40 @@ public static class RestApi
         var showingId = (int)body.showing_id;
         var seatsJson = JSON.Stringify(body.tickets);
 
-        var result = SQLQueryOne(
-            "CALL CreateBookingWithSeats(@email, @showingId, @seatsJson)",
-            new { email, showingId, seatsJson },
-            context
-        );
-
-        if (!result.HasKey("error"))
+        // Try to insert booking with a unique reference, retry on duplicate key
+        const int maxRetries = 10;
+        for (int attempt = 0; attempt < maxRetries; attempt++)
         {
-            // Release locks and broadcast updated availability via SSE
+            var bookingReference = BookingReferenceGenerator.Generate();
+            var result = SQLQueryOne(
+                "CALL CreateBookingWithSeats(@email, @showingId, @seatsJson, @bookingReference)",
+                new { email, showingId, seatsJson, bookingReference },
+                context
+            );
+
+            if (result.HasKey("error"))
+            {
+                string error = (string)result.error;
+                // MySQL error 1062: Duplicate entry — retry with a new reference
+                if (error.Contains("Duplicate entry") && attempt < maxRetries - 1)
+                {
+                    continue;
+                }
+                // Other error or last attempt — return the error
+                return RestResult.Parse(context, result);
+            }
+
+            // Success — release locks and broadcast updated availability via SSE
             var holderId = Session.GetSessionId(context);
             SeatLockManager.ReleaseLocks(holderId, showingId);
             var unavailable = SeatLockManager.GetUnavailableSeatIds(showingId);
             await SseManager.BroadcastToShowing(showingId, unavailable);
+            return RestResult.Parse(context, result);
         }
 
-        return RestResult.Parse(context, result);
+        return RestResult.Parse(context, Obj(new
+        {
+            error = "Unable to generate unique booking reference. Please try again."
+        }));
     }
 }

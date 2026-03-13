@@ -67,6 +67,7 @@ public static class DbQuery
         DROP TABLE IF EXISTS Directors;
         DROP TABLE IF EXISTS Actors;
         DROP TABLE IF EXISTS Reviews;
+        DROP TABLE IF EXISTS Contacts;
         SET FOREIGN_KEY_CHECKS = 1; 
         ";
 
@@ -82,6 +83,7 @@ public static class DbQuery
             }
         }
     }
+
     private static void CreateTablesIfNotExist(MySqlConnection db)
     {
         // Keep sessions + acl (template uses them), remove products,
@@ -194,6 +196,7 @@ public static class DbQuery
             -- Bookings
             CREATE TABLE IF NOT EXISTS Bookings (
                 id INT PRIMARY KEY AUTO_INCREMENT,
+                booking_reference VARCHAR(10) NOT NULL UNIQUE,
                 email VARCHAR(255) NOT NULL,
                 showing_id INT NOT NULL,
                 booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -212,6 +215,16 @@ public static class DbQuery
                 FOREIGN KEY (showing_id) REFERENCES Showings(id),
                 FOREIGN KEY (booking_id) REFERENCES Bookings(id),
                 FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
+            );
+
+            -- Contacts
+            CREATE TABLE IF NOT EXISTS Contacts (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                subject VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         ";
 
@@ -255,6 +268,45 @@ public static class DbQuery
         var command = db.CreateCommand();
         command.CommandText = createViewSql;
         command.ExecuteNonQuery();
+
+        var bookingDetailsViewSql = @"
+            CREATE OR REPLACE VIEW booking_details AS
+            SELECT
+                b.id AS booking_id,
+                b.booking_reference,
+                b.email,
+                b.booked_at,
+                s.start_time,
+                f.title AS film_title,
+                f.description AS film_description,
+                f.duration_minutes,
+                f.age_rating,
+                f.genre,
+                f.images AS film_images,
+                sa.name AS salong_name,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'row_num', se.row_num,
+                        'seat_number', se.seat_number,
+                        'ticket_type', tt.name,
+                        'ticket_price', tt.price
+                    )
+                ) AS seats
+            FROM Bookings b
+            JOIN Showings s ON b.showing_id = s.id
+            JOIN Films f ON s.film_id = f.id
+            JOIN Salongs sa ON s.salong_id = sa.id
+            JOIN Booked_Seats bs ON bs.booking_id = b.id
+            JOIN Seats se ON bs.seat_id = se.id
+            JOIN Ticket_Type tt ON bs.ticket_type_id = tt.id
+            GROUP BY b.id, b.booking_reference, b.email, b.booked_at,
+                     s.start_time, f.title, f.description, f.duration_minutes,
+                     f.age_rating, f.genre, f.images, sa.name
+        ";
+
+        var command2 = db.CreateCommand();
+        command2.CommandText = bookingDetailsViewSql;
+        command2.ExecuteNonQuery();
     }
 
     private static void SeedDataIfEmpty(MySqlConnection db)
@@ -267,29 +319,99 @@ public static class DbQuery
         command.CommandText = "SELECT COUNT(*) FROM acl";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
-            // Basic rules: allow login + registration, allow GET on public api,
-            // admin can do everything under /api
             var aclData = @"
-                INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
-                ('visitor,user,admin', '*', 'allow', '/api/login', 'true', 'Allow login routes'),
-                ('visitor', 'POST', 'allow', '/api/users', 'true', 'Allow registration for visitors'),
-                ('visitor,user,admin', 'GET', 'allow', '/api', 'false', 'Allow GET for non-API routes, deny elsewhere by app logic'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/films', 'true', 'Allow all to read films'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/showings', 'true', 'Allow all to read showings'),
-                ('visitor,user,admin', 'GET', 'allow', '/api/seats', 'true', 'Allow all to read seats'),
-                ('user,admin', '*', 'allow', '/api/bookings', 'true', 'Allow logged-in users to manage bookings'),
-                ('admin', '*', 'allow', '/api', 'true', 'Admins can access all API routes'),
-                ('admin', '*', 'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
-                ('admin', '*', 'allow', '/api/sessions', 'true', 'Allow admins to manage sessions');
+            INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
+            ('visitor,user,admin', '*',    'allow', '/api/login', 'true', 'Allow login/session routes'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/users', 'true', 'Allow registration for all roles'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/chat', 'true', 'Allow AI chat for all'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/films', 'true', 'Allow all to read films'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/films/{id}', 'true', 'Allow all to read single film'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors', 'true', 'Allow all to read directors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors/{id}', 'true', 'Allow all to read single director'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors', 'true', 'Allow all to read actors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors/{id}', 'true', 'Allow all to read single actor'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings', 'true', 'Allow all to read showings'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{id}', 'true', 'Allow all to read single showing'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats', 'true', 'Allow all to read seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats/{id}', 'true', 'Allow all to read single seat'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/booking_details/{id}', 'true', 'Allow all to read single booking detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail', 'true', 'Allow all to read showing details'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail/{id}', 'true', 'Allow all to read single showing detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type', 'true', 'Allow all to read ticket types'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type/{id}', 'true', 'Allow all to read single ticket type'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{showingId}/seats/stream', 'true', 'Allow all to receive seat availability stream'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/lock', 'true', 'Allow all to lock seats during booking'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/release', 'true', 'Allow all to release seat locks during booking'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/bookings', 'true', 'Allow anyone to create bookings'),
+            ('user,admin',         'GET',  'allow', '/api/bookings', 'true', 'Allow logged-in users to view bookings where backend permits'),
+            ('user,admin',         'GET',  'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to view booking detail'),
+            ('user,admin',         'DELETE', 'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to cancel booking'),
+
+            ('user,admin',         'GET',  'allow', '/api/users/{id}', 'true', 'Allow profile read'),
+            ('user,admin',         'PUT',  'allow', '/api/users/{id}', 'true', 'Allow profile update'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/contacts', 'true', 'Allow all to send contact messages'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings', 'true', 'Allow debug showings during development'),
+
+            ('admin',              '*',    'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
+            ('admin',              '*',    'allow', '/api/sessions', 'true', 'Allow admins to manage sessions'),
+            ('admin',              '*',    'allow', '/api', 'true', 'Admins can access all API routes'),
+
+            ('admin', 'GET',    'allow', '/api/admin/films', 'true', 'Allow admin to list films'),
+            ('admin', 'POST',   'allow', '/api/admin/films', 'true', 'Allow admin to create films'),
+            ('admin', 'PUT',    'allow', '/api/admin/films/{id}', 'true', 'Allow admin to update films'),
+            ('admin', 'DELETE', 'allow', '/api/admin/films/{id}', 'true', 'Allow admin to delete films')
             ";
+
             command.CommandText = aclData;
+            command.ExecuteNonQuery();
+
+            // DEBUG ACL RULES
+            command.CommandText = "SELECT COUNT(*) FROM acl";
+            Console.WriteLine("ACL rows after seed: " + Convert.ToInt32(command.ExecuteScalar()));
+        }
+
+        // -------------------------
+        // Seed admin user
+        // -------------------------
+        command.Parameters.Clear();
+        command.CommandText = "SELECT COUNT(*) FROM Users WHERE email = @email";
+        command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+
+        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
+        {
+            var adminPassword = Password.Encrypt("admin123");
+
+            command.CommandText = @"
+                INSERT INTO Users (email, firstName, lastName, role, password)
+                VALUES (@email, @firstName, @lastName, @role, @password)
+            ";
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+            command.Parameters.AddWithValue("@firstName", "Admin");
+            command.Parameters.AddWithValue("@lastName", "User");
+            command.Parameters.AddWithValue("@role", "admin");
+            command.Parameters.AddWithValue("@password", adminPassword);
             command.ExecuteNonQuery();
         }
 
         // -------------------------
-        // Seed users
+        // Seed domain data
         // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM users";
+        command.Parameters.Clear();
+        command.CommandText = "SELECT COUNT(*) FROM Films";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
             var seedData = @"
@@ -428,36 +550,78 @@ public static class DbQuery
                 (4, 'Expressen', 'Brando i toppform.', 4, 5);
                 -- Film 3, 5 och 6 har inga reviews
 
-                -- Showings
+
+                -- Showings (relative to current date, richer seed for AI testing)
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
-                (1, 1, '2025-02-10 18:00:00', 'Engelska', 'Svenska'),
-                (2, 2, '2025-02-10 20:00:00', 'Koreanska', 'Svenska'),
-                (3, 1, '2025-02-11 14:00:00', 'Svenska', NULL),
-                (6, 1, '2025-02-11 19:00:00', 'Engelska', 'Svenska'),
-                (4, 2, '2025-02-12 18:00:00', 'Engelska', 'Svenska'),
-                (5, 1, '2025-02-12 15:00:00', 'Japanska', 'Svenska'),
-                (7, 1, '2025-02-12 20:00:00', 'Engelska', 'Svenska'),
-                (8, 2, '2025-02-13 18:00:00', 'Engelska', 'Svenska'),
-                (9, 1, '2025-02-13 14:00:00', 'Engelska', 'Svenska'),
-                (10, 2, '2025-02-13 20:00:00', 'Engelska', 'Svenska'),
-                (11, 1, '2025-02-14 18:00:00', 'Engelska', 'Svenska'),
-                (12, 2, '2025-02-14 15:00:00', 'Engelska', 'Svenska'),
-                (13, 1, '2025-02-14 21:00:00', 'Engelska', 'Svenska'),
-                (14, 2, '2025-02-15 11:00:00', 'Engelska', 'Svenska'),
-                (15, 1, '2025-02-15 18:00:00', 'Engelska', 'Svenska'),
-                (16, 2, '2025-02-15 20:00:00', 'Engelska', 'Svenska'),
-                (1, 2, '2025-02-15 15:00:00', 'Engelska', 'Svenska'),
-                (2, 1, '2025-02-16 18:00:00', 'Koreanska', 'Svenska'),
-                (3, 2, '2025-02-16 11:00:00', 'Svenska', NULL),
-                (6, 2, '2025-02-16 20:00:00', 'Engelska', 'Svenska');
+
+                -- TODAY
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 14 HOUR), 'Svenska', NULL),                -- Toy Story 4
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 20 HOUR), 'Koreanska', 'Svenska'),         -- Parasite
+
+                -- TOMORROW
+                (10, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- The Grand Budapest Hotel
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Dune
+
+                -- DAY AFTER TOMORROW
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+
+                -- +3 DAYS
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Godfather
+
+                -- +4 DAYS
+                (11, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Arrival
+                (13, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+
+                -- +5 DAYS
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 12 HOUR, 'Svenska', NULL),        -- Toy Story 4
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Dune
+                (14,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),  -- Paddington 2
+
+                -- +6 DAYS
+                (15,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Her
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Knives Out
+                (12,1, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 16 HOUR, 'Engelska', 'Svenska'),  -- The Pursuit of Happyness
+
+                -- +7 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Inception
+                (2, 2, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'), -- Parasite
+
+                -- +8 DAYS
+                (7, 1, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+                (10,2, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Grand Budapest Hotel
+
+                -- +9 DAYS
+                (5, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 14 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
+                (9, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 17 HOUR, 'Engelska', 'Svenska'),  -- Coco
+                (8, 2, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+
+                -- +10 DAYS
+                (6, 1, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Dune
+                (4, 2, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'), -- The Godfather
+
+                -- +11 DAYS
+                (14,1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 13 HOUR, 'Engelska', 'Svenska'), -- Paddington 2
+                (3, 1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR, 'Svenska', NULL),       -- Toy Story 4
+                (11,2, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Arrival
+
+                -- +12 DAYS
+                (1, 1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Inception
+                (13,1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+
+                -- +13 DAYS
+                (12,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'), -- The Pursuit of Happyness
+                (16,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'); -- Knives Out
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
                 --         rad7 p10-12 (id 67,68,69), rad8 p10-12 (id 79,80,81)
-                INSERT INTO Bookings (email, showing_id) VALUES
-                ('anna.svensson@email.se', 1),
-                ('erik.johansson@email.se', 1),
-                ('lisa.andersson@email.se', 1);
+                INSERT INTO Bookings (email, showing_id, booking_reference) VALUES
+                ('anna.svensson@email.se', 1, 'AB34CD'),
+                ('erik.johansson@email.se', 1, 'XY7K3M'),
+                ('lisa.andersson@email.se', 1, 'P9R2HW');
 
                 INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id) VALUES
                 -- Rad 1 (id 1-8): alla bokade
@@ -558,37 +722,51 @@ public static class DbQuery
     )
     {
         var paras = parameters == null ? Obj() : Obj(parameters);
+
         using var db = new MySqlConnection(connectionString);
         db.Open();
+
+        // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
+        var sqlTrimmed = (sql ?? "").Trim();
+
         var command = db.CreateCommand();
-        command.CommandText = @sql;
+        command.CommandText = sqlTrimmed;
+
+        // Add parameters
         var entries = (Arr)paras.GetEntries();
         entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
+
         if (context != null)
         {
             DebugLog.Add(context, new
             {
-                sqlQuery = sql.Regplace(@"\s+", " "),
+                sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
                 sqlParams = paras
             });
         }
+
         var rows = Arr();
+
         try
         {
-            if (sql.StartsWith("SELECT ", true, null) || sql.StartsWith("CALL ", true, null))
+            // Robust detection (after Trim)
+            var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
+            var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
+            var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
+            var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
+            var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+
+            if (isSelect || isCall || isShow || isDescribe || isExplain)
             {
-                var reader = command.ExecuteReader();
+                using var reader = command.ExecuteReader();
                 while (reader.Read())
-                {
                     rows.Push(ObjFromReader(reader));
-                }
-                reader.Close();
             }
             else
             {
                 rows.Push(new
                 {
-                    command = sql.Split(" ")[0].ToUpper(),
+                    command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
                     rowsAffected = command.ExecuteNonQuery()
                 });
             }
@@ -597,6 +775,7 @@ public static class DbQuery
         {
             rows.Push(new { error = err.Message });
         }
+
         return rows;
     }
 
@@ -607,6 +786,7 @@ public static class DbQuery
     {
         return SQLQuery(sql, parameters, context)[0];
     }
+
     private static void CreateStoredProcedures(MySqlConnection db)
     {
         var dropCommand = db.CreateCommand();
@@ -620,7 +800,8 @@ public static class DbQuery
         CREATE PROCEDURE CreateBookingWithSeats(
             IN customer_email VARCHAR(255),
             IN selected_showing_id INT,
-            IN selected_seats_json JSON
+            IN selected_seats_json JSON,
+            IN booking_ref VARCHAR(10)
         )
         BEGIN
             DECLARE v_booking_id INT;
@@ -628,11 +809,12 @@ public static class DbQuery
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
+                RESIGNAL;
             END;
 
             START TRANSACTION;
 
-            INSERT INTO Bookings (email, showing_id) VALUES (customer_email, selected_showing_id);
+            INSERT INTO Bookings (email, showing_id, booking_reference) VALUES (customer_email, selected_showing_id, booking_ref);
             SET v_booking_id = LAST_INSERT_ID();
 
             INSERT INTO Booked_Seats (seat_id, showing_id, booking_id, ticket_type_id)
@@ -644,28 +826,31 @@ public static class DbQuery
 
             COMMIT;
 
-            SELECT v_booking_id AS bookingId;
+            SELECT v_booking_id AS bookingId, booking_ref AS booking_reference;
         END
         ";
         createCommand.ExecuteNonQuery();
 
         createCommand.CommandText = @"
         CREATE PROCEDURE DeleteBooking(
-            IN booking_id_param INT
+            IN booking_ref_param VARCHAR(10)
         )
         BEGIN
+            DECLARE v_booking_id INT;
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
             END;
 
+            SELECT id INTO v_booking_id FROM Bookings WHERE booking_reference = booking_ref_param;
+
             START TRANSACTION;
 
             DELETE FROM Booked_Seats
-            WHERE booking_id = booking_id_param;
+            WHERE booking_id = v_booking_id;
 
             DELETE FROM Bookings
-            WHERE id = booking_id_param;
+            WHERE id = v_booking_id;
 
             COMMIT;
         END

@@ -1,8 +1,16 @@
+import DatePicker from "react-datepicker";
+import { format, parseISO } from "date-fns";
+import { sv } from "date-fns/locale";
+
 type FilterProps = {
   selectedAge: string;
   selectedGenre: string;
+  selectedDate?: string;
+  availableDates?: string[];
   onAgeChange: (age: string) => void;
   onGenreChange: (genre: string) => void;
+  onDateChange?: (date: string) => void;
+  onReset?: () => void;
   filteredCount: number;
   totalCount: number;
 };
@@ -10,11 +18,20 @@ type FilterProps = {
 export default function Filter({
   selectedAge,
   selectedGenre,
+  selectedDate = "all",
+  availableDates = [],
   onAgeChange,
   onGenreChange,
+  onDateChange = () => { }, /* om ingen funktion skickas in, använd en tom funktion istället för att undvika att krascha */
+  onReset = () => { },
   filteredCount,
   totalCount,
 }: FilterProps) {
+  const parseDateValue = (value: string) => parseISO(value);
+
+  const handleDateChange = (value: string) => {
+    onDateChange(value);
+  };
 
   return (
     <>
@@ -22,6 +39,7 @@ export default function Filter({
       {/* Desktop filter */}
       <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
         <div className="d-flex gap-3">
+          {/* åldersgräns */}
           <div style={{ minWidth: '200px' }}>
             <label htmlFor="ageFilter" className="form-label small text-muted"> {/* åldersgräns-filter */}
               Åldersgräns
@@ -31,7 +49,6 @@ export default function Filter({
               className="form-select"
               value={selectedAge}
               onChange={(e) => onAgeChange(e.target.value)}>
-
               <option value="all">Alla åldrar</option>
               <option value="0">Barntillåten</option>
               <option value="7">7+</option>
@@ -42,15 +59,14 @@ export default function Filter({
 
           {/* Genre-filter */}
           <div style={{ minWidth: '200px' }}>
-            <label htmlFor="ageGenreFilter" className="form-label small text-muted">
+            <label htmlFor="genreFilter" className="form-label small text-muted">
               Genre
             </label>
             <select
-              id="ageGenreFilter"
+              id="genreFilter"
               className="form-select"
               value={selectedGenre}
               onChange={(e) => onGenreChange(e.target.value)}>
-
               <option value="all">Alla genrer</option>
               <option value="Drama">Drama</option>
               <option value="Action">Action</option>
@@ -61,51 +77,120 @@ export default function Filter({
               <option value="Skräck">Skräck</option>
             </select>
           </div>
+
+          {/* Datum - date picker */}
+          <div style={{ minWidth: "200px" }}>
+            <label htmlFor="dateFilter" className="form-label small text-muted">
+              Datum
+            </label>
+            <DatePicker
+              selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const dateString = format(date, "yyyy-MM-dd");
+                  handleDateChange(dateString);
+                } else {
+                  handleDateChange("all");
+                }
+              }}
+              dateFormat="EEE d MMMM"
+              locale={sv}
+              placeholderText="Alla datum"
+              className="form-control form-select"
+              wrapperClassName="d-block"
+              popperClassName="filter-datepicker-popper"
+              includeDates={availableDates.map(parseDateValue)}
+              popperPlacement="bottom"
+            />
+          </div>
         </div>
 
-        {/* Antal filmer */}
-        <div className="text-muted small pb-2">
-          {filteredCount} av {totalCount} filmer
+        {/* Reset och antal filmer till höger */}
+        <div className="d-flex align-items-center gap-3">
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            onClick={onReset}
+            type="button"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            Rensa filter
+          </button>
+          <span className="text-muted small">
+            {filteredCount} av {totalCount} filmer
+          </span>
         </div>
       </div>
 
-      {/* Mobile and tablet */}
+      {/* Mobile */}
       <div className="d-lg-none mb-4">
-        <div className="row g-3">
-          <div className="col-6">
-            <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
-            <select
-              id="ageFilterMobile" // åldersgräns-filter
-              className="form-select"
-              value={selectedAge}
-              onChange={(e) => onAgeChange(e.target.value)}>
-
-              <option value="all">Alla åldrar</option>
-              <option value="0">Barntillåten</option>
-              <option value="7">7+</option>
-              <option value="11">11+</option>
-              <option value="15">15+</option>
-            </select>
-          </div>
-          <div className="col-6">
-            <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
-            <select
-              id="genreFilterMobile" // genre-filter
-              className="form-select"
-              value={selectedGenre}
-              onChange={(e) => onGenreChange(e.target.value)}>
-
-              <option value="all">Alla genrer</option>
-              <option value="Drama">Drama</option>
-              <option value="Action">Action</option>
-              <option value="Komedi">Komedi</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Animerat">Animerat</option>
-              <option value="Thriller">Thriller</option>
-              <option value="Skräck">Skräck</option>
-            </select>
-          </div>
+        <div className="mb-3">
+          <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
+          <select
+            id="ageFilterMobile"
+            className="form-select"
+            value={selectedAge}
+            onChange={(e) => onAgeChange(e.target.value)}
+          >
+            <option value="all">Alla åldrar</option>
+            <option value="0">Barntillåten</option>
+            <option value="7">7+</option>
+            <option value="11">11+</option>
+            <option value="15">15+</option>
+          </select>
         </div>
+
+        <div className="mb-3">
+          <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
+          <select
+            id="genreFilterMobile"
+            className="form-select"
+            value={selectedGenre}
+            onChange={(e) => onGenreChange(e.target.value)}
+          >
+            <option value="all">Alla genrer</option>
+            <option value="Drama">Drama</option>
+            <option value="Action">Action</option>
+            <option value="Komedi">Komedi</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Animerat">Animerat</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Skräck">Skräck</option>
+          </select>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="datumFilterMobile" className="form-label small text-muted">
+            Datum
+          </label>
+          <DatePicker
+            selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
+            onChange={(date: Date | null) => {
+              if (date) {
+                const dateString = format(date, "yyyy-MM-dd");
+                handleDateChange(dateString);
+              } else {
+                handleDateChange("all");
+              }
+            }}
+            dateFormat="EEE d MMMM"
+            locale={sv}
+            placeholderText="Alla datum"
+            className="form-control form-select"
+            wrapperClassName="d-block"
+            popperClassName="filter-datepicker-popper"
+            includeDates={availableDates.map(parseDateValue)}
+            popperPlacement="bottom"
+          />
+        </div>
+
+        {/* Reset-knapp för mobil */}
+        <button
+          className="btn btn-outline-secondary btn-sm w-100"
+          onClick={onReset}
+          type="button"
+        >
+          Rensa filter
+        </button>
       </div>
     </>
   );

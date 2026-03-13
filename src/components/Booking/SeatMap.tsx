@@ -1,4 +1,4 @@
-import Seat from './Seat';
+import Seat from './Seat.tsx';
 import type { Seat as SeatType, SelectedSeat } from '../../interfaces/Booking';
 import { groupSeatsByRow, determineSeatStatus } from '../../utils/bookingUtils';
 
@@ -31,31 +31,35 @@ export default function SeatMap({
   const rows = Object.keys(seatsByRow).map(Number).sort((a, b) => a - b);
 
   return (
-    <div className="ch-seat-map">
+    <div className="ch-seat-map" role="region" aria-label="Välj platser">
 
 
       <div className="ch-screen-label">Bioduk</div>
       <div className="ch-screen"></div>
 
-      {rows.map(rowNum => (
-        <div key={rowNum} className="ch-seat-row">
-          <span className="ch-row-label">{rowNum}</span>
-          <div className="ch-seats-container">
-            {seatsByRow[rowNum]
-              .sort((a, b) => a.seat_number - b.seat_number)
-              .map(seat => (
-                <Seat
-                  key={seat.id}
-                  seat={seat}
-                  status={determineSeatStatus(seat, selectedSeats, bookedSeatIds, lockedByMe, previewSeatIds)}
-                  onClick={() => onSeatClick(seat)}
-                  onMouseEnter={() => onSeatHover(seat)}
-                  onMouseLeave={onSeatLeave}
-                />
-              ))}
-          </div>
+      <div className="ch-seat-rows-wrapper">
+        <div className="ch-seat-rows-scroll">
+          {rows.map(rowNum => (
+            <div key={rowNum} className="ch-seat-row">
+              <span className="ch-row-label">{rowNum}</span>
+              <div className="ch-seats-container">
+                {seatsByRow[rowNum]
+                  .sort((a, b) => a.seat_number - b.seat_number)
+                  .map(seat => (
+                    <Seat
+                      key={seat.id}
+                      seat={seat}
+                      status={determineSeatStatus(seat, selectedSeats, bookedSeatIds, lockedByMe, previewSeatIds)}
+                      onClick={() => onSeatClick(seat)}
+                      onMouseEnter={() => onSeatHover(seat)}
+                      onMouseLeave={onSeatLeave}
+                    />
+                  ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
 
       <div className="ch-seat-legend">
         <div className="ch-legend-item">
@@ -72,13 +76,17 @@ export default function SeatMap({
         </div>
 
       </div>
+      <div className="ch-seat-toggle-container">
+
       <button
           className={`ch-seat-mode-toggle ${manualMode ? 'ch-seat-mode-toggle--active' : ''}`}
           onClick={onToggleMode}
           type="button"
-        >
-          {manualMode ? 'Individuellt val' : 'Automatiskt val'}
+          aria-pressed={manualMode}
+          >
+          {manualMode ? 'Välj sits' : 'Autovälj'}
         </button>
+          </div>
     </div>
   );
 }

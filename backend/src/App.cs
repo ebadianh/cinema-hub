@@ -2,7 +2,7 @@
 Globals = Obj(new
 {
     debugOn = true,
-    detailedAclDebug = false,
+    detailedAclDebug = true,
     aclOn = false,
     isSpa = true,
     port = args[0],
