@@ -83,6 +83,7 @@ public static class DbQuery
             }
         }
     }
+
     private static void CreateTablesIfNotExist(MySqlConnection db)
     {
         // Keep sessions + acl (template uses them), remove products,
@@ -318,38 +319,99 @@ public static class DbQuery
         command.CommandText = "SELECT COUNT(*) FROM acl";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
-            // Basic rules: allow login + registration, allow GET on public api,
-            // admin can do everything under /api
             var aclData = @"
             INSERT INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
-            ('visitor,user,admin', '*',    'allow', '/api/login',           'true', 'Allow login/session routes'),
-            ('visitor',            'POST', 'allow', '/api/users',           'true', 'Allow visitor registration'),
-            
-            ('visitor,user,admin', 'POST', 'allow', '/api/chat',            'true', 'Allow AI chat for all'),
-            
-            ('visitor,user,admin', 'GET',  'allow', '/api/films',           'true', 'Allow all to read films'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/directors',       'true', 'Allow all to read directors'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/actors',          'true', 'Allow all to read actors'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/showings',        'true', 'Allow all to read showings'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/seats',           'true', 'Allow all to read seats'),
+            ('visitor,user,admin', '*',    'allow', '/api/login', 'true', 'Allow login/session routes'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/users', 'true', 'Allow registration for all roles'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/chat', 'true', 'Allow AI chat for all'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/films', 'true', 'Allow all to read films'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/films/{id}', 'true', 'Allow all to read single film'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors', 'true', 'Allow all to read directors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors/{id}', 'true', 'Allow all to read single director'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors', 'true', 'Allow all to read actors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors/{id}', 'true', 'Allow all to read single actor'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings', 'true', 'Allow all to read showings'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{id}', 'true', 'Allow all to read single showing'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats', 'true', 'Allow all to read seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats/{id}', 'true', 'Allow all to read single seat'),
+
             ('visitor,user,admin', 'GET',  'allow', '/api/booking_details', 'true', 'Allow all to read booking details'),
-            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings',  'true', 'Allow debug showings during development'),
-            
-            ('visitor,user,admin', 'POST', 'allow', '/api/bookings',        'true', 'Allow anyone to create bookings'),
-            ('user,admin',         '*',    'allow', '/api/bookings',        'true', 'Allow logged-in users to manage bookings'),
-            
-            ('admin',              '*',    'allow', '/api/acl',             'true', 'Allow admins to manage ACL'),
-            ('admin',              '*',    'allow', '/api/sessions',        'true', 'Allow admins to manage sessions'),
-            ('admin',              '*',    'allow', '/api',                 'true', 'Admins can access all API routes');
+            ('visitor,user,admin', 'GET',  'allow', '/api/booking_details/{id}', 'true', 'Allow all to read single booking detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail', 'true', 'Allow all to read showing details'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail/{id}', 'true', 'Allow all to read single showing detail'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type', 'true', 'Allow all to read ticket types'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type/{id}', 'true', 'Allow all to read single ticket type'),
+
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{showingId}/seats/stream', 'true', 'Allow all to receive seat availability stream'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/lock', 'true', 'Allow all to lock seats during booking'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/release', 'true', 'Allow all to release seat locks during booking'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/bookings', 'true', 'Allow anyone to create bookings'),
+            ('user,admin',         'GET',  'allow', '/api/bookings', 'true', 'Allow logged-in users to view bookings where backend permits'),
+            ('user,admin',         'GET',  'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to view booking detail'),
+            ('user,admin',         'DELETE', 'allow', '/api/bookings/{id}', 'true', 'Allow logged-in users to cancel booking'),
+
+            ('user,admin',         'GET',  'allow', '/api/users/{id}', 'true', 'Allow profile read'),
+            ('user,admin',         'PUT',  'allow', '/api/users/{id}', 'true', 'Allow profile update'),
+
+            ('visitor,user,admin', 'POST', 'allow', '/api/contacts', 'true', 'Allow all to send contact messages'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/debug/showings', 'true', 'Allow debug showings during development'),
+
+            ('admin',              '*',    'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
+            ('admin',              '*',    'allow', '/api/sessions', 'true', 'Allow admins to manage sessions'),
+            ('admin',              '*',    'allow', '/api', 'true', 'Admins can access all API routes'),
+
+            ('admin', 'GET',    'allow', '/api/admin/films', 'true', 'Allow admin to list films'),
+            ('admin', 'POST',   'allow', '/api/admin/films', 'true', 'Allow admin to create films'),
+            ('admin', 'PUT',    'allow', '/api/admin/films/{id}', 'true', 'Allow admin to update films'),
+            ('admin', 'DELETE', 'allow', '/api/admin/films/{id}', 'true', 'Allow admin to delete films')
             ";
+
             command.CommandText = aclData;
+            command.ExecuteNonQuery();
+
+            // DEBUG ACL RULES
+            command.CommandText = "SELECT COUNT(*) FROM acl";
+            Console.WriteLine("ACL rows after seed: " + Convert.ToInt32(command.ExecuteScalar()));
+        }
+
+        // -------------------------
+        // Seed admin user
+        // -------------------------
+        command.Parameters.Clear();
+        command.CommandText = "SELECT COUNT(*) FROM Users WHERE email = @email";
+        command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+
+        if (Convert.ToInt32(command.ExecuteScalar()) == 0)
+        {
+            var adminPassword = Password.Encrypt("admin123");
+
+            command.CommandText = @"
+                INSERT INTO Users (email, firstName, lastName, role, password)
+                VALUES (@email, @firstName, @lastName, @role, @password)
+            ";
+
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+            command.Parameters.AddWithValue("@firstName", "Admin");
+            command.Parameters.AddWithValue("@lastName", "User");
+            command.Parameters.AddWithValue("@role", "admin");
+            command.Parameters.AddWithValue("@password", adminPassword);
             command.ExecuteNonQuery();
         }
 
         // -------------------------
-        // Seed users
+        // Seed domain data
         // -------------------------
-        command.CommandText = "SELECT COUNT(*) FROM users";
+        command.Parameters.Clear();
+        command.CommandText = "SELECT COUNT(*) FROM Films";
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
             var seedData = @"
@@ -655,67 +717,67 @@ public static class DbQuery
     }
 
     // Run a query - rows are returned as an array of objects
-public static Arr SQLQuery(
-    string sql, object parameters = null, HttpContext context = null
-)
-{
-    var paras = parameters == null ? Obj() : Obj(parameters);
-
-    using var db = new MySqlConnection(connectionString);
-    db.Open();
-
-    // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
-    var sqlTrimmed = (sql ?? "").Trim();
-
-    var command = db.CreateCommand();
-    command.CommandText = sqlTrimmed;
-
-    // Add parameters
-    var entries = (Arr)paras.GetEntries();
-    entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
-
-    if (context != null)
+    public static Arr SQLQuery(
+        string sql, object parameters = null, HttpContext context = null
+    )
     {
-        DebugLog.Add(context, new
-        {
-            sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
-            sqlParams = paras
-        });
-    }
+        var paras = parameters == null ? Obj() : Obj(parameters);
 
-    var rows = Arr();
+        using var db = new MySqlConnection(connectionString);
+        db.Open();
 
-    try
-    {
-        // Robust detection (after Trim)
-        var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
-        var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
-        var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
-        var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
-        var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+        // IMPORTANT: Trim to avoid "\r\nSELECT ..." being treated as non-query
+        var sqlTrimmed = (sql ?? "").Trim();
 
-        if (isSelect || isCall || isShow || isDescribe || isExplain)
+        var command = db.CreateCommand();
+        command.CommandText = sqlTrimmed;
+
+        // Add parameters
+        var entries = (Arr)paras.GetEntries();
+        entries.ForEach(x => command.Parameters.AddWithValue("@" + x[0], x[1]));
+
+        if (context != null)
         {
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-                rows.Push(ObjFromReader(reader));
-        }
-        else
-        {
-            rows.Push(new
+            DebugLog.Add(context, new
             {
-                command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
-                rowsAffected = command.ExecuteNonQuery()
+                sqlQuery = Regex.Replace(sqlTrimmed, @"\s+", " "),
+                sqlParams = paras
             });
         }
-    }
-    catch (Exception err)
-    {
-        rows.Push(new { error = err.Message });
-    }
 
-    return rows;
-}
+        var rows = Arr();
+
+        try
+        {
+            // Robust detection (after Trim)
+            var isSelect = sqlTrimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
+            var isCall = sqlTrimmed.StartsWith("CALL", StringComparison.OrdinalIgnoreCase);
+            var isShow = sqlTrimmed.StartsWith("SHOW", StringComparison.OrdinalIgnoreCase);
+            var isDescribe = sqlTrimmed.StartsWith("DESCRIBE", StringComparison.OrdinalIgnoreCase);
+            var isExplain = sqlTrimmed.StartsWith("EXPLAIN", StringComparison.OrdinalIgnoreCase);
+
+            if (isSelect || isCall || isShow || isDescribe || isExplain)
+            {
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                    rows.Push(ObjFromReader(reader));
+            }
+            else
+            {
+                rows.Push(new
+                {
+                    command = sqlTrimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].ToUpperInvariant(),
+                    rowsAffected = command.ExecuteNonQuery()
+                });
+            }
+        }
+        catch (Exception err)
+        {
+            rows.Push(new { error = err.Message });
+        }
+
+        return rows;
+    }
 
     // Run a query - only return the first row, as an object
     public static dynamic SQLQueryOne(
@@ -724,6 +786,7 @@ public static Arr SQLQuery(
     {
         return SQLQuery(sql, parameters, context)[0];
     }
+
     private static void CreateStoredProcedures(MySqlConnection db)
     {
         var dropCommand = db.CreateCommand();

@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type User from "../interfaces/Users";
 import { useState } from "react";
+
 const logo = "/C.png";
 
 interface NavbarProps {
@@ -9,6 +10,9 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user, setUser }: NavbarProps) {
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+  const navigate = useNavigate();
+
   const logout = async () => {
     try {
       await fetch("/api/login", {
@@ -16,20 +20,17 @@ export default function Navbar({ user, setUser }: NavbarProps) {
         credentials: "include",
       });
       setUser(null);
+      navigate("/");
     } catch (error) {
       console.error("Logout misslyckades:", error);
     }
   };
 
-  const [confirmingLogout, setConfirmingLogout] = useState(false);
-
   const handleLogoutClick = () => {
     if (confirmingLogout) {
-      // Andra klicket - genomför logout
       setConfirmingLogout(false);
       logout();
     } else {
-      // Första klicket - visa bekräftelse
       setConfirmingLogout(true);
     }
   };
@@ -37,7 +38,6 @@ export default function Navbar({ user, setUser }: NavbarProps) {
   return (
     <nav className="navbar navbar-expand-lg ch-navbar">
       <div className="container py-2">
-        {/* Logo */}
         <Link
           className="navbar-brand d-flex align-items-center gap-2 text-white"
           to="/"
@@ -46,7 +46,6 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           <span className="fw-semibold">CinemaMob</span>
         </Link>
 
-        {/* Mobile toggle */}
         <button
           className="navbar-toggler"
           type="button"
@@ -56,23 +55,51 @@ export default function Navbar({ user, setUser }: NavbarProps) {
           <span className="custom-hamburger"></span>
         </button>
 
-        {/* Right side */}
         <div className="collapse navbar-collapse" id="mainNavbar">
           <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-3 mt-3 mt-lg-0">
             <li className="nav-item">
-              {" "}
               <Link className="nav-link" to="/about">
                 Om oss
               </Link>
             </li>
+
+            <li className="nav-item">
+              <Link className="nav-link" to="/contact">
+                Kontakt
+              </Link>
+            </li>
+
             {user ? (
-              // INLOGGAD:
               <>
-                <li className="nav-item mt-2 mt-lg-0">
-                  <Link className="btn ch-btn-outline" to="/profile">
-                    Profil ({user.firstName})
-                  </Link>
-                </li>
+                {user.role === "user" && (
+                  <li className="nav-item mt-2 mt-lg-0">
+                    <Link
+                      className="btn ch-btn-outline"
+                      to={`/profile/${user.id}`}
+                    >
+                      Profil ({user.firstName})
+                    </Link>
+                  </li>
+                )}
+
+                {user.role === "admin" && (
+                  <>
+                    <li className="nav-item mt-2 mt-lg-0">
+                      <Link
+                        className="btn ch-btn-outline"
+                        to={`/profile/${user.id}`}
+                      >
+                        Profil ({user.firstName})
+                      </Link>
+                    </li>
+                    <li className="nav-item mt-2 mt-lg-0">
+                      <Link className="btn ch-btn-outline" to="/admin/films">
+                        Adminpanel
+                      </Link>
+                    </li>
+                  </>
+                )}
+
                 <li className="nav-item mt-2 mt-lg-0">
                   <button
                     className={`btn w-100 w-lg-auto ch-btn-logout ${confirmingLogout ? "ch-btn-danger" : "ch-btn-primary"
@@ -84,7 +111,6 @@ export default function Navbar({ user, setUser }: NavbarProps) {
                 </li>
               </>
             ) : (
-              // INTE INLOGGAD:
               <>
                 <li className="nav-item mt-2 mt-lg-0">
                   <Link className="btn ch-btn-outline" to="/login">
