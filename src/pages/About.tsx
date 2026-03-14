@@ -183,8 +183,8 @@ export default function About() {
         <h2 className="fw-bold mb-3">Kontakta oss</h2>
         <div className="ch-muted mx-auto" style={{ maxWidth: "500px" }}>
           <p className="mb-2">📍 Biografgatan 1, Malmö</p>
-          <p className="mb-2">📧 info@cinemamob.se</p>
-          <p className="mb-2">📞 010-123 45 67</p>
+          <p className="mb-2">📧 support@cinemamob.se</p>
+          <p className="mb-2">📞 070 111 11 11</p>
           <p className="mt-3 small">Öppettider: Vardagar 17:00-23:00, Helger 13:00-23:00</p>
         </div>
       </div>
