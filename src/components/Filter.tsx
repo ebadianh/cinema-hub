@@ -75,6 +75,7 @@ export default function Filter({
               <option value="Animerat">Animerat</option>
               <option value="Thriller">Thriller</option>
               <option value="Skräck">Skräck</option>
+              <option value="Krim">Krim</option>
             </select>
           </div>
 
@@ -99,8 +100,7 @@ export default function Filter({
               className="form-control form-select"
               wrapperClassName="d-block"
               popperClassName="filter-datepicker-popper"
-              includeDates={availableDates.map(parseDateValue)}
-              popperPlacement="bottom"
+              popperPlacement="bottom-start"
             />
           </div>
         </div>
@@ -155,6 +155,7 @@ export default function Filter({
             <option value="Animerat">Animerat</option>
             <option value="Thriller">Thriller</option>
             <option value="Skräck">Skräck</option>
+            <option value="Krim">Krim</option>
           </select>
         </div>
 
@@ -178,7 +179,6 @@ export default function Filter({
             className="form-control form-select"
             wrapperClassName="d-block"
             popperClassName="filter-datepicker-popper"
-            includeDates={availableDates.map(parseDateValue)}
             popperPlacement="bottom"
           />
         </div>

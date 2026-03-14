@@ -448,172 +448,269 @@ public static class DbQuery
 
                 -- Films
                 INSERT INTO Films (title, description, duration_minutes, age_rating, genre, images, trailers) VALUES
-                ('Inception', 'En tjuv som stjäl företagshemligheter genom drömdelning får en chans att radera sitt förflutna.', 148, '15', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg"", ""inception2.jpg""]', '[""https://www.youtube.com/watch?v=YoHD9XEInc0""]'),
-                ('Parasite', 'En fattig familj infiltrerar en rik familj med oväntade konsekvenser.', 132, '15', 'Thriller', '[""https://m.media-amazon.com/images/M/MV5BYjk1Y2U4MjQtY2ZiNS00OWQyLWI3MmYtZWUwNmRjYWRiNWNhXkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=5xH0HfJHsaY""]'),
-                ('Toy Story 4', 'Woody och gänget ger sig ut på ett nytt äventyr.', 100, '0', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BMTYzMDM4NzkxOV5BMl5BanBnXkFtZTgwNzM1Mzg2NzM@._V1_.jpg"", ""toystory2.jpg""]', '[""https://youtube.com/toystory4""]'),
-                ('The Godfather', 'En maffiafamiljs patriark överför kontrollen till sin motvillige son.', 175, '15', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/godfather""]'),
-                ('Spirited Away', 'En flicka hamnar i en värld av gudar och andar.', 125, '7', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BNTEyNmEwOWUtYzkyOC00ZTQ4LTllZmUtMjk0Y2YwOGUzYjRiXkEyXkFqcGc@._V1_.jpg"", ""spirited2.jpg""]', '[""https://youtube.com/spiritedaway""]'),
-                ('Dune', 'Paul Atreides reser till den farligaste planeten i universum.', 155, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BNWIyNmU5MGYtZDZmNi00ZjAwLWJlYjgtZTc0ZGIxMDE4ZGYwXkEyXkFqcGc@._V1_.jpg""]', '[""https://youtube.com/dune""]'),
-                ('Interstellar', 'En grupp astronauter reser genom ett maskhål i rymden för att rädda mänskligheten.', 169, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=zSWdZVtXT7E""]'),
-                ('The Dark Knight', 'Batman ställs mot Jokern i en kamp om stadens själ.', 152, '15', 'Action', '[""https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=kmJLuwP3MbY""]'),
-                ('Coco', 'En pojke reser till de dödas rike för att upptäcka sin familjs historia.', 105, '7', 'Animerat', '[""https://m.media-amazon.com/images/M/MV5BMDIyM2E2NTAtMzlhNy00ZGUxLWI1NjgtZDY5MzhiMDc5NGU3XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=xlnPHQ3TLX8""]'),
-                ('The Grand Budapest Hotel', 'En excentrisk concierge och hans lobby boy dras in i ett mordmysterium.', 99, '11', 'Komedi', '[""https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=1Fg5iWmQjwk""]'),
-                ('Arrival', 'En lingvist försöker kommunicera med utomjordingar som landat på jorden.', 116, '11', 'Sci-Fi', '[""https://m.media-amazon.com/images/M/MV5BMTExMzU0ODcxNDheQTJeQWpwZ15BbWU4MDE1OTI4MzAy._V1_.jpg""]', '[""https://www.youtube.com/watch?v=tFMo3UJ4B4g""]'),
-                ('The Pursuit of Happyness', 'En ensamstående pappa kämpar för att skapa ett bättre liv för sin son.', 117, '7', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BMTQ5NjQ0NDI3NF5BMl5BanBnXkFtZTcwNDI0MjEzMw@@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=DMOBlEcRuw8""]'),
-                ('Mad Max: Fury Road', 'I en postapokalyptisk öken försöker en grupp fly från en tyrannisk härskare.', 120, '15', 'Action', '[""https://m.media-amazon.com/images/M/MV5BZDRkODJhOTgtOTc1OC00NTgzLTk4NjItNDgxZDY4YjlmNDY2XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=hEJnMQG9ev8""]'),
-                ('Paddington 2', 'En charmig björn hamnar i trubbel när han försöker köpa en speciell present.', 103, '7', 'Familj', '[""https://m.media-amazon.com/images/M/MV5BNTk1YzlhMTUtZmU5MC00NmRmLTlkZjItYzQ0NTY4Y2NiNzc4XkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=sw7RElt-SvE""]'),
-                ('Her', 'En man utvecklar en oväntad relation med ett avancerat operativsystem.', 126, '11', 'Drama', '[""https://m.media-amazon.com/images/M/MV5BMjA1Nzk0OTM2OF5BMl5BanBnXkFtZTgwNjU2NjEwMDE@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=dJTU48_yghs""]'),
-                ('Knives Out', 'En berömd deckarförfattare hittas död och en detektiv utreder familjen.', 130, '11', 'Mysterium', '[""https://m.media-amazon.com/images/M/MV5BZDU5ZTRkYmItZjg0Mi00ZTQwLThjMWItNWM3MTMxMzVjZmVjXkEyXkFqcGc@._V1_.jpg""]', '[""https://www.youtube.com/watch?v=gj5ibYSz8C0""]');
+                ('The Godfather', 'Den legendariska historien om Corleone-familjen och deras maffiaimperium.', 175, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=sY1S34973zA""]'),
+
+                ('Goodfellas', 'En ung man växer upp i den italiensk-amerikanska maffian.', 146, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BN2E5NzI2ZGMtY2VjNi00YTRjLWI1MDUtZGY5OWU1MWJjZjRjXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=qo5jJpHtI1Y""]'),
+
+                ('Scarface', 'Tony Montana bygger upp ett brutalt kokainimperium i Miami.', 170, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BNDUzYjY0NmUtMDM4OS00Y2Q5LWJiODYtNTk0ZTk0YjZhMTg1XkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=7pQQHnqBa2E""]'),
+
+                ('Casino', 'Historien om maffians kontroll över Las Vegas.', 178, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMDRlZWZjZjYtYzY2NS00ZWVjLTkwYzAtZTA2ZDAzMGRiYmYwXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=EJXDMwGWhoA""]'),
+
+                ('The Departed', 'En polis infiltrerar maffian samtidigt som en gangster infiltrerar polisen.', 151, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMTI1MTY2OTIxNV5BMl5BanBnXkFtZTYwNjQ4NjY3._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=iojhqm0JTW4""]'),
+
+                ('American Gangster', 'Frank Lucas bygger ett heroinimperium i Harlem.', 157, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BZGExM2MwNjUtNThkNi00ZjBmLWJhZDgtN2ZmOWJiZWEwNGMxXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=BV_nssS6Zkg""]'),
+
+                ('The Irishman', 'En hitman berättar historien om sitt liv inom maffian.', 209, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMTY2YThkNmQtOWJhYy00ZDc3LWEzOGEtMmQwNzM0YjFmZWIyXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=WHXxVmeGQUc""]'),
+
+                ('The Gentlemen', 'En brittisk cannabisbaron försöker sälja sitt imperium.', 113, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMjE2ZjQ4ZGMtZjFhMi00NmI5LTliNjEtODczMWMxNjliZjgxXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=2B0RpUGss2c""]'),
+
+                ('The Boss Baby', 'En bebis som egentligen är en hemlig agent försöker stoppa en ond plan.', 97, '0', 'Animerat',
+                '[""https://m.media-amazon.com/images/M/MV5BOWEwYWY5NWItMDQ0NS00MjkzLWE1MDEtNTQyYTQ3MmM1NTUyXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=tquIfapGVqs""]'),
+
+                ('Zootopia', 'En polis-kanin och en småkriminell räv löser ett mysterium.', 108, '7', 'Animerat',
+                '[""https://m.media-amazon.com/images/M/MV5BOTMyMjEyNzIzMV5BMl5BanBnXkFtZTgwNzIyNjU0NzE@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=jWM0ct-OLsM""]'),
+
+                ('Hotel Transylvania', 'Monster driver ett hotell där människor egentligen inte får komma in.', 91, '7', 'Familj',
+                '[""https://m.media-amazon.com/images/M/MV5BMTM3NjQyODI3M15BMl5BanBnXkFtZTcwMDM4NjM0OA@@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=q4RK3jY7AVk""]'),
+
+                ('Beetlejuice', 'Ett spökpar försöker skrämma bort nya invånare från sitt hus.', 92, '11', 'Skräck',
+                '[""https://m.media-amazon.com/images/M/MV5BYTQxZTUzOTgtZmU4MC00NTc3LTkyMDMtYzNkYzAwMzc4NWQxXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=ickbVzajrk0""]'),
+
+                ('Ghostbusters', 'Tre forskare startar en verksamhet som jagar spöken.', 105, '11', 'Komedi',
+                '[""https://m.media-amazon.com/images/M/MV5BMGI0Yjg2ODAtNDYzNi00Njc2LTlkMmMtMmRmYWI5MDE4ZGRkXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=vntAEVjPBzQ""]'),
+
+                ('Donnie Brasco', 'En FBI-agent infiltrerar maffian och kommer farligt nära sitt mål.', 147, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BODBlNDIxZjgtYzI1Mi00MWNlLWI1NjYtNzY2M2IzYjgyOGFkXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=omIiE9KKj2o""]'),
+
+                ('Public Enemies', 'Historien om bankrånaren John Dillinger under 1930-talet.', 140, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMThiZTM5YTMtMzczMC00ZTRjLWE1NzQtMDA2MzViMmYwNjc3XkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=Ee92mDZu_PI""]'),
+
+                ('Gangs of New York', 'Gängkrig bryter ut i New York under 1800-talet.', 167, '15', 'Krim',
+                '[""https://m.media-amazon.com/images/M/MV5BMmJmM2Q3MDYtMmFiNy00NTM2LWEzZGQtZDJmMGUyM2QwNTQxXkEyXkFqcGc@._V1_.jpg""]',
+                '[""https://www.youtube.com/watch?v=qHVUPri5tjA""]');
 
 
-                -- Directors
+            -- Directors
                 INSERT INTO Directors (film_id, name) VALUES
-                (1, 'Christopher Nolan'),
-                (2, 'Bong Joon-ho'),
-                (3, 'Josh Cooley'),
-                (4, 'Francis Ford Coppola'),
-                (5, 'Hayao Miyazaki'),
-                (6, 'Denis Villeneuve'),
-                (7, 'Christopher Nolan'),
-                (8, 'Christopher Nolan'),
-                (9, 'Lee Unkrich'),
-                (10, 'Wes Anderson'),
-                (11, 'Denis Villeneuve'),
-                (12, 'Gabriele Muccino'),
-                (13, 'George Miller'),
-                (14, 'Paul King'),
-                (15, 'Spike Jonze'),
-                (16, 'Rian Johnson');
+                (1, 'Francis Ford Coppola'),
+                (2, 'Martin Scorsese'),
+                (3, 'Brian De Palma'),
+                (4, 'Martin Scorsese'),
+                (5, 'Martin Scorsese'),
+                (6, 'Ridley Scott'),
+                (7, 'Martin Scorsese'),
+                (8, 'Guy Ritchie'),
+                (9, 'Tom McGrath'),
+                (10, 'Byron Howard'),
+                (11, 'Genndy Tartakovsky'),
+                (12, 'Tim Burton'),
+                (13, 'Ivan Reitman'),
+                (14, 'Mike Newell'),
+                (15, 'Michael Mann'),
+                (16, 'Martin Scorsese');
 
 
                 -- Actors
                 INSERT INTO Actors (film_id, name, role_order) VALUES
-                (1, 'Leonardo DiCaprio', 1),
-                (1, 'Joseph Gordon-Levitt', 2),
-                (1, 'Elliot Page', 3),
-                (2, 'Song Kang-ho', 1),
-                (2, 'Choi Woo-shik', 2),
-                (3, 'Tom Hanks', 1),
-                (3, 'Tim Allen', 2),
-                (4, 'Marlon Brando', 1),
-                (4, 'Al Pacino', 2),
-                (5, 'Rumi Hiiragi', 1),
-                (5, 'Miyu Irino', 2),
-                (6, 'Timothée Chalamet', 1),
-                (6, 'Zendaya', 2),
+                (1, 'Marlon Brando', 1),
+                (1, 'Al Pacino', 2),
+                (1, 'James Caan', 3),
 
-                (7, 'Matthew McConaughey', 1),
-                (7, 'Anne Hathaway', 2),
-                (7, 'Jessica Chastain', 3),
+                (2, 'Robert De Niro', 1),
+                (2, 'Ray Liotta', 2),
+                (2, 'Joe Pesci', 3),
 
-                (8, 'Christian Bale', 1),
-                (8, 'Heath Ledger', 2),
-                (8, 'Aaron Eckhart', 3),
+                (3, 'Al Pacino', 1),
+                (3, 'Michelle Pfeiffer', 2),
+                (3, 'Steven Bauer', 3),
 
-                (9, 'Anthony Gonzalez', 1),
-                (9, 'Gael García Bernal', 2),
+                (4, 'Robert De Niro', 1),
+                (4, 'Sharon Stone', 2),
+                (4, 'Joe Pesci', 3),
 
-                (10, 'Ralph Fiennes', 1),
-                (10, 'Tony Revolori', 2),
-                (10, 'Saoirse Ronan', 3),
+                (5, 'Leonardo DiCaprio', 1),
+                (5, 'Matt Damon', 2),
+                (5, 'Jack Nicholson', 3),
 
-                (11, 'Amy Adams', 1),
-                (11, 'Jeremy Renner', 2),
+                (6, 'Denzel Washington', 1),
+                (6, 'Russell Crowe', 2),
 
-                (12, 'Will Smith', 1),
-                (12, 'Jaden Smith', 2),
+                (7, 'Robert De Niro', 1),
+                (7, 'Al Pacino', 2),
+                (7, 'Joe Pesci', 3),
 
-                (13, 'Tom Hardy', 1),
-                (13, 'Charlize Theron', 2),
-                (13, 'Nicholas Hoult', 3),
+                (8, 'Matthew McConaughey', 1),
+                (8, 'Charlie Hunnam', 2),
+                (8, 'Hugh Grant', 3),
 
-                (14, 'Ben Whishaw', 1),
-                (14, 'Hugh Bonneville', 2),
+                (9, 'Alec Baldwin', 1),
+                (9, 'Steve Buscemi', 2),
 
-                (15, 'Joaquin Phoenix', 1),
-                (15, 'Scarlett Johansson', 2),
-                (15, 'Amy Adams', 3),
+                (10, 'Ginnifer Goodwin', 1),
+                (10, 'Jason Bateman', 2),
+                (10, 'Idris Elba', 3),
 
-                (16, 'Daniel Craig', 1),
-                (16, 'Ana de Armas', 2),
-                (16, 'Chris Evans', 3);
+                (11, 'Adam Sandler', 1),
+                (11, 'Andy Samberg', 2),
+
+                (12, 'Michael Keaton', 1),
+                (12, 'Winona Ryder', 2),
+                (12, 'Alec Baldwin', 3),
+
+                (13, 'Bill Murray', 1),
+                (13, 'Dan Aykroyd', 2),
+                (13, 'Sigourney Weaver', 3),
+
+                (14, 'Johnny Depp', 1),
+                (14, 'Al Pacino', 2),
+
+                (15, 'Johnny Depp', 1),
+                (15, 'Christian Bale', 2),
+
+                (16, 'Leonardo DiCaprio', 1),
+                (16, 'Daniel Day-Lewis', 2),
+                (16, 'Cameron Diaz', 3);
 
                 -- Reviews (några filmer med 2-3, några med 0)
                 INSERT INTO Reviews (film_id, source, quote, stars, max_stars) VALUES
-                (1, 'IMDb', 'Ett mästerverk av visuell berättarkonst.', 9, 10),
-                (1, 'Rotten Tomatoes', 'Nolan levererar igen.', 4, 5),
-                (1, 'Aftonbladet', 'Hjärnvriden och briljant.', 5, 5),
-                (2, 'IMDb', 'En unik och oförglömlig film.', 9, 10),
-                (2, 'Svenska Dagbladet', 'Samhällskritik när den är som bäst.', 5, 5),
-                (4, 'IMDb', 'En tidlös klassiker.', 10, 10),
-                (4, 'Rotten Tomatoes', 'Filmhistoriens bästa.', 5, 5),
-                (4, 'Expressen', 'Brando i toppform.', 4, 5);
-                -- Film 3, 5 och 6 har inga reviews
+                (1, 'IMDb', 'En av filmhistoriens största klassiker.', 10, 10),
+                (1, 'Empire', 'Ett mästerverk inom gangsterfilm.', 5, 5),
+
+                (2, 'Rotten Tomatoes', 'Scorsese i toppform.', 5, 5),
+                (2, 'Aftonbladet', 'Brutalt, realistiskt och fantastiskt skådespel.', 4, 5),
+
+                (3, 'IMDb', 'Al Pacino är ikonisk som Tony Montana.', 8, 10),
+                (3, 'Expressen', 'En rå och stilbildande gangsterfilm.', 4, 5),
+
+                (4, 'Empire', 'Las Vegas, maffia och Scorsese – perfekt kombination.', 4, 5),
+                (4, 'IMDb', 'En episk berättelse om makt och girighet.', 8, 10),
+
+                (5, 'Rotten Tomatoes', 'Spännande från början till slut.', 5, 5),
+                (5, 'SvD', 'Ett intelligent kriminaldrama.', 4, 5),
+
+                (6, 'IMDb', 'Denzel Washington levererar en av sina bästa roller.', 8, 10),
+                (6, 'Empire', 'Elegant och intensivt kriminaldrama.', 4, 5),
+
+                (7, 'Aftonbladet', 'Scorseses stora avsked till gangsterfilmen.', 4, 5),
+                (7, 'IMDb', 'Ett episkt och långsamt men briljant drama.', 8, 10),
+
+                (8, 'Rotten Tomatoes', 'Smart, rolig och våldsam gangsterkomedi.', 4, 5),
+                (8, 'IMDb', 'Guy Ritchie i toppform.', 7, 10),
+
+                (9, 'IMDb', 'En charmig och rolig familjefilm.', 7, 10),
+                (9, 'Expressen', 'Barnfilm med humor även för vuxna.', 3, 5),
+
+                (10, 'Rotten Tomatoes', 'Smart, rolig och visuellt imponerande.', 5, 5),
+                (10, 'SvD', 'En av Disneys bästa moderna filmer.', 4, 5),
+
+                (11, 'IMDb', 'Rolig familjefilm med monsterhumor.', 7, 10),
+                (11, 'Aftonbladet', 'Charmig animation för hela familjen.', 3, 5),
+
+                (12, 'Empire', 'Tim Burton på sitt mest kreativa.', 4, 5),
+                (12, 'IMDb', 'En kultklassiker fylld med galen humor.', 8, 10),
+
+                (13, 'IMDb', 'En klassisk komedi som fortfarande håller.', 8, 10),
+                (13, 'Expressen', 'Spökjägarna är fortfarande lika roliga.', 3, 5),
+
+                (14, 'Rotten Tomatoes', 'Johnny Depp och Pacino i en spännande historia.', 4, 5),
+                (14, 'IMDb', 'En av de bästa maffia-infiltrationsfilmerna.', 8, 10),
+
+                (15, 'Empire', 'Elegant gangsterfilm om John Dillinger.', 4, 5),
+                (15, 'IMDb', 'Stilren och intensiv kriminalhistoria.', 7, 10),
+
+                (16, 'SvD', 'Ett episkt drama om New Yorks gängkrig.', 4, 5),
+                (16, 'IMDb', 'Scorsese levererar ännu ett historiskt epos.', 7, 10);
 
 
                 -- Showings (relative to current date, richer seed for AI testing)
                 INSERT INTO Showings (film_id, salong_id, start_time, language, subtitle) VALUES
 
-                -- TODAY
-                (3, 1, DATE_ADD(CURDATE(), INTERVAL 14 HOUR), 'Svenska', NULL),                -- Toy Story 4
-                (2, 2, DATE_ADD(CURDATE(), INTERVAL 20 HOUR), 'Koreanska', 'Svenska'),         -- Parasite
+                (1,1,DATE_ADD(CURDATE(), INTERVAL 0 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (1,2,DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (1,1,DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- TOMORROW
-                (10, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- The Grand Budapest Hotel
-                (6, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Dune
+                (2,2,DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (2,1,DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (2,2,DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- DAY AFTER TOMORROW
-                (5, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 15 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
-                (7, 1, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
+                (3,1,DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (3,2,DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (3,1,DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +3 DAYS
-                (9, 1, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 14 HOUR, 'Engelska', 'Svenska'),  -- Coco
-                (8, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
-                (4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Godfather
+                (4,2,DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (4,1,DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (4,2,DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +4 DAYS
-                (11, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Arrival
-                (13, 1, DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+                (5,1,DATE_ADD(CURDATE(), INTERVAL 4 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (5,2,DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (5,1,DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +5 DAYS
-                (3, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 12 HOUR, 'Svenska', NULL),        -- Toy Story 4
-                (6, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Dune
-                (14,2, DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'),  -- Paddington 2
+                (6,2,DATE_ADD(CURDATE(), INTERVAL 5 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (6,1,DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (6,2,DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +6 DAYS
-                (15,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Her
-                (16,2, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- Knives Out
-                (12,1, DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 16 HOUR, 'Engelska', 'Svenska'),  -- The Pursuit of Happyness
+                (7,1,DATE_ADD(CURDATE(), INTERVAL 6 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (7,2,DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (7,1,DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +7 DAYS
-                (1, 1, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'),  -- Inception
-                (2, 2, DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 20 HOUR, 'Koreanska', 'Svenska'), -- Parasite
+                (8,2,DATE_ADD(CURDATE(), INTERVAL 7 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (8,1,DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (8,2,DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
 
-                -- +8 DAYS
-                (7, 1, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'),  -- Interstellar
-                (10,2, DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Grand Budapest Hotel
+                (9,1,DATE_ADD(CURDATE(), INTERVAL 8 DAY) + INTERVAL 14 HOUR,'Engelska','Svenska'),
+                (9,2,DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 15 HOUR,'Engelska','Svenska'),
+                (9,1,DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 16 HOUR,'Engelska','Svenska'),
 
-                -- +9 DAYS
-                (5, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 14 HOUR, 'Japanska', 'Svenska'),  -- Spirited Away
-                (9, 1, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 17 HOUR, 'Engelska', 'Svenska'),  -- Coco
-                (8, 2, DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'),  -- The Dark Knight
+                (10,2,DATE_ADD(CURDATE(), INTERVAL 9 DAY) + INTERVAL 14 HOUR,'Engelska','Svenska'),
+                (10,1,DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 15 HOUR,'Engelska','Svenska'),
+                (10,2,DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR,'Engelska','Svenska'),
 
-                -- +10 DAYS
-                (6, 1, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Dune
-                (4, 2, DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'), -- The Godfather
+                (11,1,DATE_ADD(CURDATE(), INTERVAL 10 DAY) + INTERVAL 13 HOUR,'Engelska','Svenska'),
+                (11,2,DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 14 HOUR,'Engelska','Svenska'),
+                (11,1,DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 15 HOUR,'Engelska','Svenska'),
 
-                -- +11 DAYS
-                (14,1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 13 HOUR, 'Engelska', 'Svenska'), -- Paddington 2
-                (3, 1, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR, 'Svenska', NULL),       -- Toy Story 4
-                (11,2, DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 19 HOUR, 'Engelska', 'Svenska'), -- Arrival
+                (12,2,DATE_ADD(CURDATE(), INTERVAL 11 DAY) + INTERVAL 16 HOUR,'Engelska','Svenska'),
+                (12,1,DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 17 HOUR,'Engelska','Svenska'),
+                (12,2,DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 18 HOUR,'Engelska','Svenska'),
 
-                -- +12 DAYS
-                (1, 1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 18 HOUR, 'Engelska', 'Svenska'), -- Inception
-                (13,1, DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 21 HOUR, 'Engelska', 'Svenska'), -- Mad Max: Fury Road
+                (13,1,DATE_ADD(CURDATE(), INTERVAL 12 DAY) + INTERVAL 17 HOUR,'Engelska','Svenska'),
+                (13,2,DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 18 HOUR,'Engelska','Svenska'),
+                (13,1,DATE_ADD(CURDATE(), INTERVAL 14 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
 
-                -- +13 DAYS
-                (12,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 15 HOUR, 'Engelska', 'Svenska'), -- The Pursuit of Happyness
-                (16,2, DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 20 HOUR, 'Engelska', 'Svenska'); -- Knives Out
+                (14,2,DATE_ADD(CURDATE(), INTERVAL 13 DAY) + INTERVAL 18 HOUR,'Engelska','Svenska'),
+                (14,1,DATE_ADD(CURDATE(), INTERVAL 14 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (14,2,DATE_ADD(CURDATE(), INTERVAL 15 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+
+                (15,1,DATE_ADD(CURDATE(), INTERVAL 14 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (15,2,DATE_ADD(CURDATE(), INTERVAL 15 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (15,1,DATE_ADD(CURDATE(), INTERVAL 16 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska'),
+
+                (16,2,DATE_ADD(CURDATE(), INTERVAL 15 DAY) + INTERVAL 19 HOUR,'Engelska','Svenska'),
+                (16,1,DATE_ADD(CURDATE(), INTERVAL 16 DAY) + INTERVAL 20 HOUR,'Engelska','Svenska'),
+                (16,2,DATE_ADD(CURDATE(), INTERVAL 17 DAY) + INTERVAL 21 HOUR,'Engelska','Svenska');
 
                 -- Bookings (nästan full showing 1 = Inception i Stora Salongen)
                 -- Lediga: rad3 p5-7 (id 22,23,24), rad4 p5,6,8 (id 32,33,35),
