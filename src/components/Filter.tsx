@@ -100,7 +100,7 @@ export default function Filter({
               className="form-control form-select"
               wrapperClassName="d-block"
               popperClassName="filter-datepicker-popper"
-              popperPlacement="bottom"
+              popperPlacement="bottom-start"
             />
           </div>
         </div>
