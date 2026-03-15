@@ -109,7 +109,10 @@ public static class AdminRoutes
             WHERE s.film_id = @id
         ", new { id }, context);
 
-        if ((long)bookingCheck.count > 0)
+        // null-check
+        var bookingCount = bookingCheck?.count != null ? (long)bookingCheck.count : 0L;
+
+        if (bookingCount > 0)
         {
             return RestResult.Parse(context, Obj(new
             {
@@ -117,7 +120,25 @@ public static class AdminRoutes
             }));
         }
 
-        var result = SQLQueryOne("DELETE FROM Films WHERE id = @id", new { id }, context);
+        var showingCheck = SQLQueryOne(@"
+        SELECT COUNT(*) AS count
+        FROM Showings
+        WHERE film_id = @id
+        ", new { id }, context);
+
+        // null-check
+        var showingCount = showingCheck?.count != null ? (long)showingCheck.count : 0L;
+
+        if (showingCount > 0)
+        {
+            return RestResult.Parse(context, Obj(new
+            {
+                error = "Filmen kan inte tas bort eftersom det finns visningar på den."
+            }));
+        }
+
+        var result = SQLQueryOne("DELETE FROM Films WHERE id = @id",
+        new { id }, context);
         return RestResult.Parse(context, result);
     }
 

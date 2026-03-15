@@ -12,8 +12,8 @@ import AiChatPage from "./pages/AiChatPage";
 import Booking from "./pages/Booking";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Contact from "./pages/Contact";
-import AdminFilms from "./pages/AdminFilms";
-import AdminRoute from "./components/admin/AdminRoute";
+import AdminRoute from "./components/Admin/AdminRoute";
+import AdminPanel from "./components/Admin/AdminPanel.tsx";
 
 function ProfileRedirect() {
   const [userId, setUserId] = useState<number | null>(null);
@@ -51,10 +51,10 @@ const routes = [
       { path: "*", element: <h1>Page not found</h1> },
       { path: "/contact", element: <Contact /> },
       {
-        path: "/admin/films",
+        path: "/admin",
         element: (
           <AdminRoute>
-            <AdminFilms />
+            <AdminPanel />
           </AdminRoute>
         ),
       },
