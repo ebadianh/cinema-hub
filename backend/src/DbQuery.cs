@@ -224,6 +224,7 @@ public static class DbQuery
                 email VARCHAR(255) NOT NULL,
                 subject VARCHAR(255) NOT NULL,
                 message TEXT NOT NULL,
+                status ENUM('unread', 'read') DEFAULT 'unread' NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         ";
