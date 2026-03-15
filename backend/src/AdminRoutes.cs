@@ -12,6 +12,8 @@ public static class AdminRoutes
         App.MapDelete("/api/admin/films/{id:int}", DeleteFilm);
         App.MapPost("/api/admin/films/{id:int}/directors", AddDirectorsToFilm);
         App.MapPost("/api/admin/films/{id:int}/actors", AddActorsToFilm);
+        App.MapDelete("/api/admin/films/{id:int}/directors", DeleteDirectorsFromFilm);
+        App.MapDelete("/api/admin/films/{id:int}/actors", DeleteActorsFromFilm);
     }
 
     private static IResult GetFilms(HttpContext context)
@@ -151,5 +153,17 @@ public static class AdminRoutes
         }
 
         return RestResult.Parse(context, Obj(new { message = "Actors added" }));
+    }
+
+    private static IResult DeleteDirectorsFromFilm(HttpContext context, int id)
+    {
+        SQLQuery("DELETE FROM Directors WHERE film_id = @film_id", new { film_id = id }, context);
+        return RestResult.Parse(context, Obj(new { message = "Directors deleted" }));
+    }
+
+    private static IResult DeleteActorsFromFilm(HttpContext context, int id)
+    {
+        SQLQuery("DELETE FROM Actors WHERE film_id = @film_id", new { film_id = id }, context);
+        return RestResult.Parse(context, Obj(new { message = "Actors deleted" }));
     }
 }

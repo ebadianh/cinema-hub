@@ -19,6 +19,7 @@ export default function AdminFilms() {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editFilm, setEditFilm] = useState<Film | null>(null);
 
   // försök hämta alla filmer från databas till denna URL'n
   useEffect(() => {
@@ -60,15 +61,15 @@ export default function AdminFilms() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        alert(data?.error || "Knde inte ta bort filmen.");
+        alert(data?.error || "Kunde inte ta bort filmen.");
         return;
       }
 
       // Ta bort från state
       setFilms((prev) => prev.filter((f) => f.id !== filmId));
-      alert(`"${filmTitle}" har tagits bort`);
+      alert(`"${filmTitle}" har tagits bort.`);
     } catch (err) {
-      alert("Ett fel uppstod vid borttagning");
+      alert("Ett fel uppstod vid borttagning.");
     }
   };
 
@@ -113,7 +114,7 @@ export default function AdminFilms() {
         <input
           type="text"
           className="form-control form-control-lg bg-dark text-light"
-          placeholder="🔍 Sök filmer (titel, genre, åldersgräns..."
+          placeholder="🔍 Sök filmer (titel, genre, åldersgräns...)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -152,7 +153,7 @@ export default function AdminFilms() {
                       <td className="text-end">
                         <button
                           className="btn btn-sm ch-btn-outline me-2"
-                          onClick={() => {/*Återkommer hit sen */ }}>
+                          onClick={() => setEditFilm(film)}>
                           Redigera
                         </button>
                         <button
@@ -194,7 +195,7 @@ export default function AdminFilms() {
                   <div className="d-flex gap-2">
                     <button
                       className="btn btn-sm ch-btn-outline flex-grow-1"
-                      onClick={() => {/* Redigera */ }}
+                      onClick={() => setEditFilm(film)}
                     >
                       Redigera
                     </button>
@@ -213,9 +214,16 @@ export default function AdminFilms() {
       </div>
 
       <FilmModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSave={refreshFilms}
+        isOpen={showModal || editFilm !== null}
+        onClose={() => {
+          setShowModal(false);
+          setEditFilm(null);
+        }}
+        onSave={() => {
+          refreshFilms();
+          setEditFilm(null);
+        }}
+        film={editFilm}
       />
     </div>
   );

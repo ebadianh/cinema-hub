@@ -4,9 +4,19 @@ type FilmModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  film?: {
+    id: number;
+    title: string;
+    description: string;
+    duration_minutes: number;
+    age_rating: string;
+    genre: string;
+    images: string[];
+    trailers: string[];
+  } | null;
 };
 
-export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
+export default function FilmModal({ isOpen, onClose, onSave, film }: FilmModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -32,8 +42,80 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
   useEffect(() => {
     if (isOpen) {
       fetchDirectorsAndActors();
+      if (film) {
+        setFormData({
+          title: film.title,
+          description: film.description,
+          genre: film.genre,
+          age_rating: film.age_rating,
+          duration_minutes: film.duration_minutes.toString(),
+        });
+
+        // Parsar images och trailers (de är JSON-strängar från backend)
+        try {
+          const parsedImages = typeof film.images === 'string'
+            ? JSON.parse(film.images)
+            : film.images;
+          const parsedTrailers = typeof film.trailers === 'string'
+            ? JSON.parse(film.trailers)
+            : film.trailers;
+
+          setImages(parsedImages.length > 0 ? parsedImages : [""]);
+          setTrailers(parsedTrailers.length > 0 ? parsedTrailers : [""]);
+        } catch (e) {
+          setImages([""]);
+          setTrailers([""]);
+        }
+
+        fetchFilmDirectorsAndActors(film.id);
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, film]);
+
+  // Reset-funktion
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      genre: "Krim",
+      age_rating: "15",
+      duration_minutes: "",
+    });
+    setImages([""]);
+    setTrailers([""]);
+    setSelectedDirectors([]);
+    setSelectedActors([]);
+    setNewDirectorName("");
+    setNewActorName("");
+  };
+
+  const fetchFilmDirectorsAndActors = async (filmId: number) => {
+    try {
+      const [directorsRes, actorsRes] = await Promise.all([
+        fetch("/api/directors", { credentials: "include" }),
+        fetch("/api/actors", { credentials: "include" }),
+      ]);
+
+      const directorsData = await directorsRes.json();
+      const actorsData = await actorsRes.json();
+
+      // Filtrera directors/actors för denna specifika film
+      const filmDirectors = directorsData
+        .filter((d: any) => d.film_id === filmId)
+        .map((d: any) => d.name);
+
+      const filmActors = actorsData
+        .filter((a: any) => a.film_id === filmId)
+        .map((a: any) => a.name);
+
+      setSelectedDirectors(filmDirectors);
+      setSelectedActors(filmActors);
+    } catch (err) {
+      console.error("Kunde inte hämta film directors/actors:", err);
+    }
+  };
 
   const fetchDirectorsAndActors = async () => {
     try {
@@ -146,29 +228,32 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
     const validTrailers = trailers.filter((tr) => tr.trim() !== "");
 
     try {
+      const isEditMode = !!film;
+
       // STEG 1: Skapa filmen
-      const filmRes = await fetch("/api/admin/films", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          ...formData,
-          duration_minutes: parseInt(formData.duration_minutes),
-          images: JSON.stringify(validImages),
-          trailers: JSON.stringify(validTrailers),
-        }),
-      });
+      const filmRes = await fetch(isEditMode ? `/api/admin/films/${film.id}` : "/api/admin/films",
+        {
+          method: isEditMode ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            ...formData,
+            duration_minutes: parseInt(formData.duration_minutes),
+            images: JSON.stringify(validImages),
+            trailers: JSON.stringify(validTrailers),
+          }),
+        });
 
       const filmData = await filmRes.json();
 
       if (!filmRes.ok || filmData.error) {
-        setError(filmData?.error || "Kunde inte skapa film");
+        setError(filmData?.error || `Kunde inte ${isEditMode ? 'uppdatera' : 'skapa'} film`);
         setSaving(false);
         return;
       }
 
       // Hämta film-ID från response
-      const filmId = filmData.id || filmData.insertId;
+      const filmId = isEditMode ? film.id : (filmData.id || filmData.insertId);
 
       if (!filmId) {
         setError("Kunde inte hämta film-ID");
@@ -176,7 +261,20 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
         return;
       }
 
-      // STEG 2: Lägg till directors (om några valda)
+      // STEG 2: Om edit mode - ta bort gamla directors/actors först
+      if (isEditMode) {
+        await fetch(`/api/admin/films/${filmId}/directors`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        await fetch(`/api/admin/films/${filmId}/actors`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+      }
+
+      // STEG 3: Lägg till directors (om några valda)
       if (selectedDirectors.length > 0) {
         await fetch(`/api/admin/films/${filmId}/directors`, {
           method: "POST",
@@ -186,7 +284,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
         });
       }
 
-      // STEG 3: Lägg till actors (om några valda)
+      // STEG 4: Lägg till actors (om några valda)
       if (selectedActors.length > 0) {
         await fetch(`/api/admin/films/${filmId}/actors`, {
           method: "POST",
@@ -197,22 +295,11 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
       }
 
       // Success!
-      alert("Film skapad!");
+      alert(isEditMode ? "Film uppdaterad!" : "Film skapad!");
       onSave();
       onClose();
+      resetForm();
 
-      // Återställ formulär
-      setFormData({
-        title: "",
-        description: "",
-        genre: "Krim",
-        age_rating: "15",
-        duration_minutes: "",
-      });
-      setImages([""]);
-      setTrailers([""]);
-      setSelectedDirectors([]);
-      setSelectedActors([]);
     } catch (err) {
       setError("Ett fel uppstod");
     } finally {
@@ -235,7 +322,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
         <div className="modal-content bg-dark text-light border-0">
           {/* Header */}
           <div className="modal-header" style={{ borderBottom: "1px solid var(--ch-border)" }}>
-            <h5 className="modal-title">Lägg till ny film</h5>
+            <h5 className="modal-title">{film ? "Redige film" : "Lägg till ny film"}</h5>
             <button
               type="button"
               className="btn-close btn-close-white"
@@ -526,7 +613,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
                 Avbryt
               </button>
               <button type="submit" className="btn ch-btn-primary" disabled={saving}>
-                {saving ? "Sparar..." : "Spara film"}
+                {saving ? "Sparar..." : film ? "Uppdatera film" : "Spara film"}
               </button>
             </div>
           </form>
@@ -534,4 +621,4 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
       </div>
     </div>
   );
-}
+};
