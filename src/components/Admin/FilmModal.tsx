@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type FilmModalProps = {
   isOpen: boolean;
@@ -14,8 +14,47 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
     age_rating: "15",
     duration_minutes: "",
   });
+  const [images, setImages] = useState<string[]>([""]);
+  const [trailers, setTrailers] = useState<string[]>([""]);
+
+  // Directors & Actors
+  const [availableDirectors, setAvailableDirectors] = useState<string[]>([]);
+  const [availableActors, setAvailableActors] = useState<string[]>([]);
+  const [selectedDirectors, setSelectedDirectors] = useState<string[]>([]);
+  const [selectedActors, setSelectedActors] = useState<string[]>([]);
+  const [newDirectorName, setNewDirectorName] = useState("");
+  const [newActorName, setNewActorName] = useState("");
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Hämta directors och actors när modal öppnas
+  useEffect(() => {
+    if (isOpen) {
+      fetchDirectorsAndActors();
+    }
+  }, [isOpen]);
+
+  const fetchDirectorsAndActors = async () => {
+    try {
+      const [directorsRes, actorsRes] = await Promise.all([
+        fetch("/api/directors", { credentials: "include" }),
+        fetch("/api/actors", { credentials: "include" }),
+      ]);
+
+      const directorsData = await directorsRes.json();
+      const actorsData = await actorsRes.json();
+
+      // Extrahera unika namn
+      const uniqueDirectors = [...new Set(directorsData.map((d: any) => d.name))];
+      const uniqueActors = [...new Set(actorsData.map((a: any) => a.name))];
+
+      setAvailableDirectors(uniqueDirectors as string[]);
+      setAvailableActors(uniqueActors as string[]);
+    } catch (err) {
+      console.error("Kunde inte hämta directors/actors:", err);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -24,6 +63,64 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleImageChange = (index: number, value: string) => {
+    const newImages = [...images];
+    newImages[index] = value;
+    setImages(newImages);
+  };
+
+  const addImageField = () => {
+    setImages([...images, ""]);
+  };
+
+  const removeImageField = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleTrailerChange = (index: number, value: string) => {
+    const newTrailers = [...trailers];
+    newTrailers[index] = value;
+    setTrailers(newTrailers);
+  };
+
+  const addTrailerField = () => {
+    setTrailers([...trailers, ""]);
+  };
+
+  const removeTrailerField = (index: number) => {
+    setTrailers(trailers.filter((_, i) => i !== index));
+  };
+
+  const toggleDirector = (name: string) => {
+    setSelectedDirectors((prev) =>
+      prev.includes(name) ? prev.filter((d) => d !== name) : [...prev, name]
+    );
+  };
+
+  const toggleActor = (name: string) => {
+    setSelectedActors((prev) =>
+      prev.includes(name) ? prev.filter((a) => a !== name) : [...prev, name]
+    );
+  };
+
+  const addNewDirector = () => {
+    const trimmed = newDirectorName.trim();
+    if (trimmed && !availableDirectors.includes(trimmed)) {
+      setAvailableDirectors([...availableDirectors, trimmed]);
+      setSelectedDirectors([...selectedDirectors, trimmed]);
+      setNewDirectorName("");
+    }
+  };
+
+  const addNewActor = () => {
+    const trimmed = newActorName.trim();
+    if (trimmed && !availableActors.includes(trimmed)) {
+      setAvailableActors([...availableActors, trimmed]);
+      setSelectedActors([...selectedActors, trimmed]);
+      setNewActorName("");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,31 +141,65 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
       return;
     }
 
+    // Filtrera bort tomma URLs
+    const validImages = images.filter((img) => img.trim() !== "");
+    const validTrailers = trailers.filter((tr) => tr.trim() !== "");
+
     try {
-      const res = await fetch("/api/admin/films", {
+      // STEG 1: Skapa filmen
+      const filmRes = await fetch("/api/admin/films", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           ...formData,
           duration_minutes: parseInt(formData.duration_minutes),
-          images: "[]",
-          trailers: "[]",
+          images: JSON.stringify(validImages),
+          trailers: JSON.stringify(validTrailers),
         }),
       });
 
-      const data = await res.json();
+      const filmData = await filmRes.json();
 
-      if (!res.ok || data.error) {
-        setError(data?.error || "Kunde inte skapa film");
+      if (!filmRes.ok || filmData.error) {
+        setError(filmData?.error || "Kunde inte skapa film");
         setSaving(false);
         return;
       }
 
+      // Hämta film-ID från response
+      const filmId = filmData.id || filmData.insertId;
+
+      if (!filmId) {
+        setError("Kunde inte hämta film-ID");
+        setSaving(false);
+        return;
+      }
+
+      // STEG 2: Lägg till directors (om några valda)
+      if (selectedDirectors.length > 0) {
+        await fetch(`/api/admin/films/${filmId}/directors`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ directors: selectedDirectors }),
+        });
+      }
+
+      // STEG 3: Lägg till actors (om några valda)
+      if (selectedActors.length > 0) {
+        await fetch(`/api/admin/films/${filmId}/actors`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ actors: selectedActors }),
+        });
+      }
+
       // Success!
       alert("Film skapad!");
-      onSave(); // Uppdatera listan
-      onClose(); // Stäng modal
+      onSave();
+      onClose();
 
       // Återställ formulär
       setFormData({
@@ -78,6 +209,10 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
         age_rating: "15",
         duration_minutes: "",
       });
+      setImages([""]);
+      setTrailers([""]);
+      setSelectedDirectors([]);
+      setSelectedActors([]);
     } catch (err) {
       setError("Ett fel uppstod");
     } finally {
@@ -94,7 +229,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
       onClick={onClose}
     >
       <div
-        className="modal-dialog modal-dialog-centered"
+        className="modal-dialog modal-dialog-centered modal-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content bg-dark text-light border-0">
@@ -110,7 +245,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
 
           {/* Body */}
           <form onSubmit={handleSubmit}>
-            <div className="modal-body">
+            <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -200,6 +335,184 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
                   />
                 </div>
               </div>
+
+              {/* DIRECTORS */}
+              <div className="mb-3">
+                <label className="form-label">Regissörer</label>
+                <div
+                  className="p-2"
+                  style={{
+                    border: "1px solid var(--ch-border)",
+                    borderRadius: "8px",
+                    maxHeight: "150px",
+                    overflowY: "auto",
+                    background: "var(--ch-surface)",
+                  }}
+                >
+                  {availableDirectors.map((director) => (
+                    <div key={director} className="form-check">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`director-${director}`}
+                        checked={selectedDirectors.includes(director)}
+                        onChange={() => toggleDirector(director)}
+                      />
+                      <label className="form-check-label" htmlFor={`director-${director}`}>
+                        {director}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="input-group mt-2">
+                  <input
+                    type="text"
+                    className="form-control form-control-sm bg-dark text-light"
+                    placeholder="Ny regissör..."
+                    value={newDirectorName}
+                    onChange={(e) => setNewDirectorName(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addNewDirector())}
+                    style={{ border: "1px solid var(--ch-border)" }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-sm ch-btn-outline"
+                    onClick={addNewDirector}
+                    disabled={!newDirectorName.trim()}
+                  >
+                    + Lägg till
+                  </button>
+                </div>
+
+                <small className="text-muted">
+                  Valda: {selectedDirectors.length > 0 ? selectedDirectors.join(", ") : "Inga"}
+                </small>
+              </div>
+
+              {/* ACTORS */}
+              <div className="mb-3">
+                <label className="form-label">Skådespelare</label>
+                <div
+                  className="p-2"
+                  style={{
+                    border: "1px solid var(--ch-border)",
+                    borderRadius: "8px",
+                    maxHeight: "150px",
+                    overflowY: "auto",
+                    background: "var(--ch-surface)",
+                  }}
+                >
+                  {availableActors.map((actor) => (
+                    <div key={actor} className="form-check">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`actor-${actor}`}
+                        checked={selectedActors.includes(actor)}
+                        onChange={() => toggleActor(actor)}
+                      />
+                      <label className="form-check-label" htmlFor={`actor-${actor}`}>
+                        {actor}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="input-group mt-2">
+                  <input
+                    type="text"
+                    className="form-control form-control-sm bg-dark text-light"
+                    placeholder="Ny skådespelare..."
+                    value={newActorName}
+                    onChange={(e) => setNewActorName(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addNewActor())}
+                    style={{ border: "1px solid var(--ch-border)" }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-sm ch-btn-outline"
+                    onClick={addNewActor}
+                    disabled={!newActorName.trim()}
+                  >
+                    + Lägg till
+                  </button>
+                </div>
+
+                <small className="text-muted">
+                  Valda: {selectedActors.length > 0 ? selectedActors.join(", ") : "Inga"}
+                </small>
+              </div>
+
+              {/* BILDER */}
+              <div className="mb-3">
+                <label className="form-label d-flex justify-content-between align-items-center">
+                  <span>Bilder (URLs)</span>
+                  <button
+                    type="button"
+                    className="btn btn-sm ch-btn-outline"
+                    onClick={addImageField}
+                  >
+                    + Lägg till bild
+                  </button>
+                </label>
+                {images.map((img, index) => (
+                  <div key={index} className="input-group mb-2">
+                    <input
+                      type="url"
+                      className="form-control bg-dark text-light"
+                      placeholder="https://example.com/poster.jpg"
+                      value={img}
+                      onChange={(e) => handleImageChange(index, e.target.value)}
+                      style={{ border: "1px solid var(--ch-border)" }}
+                    />
+                    {images.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger"
+                        onClick={() => removeImageField(index)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* TRAILERS */}
+              <div className="mb-3">
+                <label className="form-label d-flex justify-content-between align-items-center">
+                  <span>Trailers (YouTube URLs)</span>
+                  <button
+                    type="button"
+                    className="btn btn-sm ch-btn-outline"
+                    onClick={addTrailerField}
+                  >
+                    + Lägg till trailer
+                  </button>
+                </label>
+                {trailers.map((tr, index) => (
+                  <div key={index} className="input-group mb-2">
+                    <input
+                      type="url"
+                      className="form-control bg-dark text-light"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={tr}
+                      onChange={(e) => handleTrailerChange(index, e.target.value)}
+                      style={{ border: "1px solid var(--ch-border)" }}
+                    />
+                    {trailers.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger"
+                        onClick={() => removeTrailerField(index)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Footer */}
@@ -212,11 +525,7 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
               >
                 Avbryt
               </button>
-              <button
-                type="submit"
-                className="btn ch-btn-primary"
-                disabled={saving}
-              >
+              <button type="submit" className="btn ch-btn-primary" disabled={saving}>
                 {saving ? "Sparar..." : "Spara film"}
               </button>
             </div>
