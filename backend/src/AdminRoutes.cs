@@ -8,8 +8,8 @@ public static class AdminRoutes
     {
         App.MapGet("/api/admin/films", GetFilms);
         App.MapPost("/api/admin/films", CreateFilm);
-        App.MapPut("/api/admin/films/{id}", UpdateFilm);
-        App.MapDelete("/api/admin/films/{id}", DeleteFilm);
+        App.MapPut("/api/admin/films/{id:int}", UpdateFilm);
+        App.MapDelete("/api/admin/films/{id:int}", DeleteFilm);
     }
 
     private static IResult GetFilms(HttpContext context)
@@ -52,7 +52,7 @@ public static class AdminRoutes
         return RestResult.Parse(context, result);
     }
 
-    private static IResult UpdateFilm(HttpContext context, string id, JsonElement bodyJson)
+    private static IResult UpdateFilm(HttpContext context, int id, JsonElement bodyJson)
     {
         var body = JSON.Parse(bodyJson.ToString());
 
@@ -78,7 +78,7 @@ public static class AdminRoutes
         return RestResult.Parse(context, result);
     }
 
-    private static IResult DeleteFilm(HttpContext context, string id)
+    private static IResult DeleteFilm(HttpContext context, int id)
     {
         var bookingCheck = SQLQueryOne(@"
             SELECT COUNT(*) AS count
