@@ -18,6 +18,7 @@ export default function AdminFilms() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // försök hämta alla filmer från databas till denna URL'n
   useEffect(() => {
@@ -80,6 +81,15 @@ export default function AdminFilms() {
       .catch((err) => console.error(err));
   };
 
+  const filteredFilms = films.filter((film) => {
+    const search = searchQuery.toLowerCase();
+    return (
+      film.title.toLowerCase().includes(search) ||
+      film.genre.toLowerCase().includes(search) ||
+      film.age_rating.toString().includes(search)
+    );
+  });
+
   if (loading) return <div>Laddar filmer...</div>;
   if (error) return <div>{error}</div>;
 
@@ -99,6 +109,20 @@ export default function AdminFilms() {
         </button>
       </div>
 
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control form-control-lg bg-dark text-light"
+          placeholder="🔍 Sök filmer (titel, genre, åldersgräns..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            border: "1px solid var(--ch-border)",
+            borderRadius: "8px"
+          }}
+        />
+      </div>
+
       {/* Desktop/Tablet: Tabell */}
       <div className="d-none d-md-block">
         <div className="card bg-dark text-light border-0 shadow">
@@ -116,7 +140,7 @@ export default function AdminFilms() {
                   </tr>
                 </thead>
                 <tbody>
-                  {films.map((film) => (
+                  {filteredFilms.map((film) => (
                     <tr key={film.id}>
                       <td style={{ padding: "1rem" }}>{film.id}</td>
                       <td>{film.title}</td>
@@ -150,7 +174,7 @@ export default function AdminFilms() {
       {/* Mobile */}
       <div className="d-md-none">
         <div className="row g-3">
-          {films.map((film) => (
+          {filteredFilms.map((film) => (
             <div key={film.id} className="col-12">
               <div className="card bg-dark text-light border-0 shadow">
                 <div className="card-body">

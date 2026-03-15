@@ -52,8 +52,8 @@ export default function FilmModal({ isOpen, onClose, onSave }: FilmModalProps) {
         body: JSON.stringify({
           ...formData,
           duration_minutes: parseInt(formData.duration_minutes),
-          images: [],
-          trailers: [],
+          images: "[]",
+          trailers: "[]",
         }),
       });
 
