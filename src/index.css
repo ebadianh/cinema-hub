@@ -68,21 +68,50 @@ body {
 }
 
 /* ===============================
-   NAVBAR
+   NAVBAR - Sticky med SF Bio stil
 ================================ */
 
 .ch-navbar {
-  background: var(--ch-bg);
-  border-bottom: 1px solid var(--ch-border);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 15, 30, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ch-navbar-scrolled {
+  background: rgba(10, 15, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ch-navbar .navbar-brand {
+  transition: transform 0.2s ease;
+}
+
+.ch-navbar .navbar-brand:hover {
+  transform: scale(1.05);
 }
 
 .ch-navbar .nav-link {
-  color: var(--ch-text-muted);
+  color: rgba(255, 255, 255, 0.8);
   transition: color 0.2s ease;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
 }
 
 .ch-navbar .nav-link:hover {
-  color: var(--ch-text);
+  color: var(--ch-accent);
+}
+
+.ch-navbar .nav-link.active {
+  color: var(--ch-accent);
 }
 
 /* Navbar toggler (hamburger) */
@@ -136,7 +165,24 @@ body {
   box-shadow: none;
 }
 
+/* Mobile menu styling */
 @media (max-width: 991.98px) {
+  .ch-navbar .navbar-collapse {
+    background: rgba(10, 15, 30, 0.98);
+    backdrop-filter: blur(20px);
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .ch-navbar .nav-link {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ch-navbar .nav-link:last-child {
+    border-bottom: none;
+  }
 
   .ch-navbar .ch-btn-primary,
   .ch-navbar .ch-btn-outline {
@@ -146,6 +192,18 @@ body {
   }
 }
 
+/* Desktop adjustments */
+@media (min-width: 992px) {
+  .ch-navbar .container {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .ch-navbar-scrolled .container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
 /* ===============================
    BUTTONS
 ================================ */
