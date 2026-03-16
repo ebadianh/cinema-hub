@@ -11,6 +11,21 @@ public static class FileServer
             Globals.frontendPath
         );
 
+        // #region agent log
+        {
+            var exists = Directory.Exists(FPath);
+            var log = $"{{\"sessionId\":\"f56b18\",\"runId\":\"post-fix\",\"hypothesisId\":\"H3\",\"location\":\"FileServer.cs:8\",\"message\":\"Frontend path resolved\",\"data\":{{\"FPath\":\"{FPath.Replace("\\", "\\\\")}\",\"exists\":{exists.ToString().ToLower()}}},\"timestamp\":{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}}}\n";
+            System.IO.File.AppendAllText("C:\\Users\\Mo\\repos\\cinema-hub\\debug-f56b18.log", log);
+        }
+        // #endregion
+
+        if (!Directory.Exists(FPath))
+        {
+            // If the frontend directory does not exist, skip static file hosting
+            // so that the backend APIs can still run.
+            return;
+        }
+
         HandleStatusCodes();
         ServeFiles();
         ServeFileLists();

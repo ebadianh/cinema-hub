@@ -45,9 +45,30 @@ export default function Footer() {
             <h6 className="fw-semibold">Support</h6>
 
             <ul className="list-unstyled text-secondary">
-              <li>Integritetspolicy</li>
-              <li>Användarvillkor</li>
-              <li>Hjälpcenter</li>
+              <li>
+                <Link
+                  className="text-decoration-none text-secondary"
+                  to="/integritetspolicy"
+                >
+                  Integritetspolicy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-decoration-none text-secondary"
+                  to="/anvandarvillkor"
+                >
+                  Användarvillkor
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-decoration-none text-secondary"
+                  to="/hjalpcenter"
+                >
+                  Hjälpcenter
+                </Link>
+              </li>
             </ul>
           </div>
 

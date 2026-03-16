@@ -12,6 +12,9 @@ import AiChatPage from "./pages/AiChatPage";
 import Booking from "./pages/Booking";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Contact from "./pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
+import HelpCenter from "./pages/HelpCenter";
 
 
 function ProfileRedirect() {
@@ -44,8 +47,11 @@ const routes = [
       { path: '/chat', element: <AiChatPage /> },
       { path: '/booking/:showingId', element: <Booking /> },
       { path: '/booking/confirmation/:reference', element: <BookingConfirmation /> },
-      { path: "*", element: <h1>Page not found</h1> },
       { path: "/contact", element: <Contact /> },
+      { path: "/integritetspolicy", element: <PrivacyPolicy /> },
+      { path: "/anvandarvillkor", element: <TermsOfUse /> },
+      { path: "/hjalpcenter", element: <HelpCenter /> },
+      { path: "*", element: <h1>Page not found</h1> },
     ],
   },
 ];
