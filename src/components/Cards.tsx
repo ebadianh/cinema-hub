@@ -30,6 +30,8 @@ type Actor = {
 };
 
 export default function Cards() {
+  const CARDS_PER_PAGE = 12;
+
   const [films, setFilms] = useState<Film[]>([]);
   const [directors, setDirectors] = useState<Director[]>([]);
   const [actors, setActors] = useState<Actor[]>([]);
@@ -39,6 +41,7 @@ export default function Cards() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<string>("all");
   const [showings, setShowings] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleReset = () => {
     setSelectedAge("all");
@@ -108,6 +111,55 @@ export default function Cards() {
     return Array.from(dates).sort();
   }, [showings]);
 
+  const filteredFilms = useMemo(() => {
+    return films.filter((film) => {
+      if (selectedAge !== "all") {
+        const maxAge = parseInt(selectedAge);
+        if (film.age_rating > maxAge) {
+          return false;
+        }
+      }
+
+      if (selectedGenre !== "all" && film.genre !== selectedGenre) {
+        return false;
+      }
+
+      if (selectedDate !== "all") {
+        const hasShowingOnDate = showings.some(
+          (showing) =>
+            showing.film_id === film.id &&
+            showing.start_time.startsWith(selectedDate)
+        );
+
+        if (!hasShowingOnDate) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [films, selectedAge, selectedGenre, selectedDate, showings]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredFilms.length / CARDS_PER_PAGE)
+  );
+
+  const paginatedFilms = useMemo(() => {
+    const start = (currentPage - 1) * CARDS_PER_PAGE;
+    return filteredFilms.slice(start, start + CARDS_PER_PAGE);
+  }, [currentPage, filteredFilms]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedAge, selectedGenre, selectedDate]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   if (loading)
     return <div className="container mt-4">Laddar filmer…</div>;
 
@@ -115,31 +167,6 @@ export default function Cards() {
     return (
       <div className="container mt-4 text-danger">Error: {error}</div>
     );
-
-  const filteredFilms = films.filter((film) => {
-    if (selectedAge !== "all") {
-      const maxAge = parseInt(selectedAge);
-      if (film.age_rating > maxAge)
-        return false;
-    }
-
-    if (selectedGenre !== "all" && film.genre !== selectedGenre) {
-      return false;
-    }
-
-    if (selectedDate !== "all") {
-      const hasShowingOnDate = showings.some(
-        (showing) =>
-          showing.film_id === film.id &&
-          showing.start_time.startsWith(selectedDate)
-      );
-
-      if (!hasShowingOnDate) {
-        return false;
-      }
-    }
-    return true;
-  });
 
   return (
     <div className="container mt-4">
@@ -164,7 +191,7 @@ export default function Cards() {
       />
 
       <div className="row g-3">
-        {filteredFilms.map((f) => (
+        {paginatedFilms.map((f) => (
           <div key={f.id} className="col-6 col-md-4 col-lg-2">
             {/* HELA KORTET ÄR NU KLICKBART */}
             <Link
@@ -203,7 +230,56 @@ export default function Cards() {
             </Link>
           </div>
         ))}
+
+        {filteredFilms.length === 0 && (
+          <div className="col-12 text-center text-muted py-4">
+            Inga filmer matchar de valda filtren.
+          </div>
+        )}
       </div>
+
+      {filteredFilms.length > CARDS_PER_PAGE && (
+        <nav className="d-flex justify-content-center mt-4 ch-pagination-nav" aria-label="Film pagination">
+          <ul className="pagination mb-0 ch-pagination">
+            <li className={`page-item ch-page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button
+                type="button"
+                className="page-link ch-page-link"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              >
+                Föregående
+              </button>
+            </li>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <li
+                key={page}
+                className={`page-item ch-page-item ${currentPage === page ? "active" : ""}`}
+              >
+                <button
+                  type="button"
+                  className="page-link ch-page-link"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              </li>
+            ))}
+
+            <li className={`page-item ch-page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+              <button
+                type="button"
+                className="page-link ch-page-link"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+              >
+                Nästa
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
     </div>
   );
 }
