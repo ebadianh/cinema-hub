@@ -93,7 +93,7 @@ export default function Navbar({ user, setUser }: NavbarProps) {
                       </Link>
                     </li>
                     <li className="nav-item mt-2 mt-lg-0">
-                      <Link className="btn ch-btn-outline" to="/admin/films">
+                      <Link className="btn ch-btn-outline" to="/admin">
                         Adminpanel
                       </Link>
                     </li>

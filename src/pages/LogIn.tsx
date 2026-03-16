@@ -51,7 +51,7 @@ export default function LogIn() {
       setUser(userData);
 
       if (userData.role === "admin") {
-        navigate("/admin/films");
+        navigate("/admin");
       } else {
         navigate(`/profile/${userData.id}`);
       }
@@ -85,10 +85,10 @@ export default function LogIn() {
 
               <Form onSubmit={handleLogin}>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
-                  <Form.Label>E-post adress</Form.Label>
+                  <Form.Label>E-postadress</Form.Label>
                   <Form.Control
                     type="email"
-                    placeholder="Skriv in din e-post adress"
+                    placeholder="Skriv in din e-postadress"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
