@@ -61,35 +61,42 @@ export default function Cards() {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
         const filmsData = await res.json();
-        const filmsList: Film[] =
-          Array.isArray(filmsData) ? filmsData : filmsData.films ?? [];
+        const filmsList: Film[] = Array.isArray(filmsData)
+          ? filmsData
+          : (filmsData.films ?? []);
 
-        const res2 = await fetch("/api/directors", { signal: controller.signal });
+        const res2 = await fetch("/api/directors", {
+          signal: controller.signal,
+        });
         if (!res2.ok)
           throw new Error(`Directors: ${res2.status} ${res2.statusText}`);
         const directorsData = await res2.json();
-        const directorsList: Director[] =
-          Array.isArray(directorsData)
-            ? directorsData
-            : directorsData.directors ?? [];
+        const directorsList: Director[] = Array.isArray(directorsData)
+          ? directorsData
+          : (directorsData.directors ?? []);
 
         const res3 = await fetch("/api/actors", { signal: controller.signal });
         if (!res3.ok)
           throw new Error(`Actors: ${res3.status} ${res3.statusText}`);
         const actorsData = await res3.json();
-        const actorsList: Actor[] =
-          Array.isArray(actorsData) ? actorsData : actorsData.actors ?? [];
+        const actorsList: Actor[] = Array.isArray(actorsData)
+          ? actorsData
+          : (actorsData.actors ?? []);
 
         setFilms(filmsList);
         setDirectors(directorsList);
         setActors(actorsList);
 
-        const res4 = await fetch("/api/showings", { signal: controller.signal });
-        if (!res4.ok) throw new Error(`Showings: ${res4.status} ${res4.statusText}`);
+        const res4 = await fetch("/api/showings", {
+          signal: controller.signal,
+        });
+        if (!res4.ok)
+          throw new Error(`Showings: ${res4.status} ${res4.statusText}`);
         const showingsData = await res4.json();
-        const showingsList = Array.isArray(showingsData) ? showingsData : showingsData.showings ?? [];
+        const showingsList = Array.isArray(showingsData)
+          ? showingsData
+          : (showingsData.showings ?? []);
         setShowings(showingsList);
-
       } catch (e: any) {
         if (e.name !== "AbortError") {
           setError(e.message ?? "Failed to load");
@@ -128,7 +135,7 @@ export default function Cards() {
         const hasShowingOnDate = showings.some(
           (showing) =>
             showing.film_id === film.id &&
-            showing.start_time.startsWith(selectedDate)
+            showing.start_time.startsWith(selectedDate),
         );
 
         if (!hasShowingOnDate) {
@@ -142,7 +149,7 @@ export default function Cards() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredFilms.length / CARDS_PER_PAGE)
+    Math.ceil(filteredFilms.length / CARDS_PER_PAGE),
   );
 
   const paginatedFilms = useMemo(() => {
@@ -160,17 +167,13 @@ export default function Cards() {
     }
   }, [currentPage, totalPages]);
 
-  if (loading)
-    return <div className="container mt-4">Laddar filmer…</div>;
+  if (loading) return <div className="container mt-4">Laddar filmer…</div>;
 
   if (error)
-    return (
-      <div className="container mt-4 text-danger">Error: {error}</div>
-    );
+    return <div className="container mt-4 text-danger">Error: {error}</div>;
 
   return (
     <div className="container mt-4">
-
       <div className="text-center mb-4">
         <h2 className="section-title d-inline-block position-relative px-4">
           Filmer
@@ -214,16 +217,12 @@ export default function Cards() {
 
                 {/* Info */}
                 <div className="card-body text-center p-2">
-                  <h5 className="card-title small mb-1">
-                    {f.title}
-                  </h5>
+                  <h5 className="card-title small mb-1">{f.title}</h5>
                   <div className="mb-2">
                     <span className="badge text-bg-secondary me-1">
                       {f.genre}
                     </span>
-                    <span className="badge text-bg-light">
-                      {f.distributor}
-                    </span>
+                    <span className="badge text-bg-light">{f.distributor}</span>
                   </div>
                 </div>
               </div>
@@ -239,9 +238,14 @@ export default function Cards() {
       </div>
 
       {filteredFilms.length > CARDS_PER_PAGE && (
-        <nav className="d-flex justify-content-center mt-4 ch-pagination-nav" aria-label="Film pagination">
+        <nav
+          className="d-flex justify-content-center mt-4 ch-pagination-nav"
+          aria-label="Film pagination"
+        >
           <ul className="pagination mb-0 ch-pagination">
-            <li className={`page-item ch-page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <li
+              className={`page-item ch-page-item ${currentPage === 1 ? "disabled" : ""}`}
+            >
               <button
                 type="button"
                 className="page-link ch-page-link"
@@ -251,22 +255,26 @@ export default function Cards() {
               </button>
             </li>
 
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-              <li
-                key={page}
-                className={`page-item ch-page-item ${currentPage === page ? "active" : ""}`}
-              >
-                <button
-                  type="button"
-                  className="page-link ch-page-link"
-                  onClick={() => setCurrentPage(page)}
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (page) => (
+                <li
+                  key={page}
+                  className={`page-item ch-page-item ${currentPage === page ? "active" : ""}`}
                 >
-                  {page}
-                </button>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    className="page-link ch-page-link"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                </li>
+              ),
+            )}
 
-            <li className={`page-item ch-page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+            <li
+              className={`page-item ch-page-item ${currentPage === totalPages ? "disabled" : ""}`}
+            >
               <button
                 type="button"
                 className="page-link ch-page-link"
