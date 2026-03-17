@@ -367,12 +367,12 @@ public static class DbQuery
 
             ('admin',              '*',    'allow', '/api/acl', 'true', 'Allow admins to manage ACL'),
             ('admin',              '*',    'allow', '/api/sessions', 'true', 'Allow admins to manage sessions'),
-            ('admin',              '*',    'allow', '/api', 'true', 'Admins can access all API routes'),
 
-            ('admin', 'GET',    'allow', '/api/admin/films', 'true', 'Allow admin to list films'),
-            ('admin', 'POST',   'allow', '/api/admin/films', 'true', 'Allow admin to create films'),
-            ('admin', 'PUT',    'allow', '/api/admin/films/{id}', 'true', 'Allow admin to update films'),
-            ('admin', 'DELETE', 'allow', '/api/admin/films/{id}', 'true', 'Allow admin to delete films')
+            ('admin',              'GET',  'allow', '/api/contacts', 'true', 'Allow admin to list contact messages'),
+            ('admin',              'GET',  'allow', '/api/contacts/{id}', 'true', 'Allow admin to read single contact message'),
+            ('admin',              'PUT',  'allow', '/api/contacts/{id}', 'true', 'Allow admin to update contact status'),
+
+            ('admin',               '*',   'allow', '/api/admin/*',       'true', 'Admin full access to admin routes')
             ";
 
             command.CommandText = aclData;
