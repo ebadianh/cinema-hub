@@ -51,6 +51,7 @@ public static class AiOrchestratorService
                 - Om needs_clarification är true och clarification_question finns:
                   ställ den frågan kort istället för att gissa.
                                 - Om showings har film_url eller booking_url: inkludera klickbara markdown-länkar i svaret.
+                                - När du länkar internt i CinemaHub: använd endast relativa länkar som börjar med "/".
 
                                 Svarsmall:
                                 - Vid listor: använd tydliga punktlistor.

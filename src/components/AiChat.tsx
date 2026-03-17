@@ -1,6 +1,7 @@
 import "../ai-chat.css";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, Form, Button, Spinner } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -23,9 +24,59 @@ type Props = {
 const remarkPlugins: PluggableList = [remarkGfm];
 const rehypePlugins: PluggableList = [rehypeSanitize];
 
+const CHAT_INTERNAL_ROUTE_PREFIXES = [
+  "booking",
+  "films",
+  "chat",
+  "about",
+  "contact",
+  "register",
+  "login",
+  "profile",
+] as const;
+
+function resolveInternalChatPath(rawHref?: string): string | null {
+  if (!rawHref) return null;
+
+  const normalizedHref = rawHref.trim();
+  if (!normalizedHref) return null;
+
+  if (normalizedHref.startsWith("/")) {
+    return normalizedHref;
+  }
+
+  // Convert absolute links for the same site into SPA-internal paths.
+  if (/^https?:\/\//i.test(normalizedHref)) {
+    try {
+      const parsedUrl = new URL(normalizedHref);
+      const isCinemaHubDomain =
+        parsedUrl.hostname === "cinemahub.se" ||
+        parsedUrl.hostname === "www.cinemahub.se" ||
+        parsedUrl.hostname === window.location.hostname;
+
+      if (isCinemaHubDomain) {
+        return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  const hasInternalPrefix = CHAT_INTERNAL_ROUTE_PREFIXES.some((routePrefix) =>
+    normalizedHref.startsWith(`${routePrefix}/`) || normalizedHref === routePrefix,
+  );
+
+  if (hasInternalPrefix) {
+    return `/${normalizedHref.replace(/^\/+/, "")}`;
+  }
+
+  return null;
+}
+
 export default function AiChat({ messages, setMessages, onClear }: Props) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -156,17 +207,24 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
                   rehypePlugins={rehypePlugins}
                   components={{
                     a: ({ node: _node, href, ...props }) => {
-                      const isInternalLink = !!href && href.startsWith("/");
+                      const internalPath = resolveInternalChatPath(href);
+                      const isInternalLink = !!internalPath;
 
                       return (
                         <a
                           {...props}
-                          href={href}
+                          href={internalPath ?? href}
                           target={isInternalLink ? undefined : "_blank"}
                           rel={
                             isInternalLink ? undefined : "noreferrer noopener"
                           }
                           className="ai-chat__link"
+                          onClick={(event) => {
+                            if (!internalPath) return;
+
+                            event.preventDefault();
+                            navigate(internalPath);
+                          }}
                         />
                       );
                     },

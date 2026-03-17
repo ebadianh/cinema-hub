@@ -70,7 +70,7 @@ public static class AiShowingsService
                 genre,
                 CONCAT('/films/', film_id) AS film_url,
                 CONCAT('/booking/', id) AS booking_url
-            FROM showings_detaila
+            FROM showings_detail
             {where}
             ORDER BY start_time
             LIMIT 50
