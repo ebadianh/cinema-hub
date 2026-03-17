@@ -8,7 +8,8 @@ public static class AiOrchestratorService
 
         var intent = await AiIntentService.ExtractIntentAsync(messages);
         var groundedFacts = BuildGroundedFacts(intent, context);
-        var deterministicResponse = TryBuildDeterministicResponse(intent, groundedFacts);
+        var latestUserPrompt = messages.LastOrDefault(message => message.role == "user")?.content ?? "";
+        var deterministicResponse = TryBuildDeterministicResponse(intent, groundedFacts, latestUserPrompt);
 
         if (deterministicResponse != null)
             return deterministicResponse;
@@ -78,12 +79,20 @@ public static class AiOrchestratorService
         return await AiProxyService.ChatAsync(fullMessages);
     }
 
-    private static dynamic TryBuildDeterministicResponse(AiIntentResult intent, dynamic groundedFacts)
+    private static dynamic TryBuildDeterministicResponse(AiIntentResult intent, dynamic groundedFacts, string latestUserPrompt)
     {
         // Use explicit fallback messages in high-risk cases where models often hallucinate.
         // This ensures the assistant stays aligned with verified grounding data.
         if (intent == null)
             return null;
+
+        if (IsGreetingPrompt(latestUserPrompt))
+        {
+            return BuildAssistantResponse(
+                "Hej! Jag hjälper gärna till med visningar, öppettider, priser, snacks och bokning. " +
+                "Du kan till exempel fråga: \"vilka filmer går på lördag?\""
+            );
+        }
 
         if (intent.intent == "showings.search")
         {
@@ -96,7 +105,27 @@ public static class AiOrchestratorService
             try { followUpSuggestion = (string)groundedFacts.data.follow_up_suggestion ?? followUpSuggestion; } catch { }
 
             if (!showingsFound)
+            {
+                var hasAgeFilter = false;
+                try
+                {
+                    hasAgeFilter = groundedFacts.filters.child_friendly == true ||
+                                   groundedFacts.filters.age_rating_max != null;
+                }
+                catch
+                {
+                }
+
+                if (hasAgeFilter || LooksLikeAgeSensitivePrompt(latestUserPrompt))
+                {
+                    return BuildAssistantResponse(
+                        "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
+                        "Vill du att jag visar alla visningar på den dagen så kan vi jämföra åldersgränserna tillsammans?"
+                    );
+                }
+
                 return BuildAssistantResponse($"{noResultsMessage}\n\n{followUpSuggestion}");
+            }
         }
 
         if (intent.intent == "snacks.price")
@@ -117,6 +146,45 @@ public static class AiOrchestratorService
         }
 
         return null;
+    }
+
+    private static bool IsGreetingPrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = prompt
+            .Trim()
+            .ToLowerInvariant()
+            .Replace("!", "")
+            .Replace("?", "")
+            .Replace(".", "")
+            .Trim();
+
+        return normalizedPrompt == "hej" ||
+               normalizedPrompt == "hejsan" ||
+               normalizedPrompt == "hej hej" ||
+               normalizedPrompt == "tjena" ||
+               normalizedPrompt == "tjenare" ||
+               normalizedPrompt == "hallå" ||
+               normalizedPrompt == "halloj" ||
+               normalizedPrompt == "hello" ||
+               normalizedPrompt == "hi";
+    }
+
+    private static bool LooksLikeAgeSensitivePrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = prompt.ToLowerInvariant();
+        return System.Text.RegularExpressions.Regex.IsMatch(normalizedPrompt, "\\b\\d{1,2}\\s*år\\b") ||
+               normalizedPrompt.Contains("barnvänlig") ||
+               normalizedPrompt.Contains("barnvänliga") ||
+               normalizedPrompt.Contains("barntillåten") ||
+               normalizedPrompt.Contains("för barn") ||
+               normalizedPrompt.Contains("min son") ||
+               normalizedPrompt.Contains("min dotter");
     }
 
     private static dynamic BuildAssistantResponse(string assistantContent)
