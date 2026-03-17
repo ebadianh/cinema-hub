@@ -20,8 +20,8 @@ export default function Filter({
   selectedDate = "all",
   onAgeChange,
   onGenreChange,
-  onDateChange = () => { }, /* om ingen funktion skickas in, använd en tom funktion istället för att undvika att krascha */
-  onReset = () => { },
+  onDateChange = () => {} /* om ingen funktion skickas in, använd en tom funktion istället för att undvika att krascha */,
+  onReset = () => {},
   filteredCount,
   totalCount,
 }: FilterProps) {
@@ -33,20 +33,22 @@ export default function Filter({
 
   return (
     <>
-
       {/* Desktop filter */}
       <div className="d-none d-lg-flex justify-content-between align-items-end mb-4">
         <div className="d-flex gap-3">
           {/* åldersgräns */}
-          <div style={{ minWidth: '200px' }}>
-            <label htmlFor="ageFilter" className="form-label small text-muted"> {/* åldersgräns-filter */}
+          <div style={{ minWidth: "200px" }}>
+            <label htmlFor="ageFilter" className="form-label small text-muted">
+              {" "}
+              {/* åldersgräns-filter */}
               Åldersgräns
             </label>
             <select
               id="ageFilter"
               className="form-select"
               value={selectedAge}
-              onChange={(e) => onAgeChange(e.target.value)}>
+              onChange={(e) => onAgeChange(e.target.value)}
+            >
               <option value="all">Alla åldrar</option>
               <option value="0">Barntillåten</option>
               <option value="7">7+</option>
@@ -56,15 +58,19 @@ export default function Filter({
           </div>
 
           {/* Genre-filter */}
-          <div style={{ minWidth: '200px' }}>
-            <label htmlFor="genreFilter" className="form-label small text-muted">
+          <div style={{ minWidth: "200px" }}>
+            <label
+              htmlFor="genreFilter"
+              className="form-label small text-muted"
+            >
               Genre
             </label>
             <select
               id="genreFilter"
               className="form-select"
               value={selectedGenre}
-              onChange={(e) => onGenreChange(e.target.value)}>
+              onChange={(e) => onGenreChange(e.target.value)}
+            >
               <option value="all">Alla genrer</option>
               <option value="Drama">Drama</option>
               <option value="Action">Action</option>
@@ -83,7 +89,9 @@ export default function Filter({
               Datum
             </label>
             <DatePicker
-              selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
+              selected={
+                selectedDate !== "all" ? parseDateValue(selectedDate) : null
+              }
               onChange={(date: Date | null) => {
                 if (date) {
                   const dateString = format(date, "yyyy-MM-dd");
@@ -109,7 +117,7 @@ export default function Filter({
             className="btn btn-outline-secondary btn-sm"
             onClick={onReset}
             type="button"
-            style={{ whiteSpace: 'nowrap' }}
+            style={{ whiteSpace: "nowrap" }}
           >
             Rensa filter
           </button>
@@ -122,7 +130,12 @@ export default function Filter({
       {/* Mobile */}
       <div className="d-lg-none mb-4">
         <div className="mb-3">
-          <label htmlFor="ageFilterMobile" className="form-label small text-muted">Åldersgräns</label>
+          <label
+            htmlFor="ageFilterMobile"
+            className="form-label small text-muted"
+          >
+            Åldersgräns
+          </label>
           <select
             id="ageFilterMobile"
             className="form-select"
@@ -138,7 +151,12 @@ export default function Filter({
         </div>
 
         <div className="mb-3">
-          <label htmlFor="genreFilterMobile" className="form-label small text-muted">Genre</label>
+          <label
+            htmlFor="genreFilterMobile"
+            className="form-label small text-muted"
+          >
+            Genre
+          </label>
           <select
             id="genreFilterMobile"
             className="form-select"
@@ -158,11 +176,16 @@ export default function Filter({
         </div>
 
         <div className="mb-3">
-          <label htmlFor="datumFilterMobile" className="form-label small text-muted">
+          <label
+            htmlFor="datumFilterMobile"
+            className="form-label small text-muted"
+          >
             Datum
           </label>
           <DatePicker
-            selected={selectedDate !== "all" ? parseDateValue(selectedDate) : null}
+            selected={
+              selectedDate !== "all" ? parseDateValue(selectedDate) : null
+            }
             onChange={(date: Date | null) => {
               if (date) {
                 const dateString = format(date, "yyyy-MM-dd");

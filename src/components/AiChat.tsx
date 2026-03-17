@@ -1,12 +1,12 @@
 import "../ai-chat.css";
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Card, Form, Button, Spinner } from 'react-bootstrap';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
-import type { PluggableList } from 'unified';
-import type { Message } from '../pages/AiChatWidget';
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Card, Form, Button, Spinner } from "react-bootstrap";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+import type { PluggableList } from "unified";
+import type { Message } from "../pages/AiChatWidget";
 
 interface ChatResponse {
   choices: Array<{
@@ -24,7 +24,7 @@ const remarkPlugins: PluggableList = [remarkGfm];
 const rehypePlugins: PluggableList = [rehypeSanitize];
 
 export default function AiChat({ messages, setMessages, onClear }: Props) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -37,8 +37,9 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
   useEffect(() => {
     const textareaElement = textareaRef.current;
     if (!textareaElement) return;
-    textareaElement.style.height = 'auto';
-    textareaElement.style.height = Math.min(textareaElement.scrollHeight, 160) + 'px';
+    textareaElement.style.height = "auto";
+    textareaElement.style.height =
+      Math.min(textareaElement.scrollHeight, 160) + "px";
   }, [input]);
 
   // Keep keyboard flow smooth by restoring focus after each response cycle.
@@ -69,40 +70,40 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
     const text = input.trim();
     if (!text || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: text };
+    const userMessage: Message = { role: "user", content: text };
     const nextMessages = [...messages, userMessage];
 
     setMessages(nextMessages);
-    setInput('');
+    setInput("");
     setIsLoading(true);
     textareaRef.current?.focus();
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: nextMessages })
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nextMessages }),
       });
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || 'Request failed');
+        throw new Error(err.error || "Request failed");
       }
 
       const data: ChatResponse = await response.json();
       const assistantMessage: Message = {
-        role: 'assistant',
-        content: data.choices?.[0]?.message?.content ?? '(No response)'
+        role: "assistant",
+        content: data.choices?.[0]?.message?.content ?? "(No response)",
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
-          role: 'assistant',
-          content: `Fel: ${error instanceof Error ? error.message : 'Okänt fel'}`
-        }
+          role: "assistant",
+          content: `Fel: ${error instanceof Error ? error.message : "Okänt fel"}`,
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -110,7 +111,7 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -140,35 +141,44 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
       <div ref={bodyRef} className="ai-chat__body" onScroll={onBodyScroll}>
         {messages.length === 0 ? (
           <div className="ai-chat__empty">
-            Fråga om öppettider, priser, snacks, bokning eller vilka filmer som går.
+            Fråga om öppettider, priser, snacks, bokning eller vilka filmer som
+            går.
           </div>
         ) : (
           messages.map((chatMessage, messageIndex) => (
             <div
               key={messageIndex}
-              className={`ai-chat__bubble ${chatMessage.role === 'user' ? 'is-user' : 'is-assistant'}`}
+              className={`ai-chat__bubble ${chatMessage.role === "user" ? "is-user" : "is-assistant"}`}
             >
-              {chatMessage.role === 'assistant' ? (
+              {chatMessage.role === "assistant" ? (
                 <ReactMarkdown
                   remarkPlugins={remarkPlugins}
                   rehypePlugins={rehypePlugins}
                   components={{
                     a: ({ node: _node, href, ...props }) => {
-                      const isInternalLink = !!href && href.startsWith('/');
+                      const isInternalLink = !!href && href.startsWith("/");
 
                       return (
                         <a
                           {...props}
                           href={href}
-                          target={isInternalLink ? undefined : '_blank'}
-                          rel={isInternalLink ? undefined : 'noreferrer noopener'}
+                          target={isInternalLink ? undefined : "_blank"}
+                          rel={
+                            isInternalLink ? undefined : "noreferrer noopener"
+                          }
                           className="ai-chat__link"
                         />
                       );
                     },
-                    ul: ({ node: _node, ...props }) => <ul {...props} className="ai-chat__markdown-list" />,
-                    ol: ({ node: _node, ...props }) => <ol {...props} className="ai-chat__markdown-list" />,
-                    code: ({ node: _node, ...props }) => <code {...props} className="ai-chat__markdown-code" />
+                    ul: ({ node: _node, ...props }) => (
+                      <ul {...props} className="ai-chat__markdown-list" />
+                    ),
+                    ol: ({ node: _node, ...props }) => (
+                      <ol {...props} className="ai-chat__markdown-list" />
+                    ),
+                    code: ({ node: _node, ...props }) => (
+                      <code {...props} className="ai-chat__markdown-code" />
+                    ),
                   }}
                 >
                   {chatMessage.content}

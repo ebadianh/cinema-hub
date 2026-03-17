@@ -1,22 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Button, Offcanvas } from 'react-bootstrap';
-import AiChat from '../components/AiChat';
+import { useEffect, useState } from "react";
+import { Button, Offcanvas } from "react-bootstrap";
+import AiChat from "../components/AiChat";
 
 export interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
-const STORAGE_KEY = 'cinemahub_ai_chat_v1';
+const STORAGE_KEY = "cinemahub_ai_chat_v1";
 const MAX_MESSAGES_TO_STORE = 200;
 
 function isValidMessages(data: unknown): data is Message[] {
   return (
     Array.isArray(data) &&
-    data.every((chatMessage: any) =>
-      chatMessage &&
-      (chatMessage.role === 'user' || chatMessage.role === 'assistant') &&
-      typeof chatMessage.content === 'string'
+    data.every(
+      (chatMessage: any) =>
+        chatMessage &&
+        (chatMessage.role === "user" || chatMessage.role === "assistant") &&
+        typeof chatMessage.content === "string",
     )
   );
 }
@@ -69,7 +70,7 @@ export default function AiChatWidget() {
     setMessages([]);
     try {
       localStorage.removeItem(STORAGE_KEY);
-    } catch { }
+    } catch {}
   };
 
   return (
@@ -79,12 +80,12 @@ export default function AiChatWidget() {
         className="ai-chat__launcher"
         onClick={() => setOpen(true)}
         style={{
-          position: 'fixed',
+          position: "fixed",
           right: 18,
           bottom: 18,
           zIndex: 1050,
           borderRadius: 999,
-          padding: '10px 14px'
+          padding: "10px 14px",
         }}
       >
         Chat
