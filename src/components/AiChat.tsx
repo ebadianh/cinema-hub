@@ -38,16 +38,18 @@ const CHAT_INTERNAL_ROUTE_PREFIXES = [
 function normalizeAssistantMarkdown(rawContent: string): string {
   // Clean up inconsistent markdown spacing from model output so list markers
   // and list item text stay visually connected in the rendered chat bubble.
-  return rawContent
-    .replace(/\r\n/g, "\n")
-    // Remove standalone unicode bullet lines that often create empty-looking rows.
-    .replace(/^[ \t]*[•·]\s*$/gm, "")
-    // Remove standalone markdown marker lines that do not contain content.
-    .replace(/^[ \t]*[-*+]\s*$/gm, "")
-    .replace(/^([ \t]*[-*+]\s*)\n+(?=\S)/gm, "$1")
-    .replace(/^([ \t]*\d+\.\s*)\n+(?=\S)/gm, "$1")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return (
+    rawContent
+      .replace(/\r\n/g, "\n")
+      // Remove standalone unicode bullet lines that often create empty-looking rows.
+      .replace(/^[ \t]*[•·]\s*$/gm, "")
+      // Remove standalone markdown marker lines that do not contain content.
+      .replace(/^[ \t]*[-*+]\s*$/gm, "")
+      .replace(/^([ \t]*[-*+]\s*)\n+(?=\S)/gm, "$1")
+      .replace(/^([ \t]*\d+\.\s*)\n+(?=\S)/gm, "$1")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
 }
 
 function resolveInternalChatPath(rawHref?: string): string | null {
