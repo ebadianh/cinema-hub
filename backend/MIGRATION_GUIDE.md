@@ -46,18 +46,19 @@ Or copy/paste the contents of each file into your client one at a time.
 ### Re-running Setup
 
 Running these files again is **safe** because:
+
 - `001_schema.sql` uses `CREATE TABLE IF NOT EXISTS`
 - `003_seed_data.sql` checks if data exists before inserting
 
 ## Risks Assessment
 
-| Scenario | Risk Level | Solution |
-|----------|-----------|----------|
-| Backend starts normally | ✅ None | Application will not touch schema |
-| Accidentally restart backend | ✅ None | Config flags are now disabled |
-| Manual DELETE/UPDATE on tables | ⚠️ User Error | Use backups or ask teacher |
-| Running migrations twice | ✅ Safe | Migration files are idempotent |
-| Forgot to initialize schema | ⚠️ Connection Error | Run 001_schema.sql immediately |
+| Scenario                       | Risk Level          | Solution                          |
+| ------------------------------ | ------------------- | --------------------------------- |
+| Backend starts normally        | ✅ None             | Application will not touch schema |
+| Accidentally restart backend   | ✅ None             | Config flags are now disabled     |
+| Manual DELETE/UPDATE on tables | ⚠️ User Error       | Use backups or ask teacher        |
+| Running migrations twice       | ✅ Safe             | Migration files are idempotent    |
+| Forgot to initialize schema    | ⚠️ Connection Error | Run 001_schema.sql immediately    |
 
 ## Admin User
 
@@ -68,11 +69,13 @@ Running these files again is **safe** because:
 ### Current State of Cloud Database
 
 When you ran the app before this migration, some data may have been created:
+
 - Existing tables: intact
 - Data: Only what your app created (registrations, bookings)
 - Duplicates: Check if seed ran twice (unlikely, but fixable)
 
 If you need a fresh start:
+
 1. Ask your teacher to clear the h25malmo-grupp6 database
 2. Then run all three migrations in order
 
