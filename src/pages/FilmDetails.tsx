@@ -425,13 +425,17 @@ export default function FilmDetails() {
           <div className="mt-3">
             <div className="fw-semibold mb-2">Föreställningar:</div>
 
-            <div className="d-flex flex-wrap gap-2 mb-3">
+            <div className="d-flex flex-wrap gap-2 mb-3 fd-chip-row fd-chip-row--dates">
               {availableDates.map((date) => (
                 <button
                   key={date}
-                  className={`btn btn-sm ${selectedDate === date ? "btn-primary" : "btn-outline-secondary"
+                  type="button"
+                  className={`btn btn-sm fd-chip-btn ${selectedDate === date ? "fd-chip-btn--active" : ""
                     }`}
-                  onClick={() => setSelectedDate(date)}
+                  onClick={() => {
+                    setSelectedDate(date);
+                    setSelectedShowing(null);
+                  }}
                 >
                   {formatDateShort(date)}
                 </button>
@@ -440,14 +444,15 @@ export default function FilmDetails() {
 
 
             {showingsForSelectedDate.length > 0 ? (
-              <div className="d-flex flex-wrap gap-2">
+              <div className="d-flex flex-wrap gap-2 fd-chip-row fd-chip-row--times">
                 {showingsForSelectedDate.map((s) => {
                   const time = s.start_time.substring(11, 16);
 
                   return (
                     <button
                       key={s.id}
-                      className={`btn btn-sm ${selectedShowing?.id === s.id ? "btn-primary" : "btn-outline-secondary"
+                      type="button"
+                      className={`btn btn-sm fd-chip-btn ${selectedShowing?.id === s.id ? "fd-chip-btn--active" : ""
                         }`}
                       onClick={() => setSelectedShowing(s)}
                     >
@@ -482,12 +487,11 @@ export default function FilmDetails() {
     <div className="d-none d-md-block">
       <div className="row g-4 align-items-stretch">
         <div className="col-12 col-md-4 col-lg-3">
-          <div className="border rounded overflow-hidden h-100 bg-light">
+          <div className="border rounded overflow-hidden bg-light fd-poster-card">
             <img
               src={poster}
               alt={film.title}
-              className="w-100 h-100 d-block"
-              style={{ objectFit: "cover" }}
+              className="w-100 d-block fd-poster-image"
             />
           </div>
         </div>
@@ -519,13 +523,17 @@ export default function FilmDetails() {
               <div className="mt-3">
                 <div className="fw-semibold mb-2">Föreställningar:</div>
 
-                <div className="d-flex flex-wrap gap-2 mb-3">
+                <div className="d-flex flex-wrap gap-2 mb-3 fd-chip-row fd-chip-row--dates">
                   {availableDates.map((date) => (
                     <button
                       key={date}
-                      className={`btn btn-sm ${selectedDate === date ? "btn-primary" : "btn-outline-secondary"
+                      type="button"
+                      className={`btn btn-sm fd-chip-btn ${selectedDate === date ? "fd-chip-btn--active" : ""
                         }`}
-                      onClick={() => setSelectedDate(date)}
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedShowing(null);
+                      }}
                     >
                       {formatDateShort(date)}
                     </button>
@@ -533,14 +541,15 @@ export default function FilmDetails() {
                 </div>
 
                 {showingsForSelectedDate.length > 0 ? (
-                  <div className="d-flex flex-wrap gap-2">
+                  <div className="d-flex flex-wrap gap-2 fd-chip-row fd-chip-row--times">
                     {showingsForSelectedDate.map((s) => {
                       const time = s.start_time.substring(11, 16);
 
                       return (
                         <button
                           key={s.id}
-                          className={`btn btn-sm ${selectedShowing?.id === s.id ? "btn-primary" : "btn-outline-secondary"
+                          type="button"
+                          className={`btn btn-sm fd-chip-btn ${selectedShowing?.id === s.id ? "fd-chip-btn--active" : ""
                             }`}
                           onClick={() => setSelectedShowing(s)}
                         >
