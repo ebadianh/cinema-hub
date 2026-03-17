@@ -8,6 +8,11 @@ public static class AiOrchestratorService
 
         var intent = await AiIntentService.ExtractIntentAsync(messages);
         var groundedFacts = BuildGroundedFacts(intent, context);
+        var latestUserPrompt = messages.LastOrDefault(message => message.role == "user")?.content ?? "";
+        var deterministicResponse = TryBuildDeterministicResponse(intent, groundedFacts, latestUserPrompt);
+
+        if (deterministicResponse != null)
+            return deterministicResponse;
 
         var fullMessages = Arr();
 
@@ -26,22 +31,33 @@ public static class AiOrchestratorService
             content =
                 """
                 Du är Cinema-Bot för CinemaHub.
+                                Personlighet: varm, tydlig, professionell och hjälpsam.
+                                Ton: naturlig svenska, konkret, kort när det går men komplett när det behövs.
 
                 Svara endast utifrån de grundade uppgifterna i "GROUNDING".
 
                 Regler:
                 - Hitta aldrig på specifika produkter, filmer, tider eller priser.
+                                - Om fakta saknas i grounding: säg tydligt att informationen saknas.
+                                - Gissa aldrig på saknad data. Var transparent med osäkerhet.
                 - Om en användare frågar om en specifik snack-produkt och matched_item är null:
                   säg att du inte har exakt information om just den produkten.
                 - Om grounding bara innehåller en kategori, som "läsk & mineralvatten",
                   får du inte nämna specifika märken eller varianter som Cola Zero eller Pepsi Max.
                 - Om inga visningar hittas:
-                  säg att du inte hittar några matchande visningar.
+                                    använd no_results_message och erbjud en rimlig uppföljningsfråga.
                 - Om frågan är utanför biografens område, använd out_of_scope_reply om den finns.
                 - Om användaren vill boka:
                   förklara stegen, men påstå aldrig att bokningen redan är gjord.
                 - Om needs_clarification är true och clarification_question finns:
                   ställ den frågan kort istället för att gissa.
+                                - Om showings har film_url eller booking_url: inkludera klickbara markdown-länkar i svaret.
+                                - När du länkar internt i CinemaHub: använd endast relativa länkar som börjar med "/".
+
+                                Svarsmall:
+                                - Vid listor: använd tydliga punktlistor.
+                                - Vid tider och priser: återge exakta värden från grounding.
+                                - Avsluta gärna med en kort följdfråga som hjälper användaren vidare.
                 """.Trim()
         }));
 
@@ -51,16 +67,141 @@ public static class AiOrchestratorService
             content = "## GROUNDING\n" + JSON.Stringify(groundedFacts)
         }));
 
-        foreach (var m in messages)
+        foreach (var chatMessage in messages)
         {
             fullMessages.Push(Obj(new
             {
-                role = m.role,
-                content = m.content
+                role = chatMessage.role,
+                content = chatMessage.content
             }));
         }
 
         return await AiProxyService.ChatAsync(fullMessages);
+    }
+
+    private static dynamic TryBuildDeterministicResponse(AiIntentResult intent, dynamic groundedFacts, string latestUserPrompt)
+    {
+        // Use explicit fallback messages in high-risk cases where models often hallucinate.
+        // This ensures the assistant stays aligned with verified grounding data.
+        if (intent == null)
+            return null;
+
+        if (IsGreetingPrompt(latestUserPrompt))
+        {
+            return BuildAssistantResponse(
+                "Hej! Jag hjälper gärna till med visningar, öppettider, priser, snacks och bokning. " +
+                "Du kan till exempel fråga: \"vilka filmer går på lördag?\""
+            );
+        }
+
+        if (intent.intent == "showings.search")
+        {
+            bool showingsFound = false;
+            string noResultsMessage = "Jag hittar tyvärr inga visningar som matchar det du söker just nu.";
+            string followUpSuggestion = "Vill du att jag testar ett bredare datumintervall eller en annan film?";
+
+            try { showingsFound = groundedFacts.data.showings_found == true; } catch { }
+            try { noResultsMessage = (string)groundedFacts.data.no_results_message ?? noResultsMessage; } catch { }
+            try { followUpSuggestion = (string)groundedFacts.data.follow_up_suggestion ?? followUpSuggestion; } catch { }
+
+            if (!showingsFound)
+            {
+                var hasAgeFilter = false;
+                try
+                {
+                    hasAgeFilter = groundedFacts.filters.child_friendly == true ||
+                                   groundedFacts.filters.age_rating_max != null;
+                }
+                catch
+                {
+                }
+
+                if (hasAgeFilter || LooksLikeAgeSensitivePrompt(latestUserPrompt))
+                {
+                    return BuildAssistantResponse(
+                        "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
+                        "Vill du att jag visar alla visningar på den dagen så kan vi jämföra åldersgränserna tillsammans?"
+                    );
+                }
+
+                return BuildAssistantResponse($"{noResultsMessage}\n\n{followUpSuggestion}");
+            }
+        }
+
+        if (intent.intent == "snacks.price")
+        {
+            bool snackItemFound = false;
+            string snackItemRequested = "produkten";
+
+            try { snackItemFound = groundedFacts.data.snack_item_found == true; } catch { }
+            try { snackItemRequested = (string)groundedFacts.data.snack_item_requested ?? snackItemRequested; } catch { }
+
+            if (!snackItemFound)
+            {
+                return BuildAssistantResponse(
+                    $"Jag har ingen exakt information om just \"{snackItemRequested}\" i vårt kioskutbud. " +
+                    "Jag kan däremot visa de snacks och drycker som finns i menyn om du vill."
+                );
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsGreetingPrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = prompt
+            .Trim()
+            .ToLowerInvariant()
+            .Replace("!", "")
+            .Replace("?", "")
+            .Replace(".", "")
+            .Trim();
+
+        return normalizedPrompt == "hej" ||
+               normalizedPrompt == "hejsan" ||
+               normalizedPrompt == "hej hej" ||
+               normalizedPrompt == "tjena" ||
+               normalizedPrompt == "tjenare" ||
+               normalizedPrompt == "hallå" ||
+               normalizedPrompt == "halloj" ||
+               normalizedPrompt == "hello" ||
+               normalizedPrompt == "hi";
+    }
+
+    private static bool LooksLikeAgeSensitivePrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = prompt.ToLowerInvariant();
+        return System.Text.RegularExpressions.Regex.IsMatch(normalizedPrompt, "\\b\\d{1,2}\\s*år\\b") ||
+               normalizedPrompt.Contains("barnvänlig") ||
+               normalizedPrompt.Contains("barnvänliga") ||
+               normalizedPrompt.Contains("barntillåten") ||
+               normalizedPrompt.Contains("för barn") ||
+               normalizedPrompt.Contains("min son") ||
+               normalizedPrompt.Contains("min dotter");
+    }
+
+    private static dynamic BuildAssistantResponse(string assistantContent)
+    {
+        return Obj(new
+        {
+            choices = Arr(
+                Obj(new
+                {
+                    message = Obj(new
+                    {
+                        role = "assistant",
+                        content = assistantContent
+                    })
+                })
+            )
+        });
     }
 
     private static dynamic BuildGroundedFacts(AiIntentResult intent, HttpContext context)
@@ -86,7 +227,8 @@ public static class AiOrchestratorService
                     showings = showings,
                     showings_found = showings != null && showings.Length > 0,
                     requested_scope = intent.filters,
-                    no_results_message = "Jag hittar inga matchande visningar med de filtren."
+                    no_results_message = "Jag hittar tyvärr inga visningar som matchar det du söker just nu.",
+                    follow_up_suggestion = "Vill du att jag testar ett bredare datumintervall eller en annan film?"
                 });
                 break;
 
@@ -176,7 +318,7 @@ public static class AiOrchestratorService
                         "aktuella visningar"
                     ),
                     scope_note = "Cinema-Bot hjälper främst till med biografens information och funktioner.",
-                    out_of_scope_reply = "Jag hjälper främst till med biografens visningar, priser, öppettider, snacks, salonger och bokning."
+                    out_of_scope_reply = "Jag hjälper främst till med visningar, priser, öppettider, snacks, salonger och bokning på CinemaHub."
                 });
                 break;
         }

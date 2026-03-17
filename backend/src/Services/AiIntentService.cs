@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace WebApp;
 
@@ -137,6 +138,32 @@ Conversation:
         var latestLower = latestUser.ToLowerInvariant().Trim();
         var tinyPrompt = latestLower.Trim();
 
+        if (IsGreetingPrompt(tinyPrompt))
+        {
+            result.intent = "general.capabilities";
+            result.needs_clarification = false;
+            result.clarification_question = "";
+            result.filters = new AiIntentFilters();
+            return result;
+        }
+
+        if (IsAffirmativeFollowUp(tinyPrompt))
+        {
+            result.intent = "showings.search";
+            result.needs_clarification = false;
+            result.clarification_question = "";
+
+            // Keep this broad to avoid carrying stale title filters from prior turns.
+            result.filters.film_title = "";
+            result.filters.salong_name = "";
+            result.filters.genre = "";
+
+            if (string.IsNullOrWhiteSpace(result.filters.date_mode))
+                result.filters.date_mode = "upcoming";
+
+            return result;
+        }
+
         if (tinyPrompt == "när" || tinyPrompt == "var" || tinyPrompt == "hur")
         {
             result.needs_clarification = true;
@@ -218,6 +245,11 @@ Conversation:
         {
             result.filters.film_title = "";
         }
+
+        if (LooksLikeBroadShowingsRequest(latestLower))
+        {
+            result.filters.film_title = "";
+        }
         
         // Stronger raw date phrase extraction from latest prompt
         var detectedRawDatePhrase = "";
@@ -256,6 +288,26 @@ Conversation:
             result.filters.specific_date = detectedRawDatePhrase;
         }
 
+        var requestedAge = TryExtractRequestedAge(latestLower);
+        if (requestedAge != null)
+        {
+            if (result.intent == "unknown")
+                result.intent = "showings.search";
+
+            result.filters.age_rating_max = requestedAge.Value;
+            result.filters.child_friendly = requestedAge.Value <= 11;
+        }
+
+        if (LooksLikeChildFriendlyQuery(latestLower))
+        {
+            if (result.intent == "unknown")
+                result.intent = "showings.search";
+
+            result.filters.child_friendly = true;
+            if (result.filters.age_rating_max == null)
+                result.filters.age_rating_max = 11;
+        }
+
         // Fallback: obvious showings prompts should still search showings
         bool looksLikeShowingsPrompt =
             latestLower.Contains("film") ||
@@ -277,5 +329,111 @@ Conversation:
         }
 
         return result;
+    }
+
+    private static bool IsGreetingPrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = Regex.Replace(prompt, "[^\\p{L}\\p{N}\\s]", " ").Trim();
+        normalizedPrompt = Regex.Replace(normalizedPrompt, "\\s+", " ");
+
+        var greetingSet = new HashSet<string>
+        {
+            "hej",
+            "hejsan",
+            "hej hej",
+            "tjena",
+            "tjenare",
+            "hallå",
+            "halloj",
+            "god morgon",
+            "god kväll",
+            "hello",
+            "hi"
+        };
+
+        return greetingSet.Contains(normalizedPrompt);
+    }
+
+    private static bool IsAffirmativeFollowUp(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = Regex.Replace(prompt, "[^\\p{L}\\p{N}\\s]", " ").Trim();
+        normalizedPrompt = Regex.Replace(normalizedPrompt, "\\s+", " ");
+
+        return normalizedPrompt == "ja" ||
+               normalizedPrompt == "japp" ||
+               normalizedPrompt == "yes" ||
+               normalizedPrompt == "absolut" ||
+               normalizedPrompt == "gärna";
+    }
+
+    private static bool LooksLikeBroadShowingsRequest(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        bool asksForPluralMoviesOrShowings =
+            prompt.Contains("filmer") ||
+            prompt.Contains("visningar") ||
+            prompt.Contains("vilka filmer") ||
+            prompt.Contains("andra filmer") ||
+            prompt.Contains("alla filmer");
+
+        bool asksForDateScope =
+            prompt.Contains("idag") ||
+            prompt.Contains("imorgon") ||
+            prompt.Contains("ikväll") ||
+            prompt.Contains("i helgen") ||
+            prompt.Contains("nästa vecka") ||
+            prompt.Contains("måndag") ||
+            prompt.Contains("tisdag") ||
+            prompt.Contains("onsdag") ||
+            prompt.Contains("torsdag") ||
+            prompt.Contains("fredag") ||
+            prompt.Contains("lördag") ||
+            prompt.Contains("söndag");
+
+        bool isGenericInventoryQuestion =
+            prompt.Contains("vilka filmer har ni") ||
+            prompt.Contains("har ni andra filmer") ||
+            prompt.Contains("filmer ni har");
+
+        return (asksForPluralMoviesOrShowings && asksForDateScope) || isGenericInventoryQuestion;
+    }
+
+    private static int? TryExtractRequestedAge(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return null;
+
+        var match = Regex.Match(prompt, "\\b(\\d{1,2})\\s*år\\b");
+        if (!match.Success)
+            return null;
+
+        if (!int.TryParse(match.Groups[1].Value, out var parsedAge))
+            return null;
+
+        if (parsedAge < 0 || parsedAge > 20)
+            return null;
+
+        return parsedAge;
+    }
+
+    private static bool LooksLikeChildFriendlyQuery(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        return prompt.Contains("barnvänlig") ||
+               prompt.Contains("barnvänliga") ||
+               prompt.Contains("barntillåten") ||
+               prompt.Contains("för barn") ||
+               prompt.Contains("min son") ||
+               prompt.Contains("min dotter");
     }
 }

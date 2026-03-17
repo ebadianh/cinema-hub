@@ -60,13 +60,16 @@ public static class AiShowingsService
         var sql = $@"
             SELECT
                 id,
+                film_id,
                 film_title,
                 salong_name,
                 start_time,
                 language,
                 subtitle,
                 age_rating,
-                genre
+                genre,
+                CONCAT('/films/', film_id) AS film_url,
+                CONCAT('/booking/', id) AS booking_url
             FROM showings_detail
             {where}
             ORDER BY start_time

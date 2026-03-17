@@ -44,17 +44,28 @@ public static class AiChatRoutes
 
     private static List<AiChatMessage> ParseMessages(Arr messagesArr)
     {
-        var list = new List<AiChatMessage>();
+        var parsedMessages = new List<AiChatMessage>();
 
-        for (int i = 0; i < messagesArr.Length; i++)
+        for (int messageIndex = 0; messageIndex < messagesArr.Length; messageIndex++)
         {
             try
             {
-                var m = messagesArr[i];
-                list.Add(new AiChatMessage
+                var rawMessage = messagesArr[messageIndex];
+                var parsedRole = ((string)rawMessage.role ?? "").Trim().ToLowerInvariant();
+                var parsedContent = ((string)rawMessage.content ?? "").Trim();
+
+                // Only allow user and assistant messages from the client.
+                // This prevents prompt-injection attempts via user-supplied system roles.
+                if (parsedRole != "user" && parsedRole != "assistant")
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(parsedContent))
+                    continue;
+
+                parsedMessages.Add(new AiChatMessage
                 {
-                    role = (string)m.role ?? "",
-                    content = (string)m.content ?? ""
+                    role = parsedRole,
+                    content = parsedContent
                 });
             }
             catch
@@ -62,6 +73,6 @@ public static class AiChatRoutes
             }
         }
 
-        return list;
+        return parsedMessages;
     }
 }
