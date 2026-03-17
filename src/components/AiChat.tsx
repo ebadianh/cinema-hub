@@ -35,11 +35,18 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
 
   // Auto-resize textarea
   useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    const textareaElement = textareaRef.current;
+    if (!textareaElement) return;
+    textareaElement.style.height = 'auto';
+    textareaElement.style.height = Math.min(textareaElement.scrollHeight, 160) + 'px';
   }, [input]);
+
+  // Keep keyboard flow smooth by restoring focus after each response cycle.
+  useEffect(() => {
+    if (!isLoading) {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading]);
 
   const onBodyScroll = () => {
     const el = bodyRef.current;
@@ -68,6 +75,7 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
     setMessages(nextMessages);
     setInput('');
     setIsLoading(true);
+    textareaRef.current?.focus();
 
     try {
       const response = await fetch('/api/chat', {
@@ -135,25 +143,38 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
             Fråga om öppettider, priser, snacks, bokning eller vilka filmer som går.
           </div>
         ) : (
-          messages.map((m, i) => (
+          messages.map((chatMessage, messageIndex) => (
             <div
-              key={i}
-              className={`ai-chat__bubble ${m.role === 'user' ? 'is-user' : 'is-assistant'}`}
+              key={messageIndex}
+              className={`ai-chat__bubble ${chatMessage.role === 'user' ? 'is-user' : 'is-assistant'}`}
             >
-              {m.role === 'assistant' ? (
+              {chatMessage.role === 'assistant' ? (
                 <ReactMarkdown
                   remarkPlugins={remarkPlugins}
                   rehypePlugins={rehypePlugins}
                   components={{
-                    a: ({ node, ...props }) => (
-                      <a {...props} target="_blank" rel="noreferrer noopener" />
-                    )
+                    a: ({ node: _node, href, ...props }) => {
+                      const isInternalLink = !!href && href.startsWith('/');
+
+                      return (
+                        <a
+                          {...props}
+                          href={href}
+                          target={isInternalLink ? undefined : '_blank'}
+                          rel={isInternalLink ? undefined : 'noreferrer noopener'}
+                          className="ai-chat__link"
+                        />
+                      );
+                    },
+                    ul: ({ node: _node, ...props }) => <ul {...props} className="ai-chat__markdown-list" />,
+                    ol: ({ node: _node, ...props }) => <ol {...props} className="ai-chat__markdown-list" />,
+                    code: ({ node: _node, ...props }) => <code {...props} className="ai-chat__markdown-code" />
                   }}
                 >
-                  {m.content}
+                  {chatMessage.content}
                 </ReactMarkdown>
               ) : (
-                m.content
+                chatMessage.content
               )}
             </div>
           ))
@@ -183,7 +204,7 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
           </Button>
         </div>
 
-        <div className="ai-chat__hint" style={{color: 'white'}}>
+        <div className="ai-chat__hint">
           Enter för att skicka • Shift+Enter för ny rad
         </div>
       </Card.Footer>

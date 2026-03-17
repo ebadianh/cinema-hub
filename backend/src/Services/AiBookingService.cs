@@ -7,13 +7,14 @@ public static class AiBookingService
         return Obj(new
         {
             steps = Arr(
-                "Gå till startsidan och välj en visning.",
-                "Öppna bokningssidan: /booking/<visnings-id>.",
-                "Välj platser.",
-                "Välj biljettyp och fyll i email.",
-                "Bekräfta i flödet i appen."
+                "Gå till filmer och öppna filmen du vill se.",
+                "Välj en visningstid och öppna bokningssidan.",
+                "Välj platser i salongen.",
+                "Välj biljettyper och ange din e-postadress.",
+                "Bekräfta bokningen i flödet och spara bokningsreferensen."
             ),
-            bookingPattern = "/booking/<visnings-id>"
+            bookingPattern = "/booking/<visnings-id>",
+            bookingEntryPoints = Arr("/", "/films/<film-id>")
         });
     }
 }

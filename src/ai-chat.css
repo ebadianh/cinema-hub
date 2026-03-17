@@ -17,10 +17,10 @@
 }
 
 .ai-chat__body {
-  height: 380px;           /* key: fixed message area */
-  overflow-y: auto;        /* key: scroll inside */
+  height: 380px;
+  overflow-y: auto;
   padding: 14px;
-  background: #0b1220;     /* dark, “app-like” */
+  background: #0b1220;
 }
 
 .ai-chat__empty {
@@ -31,13 +31,13 @@
 
 .ai-chat__bubble {
   max-width: 85%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 12px;
   margin: 0 0 10px 0;
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.35;
-  font-size: 0.95rem;
+  line-height: 1.45;
+  font-size: 0.94rem;
 }
 
 .ai-chat__bubble.is-user {
@@ -49,19 +49,51 @@
 
 .ai-chat__bubble.is-assistant {
   margin-right: auto;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
   color: rgba(255, 255, 255, 0.92);
   border-bottom-left-radius: 6px;
 }
 
+.ai-chat__bubble.is-assistant p {
+  margin: 0 0 8px 0;
+}
+
+.ai-chat__bubble.is-assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-chat__markdown-list {
+  margin: 0 0 8px 18px;
+  padding: 0;
+}
+
+.ai-chat__bubble.is-assistant li {
+  margin: 0 0 4px 0;
+}
+
+.ai-chat__markdown-code {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.86rem;
+}
+
+.ai-chat__link {
+  color: #9fd9ff;
+  text-decoration: underline;
+}
+
+.ai-chat__link:hover {
+  color: #d7efff;
+}
+
 .ai-chat__footer {
-  border-top: 1px solid rgba(0,0,0,0.08);
   background: #060645;
   border-top: 1px solid rgba(255,255,255,0.12);
 }
 
 .ai-chat__hint {
-  color: white;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .ai-chat__inputRow {
@@ -85,5 +117,20 @@
 .ai-chat__hint {
   margin-top: 6px;
   font-size: 0.78rem;
-  color: rgba(0,0,0,0.55);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ai-chat__launcher {
+  background: #e85d2a;
+  border-color: #e85d2a;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.ai-chat__launcher:hover,
+.ai-chat__launcher:focus,
+.ai-chat__launcher:active {
+  background: #f27345;
+  border-color: #f27345;
+  color: #ffffff;
 }

@@ -5,7 +5,6 @@ import { formatShowtime } from '../utils/bookingUtils';
 
 interface OutletContextType {
     user: User | null;
-    setUser: (user: User | null) => void;
 }
 
 type Booking = {
@@ -35,7 +34,7 @@ type BookingWithDetails = Booking & {
 
 export default function Profile() {
     const { id } = useParams<{ id: string }>();
-    const { user: loggedInUser, setUser } = useOutletContext<OutletContextType>();
+    const { user: loggedInUser } = useOutletContext<OutletContextType>();
     const navigate = useNavigate();
 
     const [profile, setProfile] = useState<User | null>(null);

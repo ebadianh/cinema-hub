@@ -6,7 +6,6 @@ type FilterProps = {
   selectedAge: string;
   selectedGenre: string;
   selectedDate?: string;
-  availableDates?: string[];
   onAgeChange: (age: string) => void;
   onGenreChange: (genre: string) => void;
   onDateChange?: (date: string) => void;
@@ -19,7 +18,6 @@ export default function Filter({
   selectedAge,
   selectedGenre,
   selectedDate = "all",
-  availableDates = [],
   onAgeChange,
   onGenreChange,
   onDateChange = () => { }, /* om ingen funktion skickas in, använd en tom funktion istället för att undvika att krascha */

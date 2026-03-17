@@ -16,25 +16,10 @@ type Film = {
   images: string[];
 };
 
-type Director = {
-  id: number;
-  film_id: number;
-  name: string;
-};
-
-type Actor = {
-  id: number;
-  film_id: number;
-  name: string;
-  role_order: number;
-};
-
 export default function Cards() {
   const CARDS_PER_PAGE = 12;
 
   const [films, setFilms] = useState<Film[]>([]);
-  const [directors, setDirectors] = useState<Director[]>([]);
-  const [actors, setActors] = useState<Actor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAge, setSelectedAge] = useState<string>("all");
@@ -65,27 +50,7 @@ export default function Cards() {
           ? filmsData
           : (filmsData.films ?? []);
 
-        const res2 = await fetch("/api/directors", {
-          signal: controller.signal,
-        });
-        if (!res2.ok)
-          throw new Error(`Directors: ${res2.status} ${res2.statusText}`);
-        const directorsData = await res2.json();
-        const directorsList: Director[] = Array.isArray(directorsData)
-          ? directorsData
-          : (directorsData.directors ?? []);
-
-        const res3 = await fetch("/api/actors", { signal: controller.signal });
-        if (!res3.ok)
-          throw new Error(`Actors: ${res3.status} ${res3.statusText}`);
-        const actorsData = await res3.json();
-        const actorsList: Actor[] = Array.isArray(actorsData)
-          ? actorsData
-          : (actorsData.actors ?? []);
-
         setFilms(filmsList);
-        setDirectors(directorsList);
-        setActors(actorsList);
 
         const res4 = await fetch("/api/showings", {
           signal: controller.signal,
@@ -108,15 +73,6 @@ export default function Cards() {
 
     return () => controller.abort();
   }, []);
-
-  const availableDates = useMemo(() => {
-    const dates = new Set<string>();
-    showings.forEach((s) => {
-      const date = s.start_time.split("T")[0];
-      dates.add(date);
-    });
-    return Array.from(dates).sort();
-  }, [showings]);
 
   const filteredFilms = useMemo(() => {
     return films.filter((film) => {
@@ -184,7 +140,6 @@ export default function Cards() {
         selectedAge={selectedAge}
         selectedGenre={selectedGenre}
         selectedDate={selectedDate}
-        availableDates={availableDates}
         onAgeChange={setSelectedAge}
         onGenreChange={setSelectedGenre}
         onDateChange={setSelectedDate}
