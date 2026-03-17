@@ -322,7 +322,7 @@ export default function FilmModal({ isOpen, onClose, onSave, film }: FilmModalPr
         <div className="modal-content bg-dark text-light border-0">
           {/* Header */}
           <div className="modal-header" style={{ borderBottom: "1px solid var(--ch-border)" }}>
-            <h5 className="modal-title">{film ? "Redige film" : "Lägg till ny film"}</h5>
+            <h5 className="modal-title">{film ? "Redigera film" : "Lägg till ny film"}</h5>
             <button
               type="button"
               className="btn-close btn-close-white"

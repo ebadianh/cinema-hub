@@ -113,7 +113,7 @@ export default function AdminFilms() {
       <div className="mb-4">
         <input
           type="text"
-          className="form-control form-control-lg bg-dark text-light"
+          className="form-control bg-dark text-light"
           placeholder="🔍 Sök filmer (titel, genre, åldersgräns...)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

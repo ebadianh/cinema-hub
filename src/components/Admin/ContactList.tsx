@@ -87,8 +87,8 @@ export default function ContactList() {
     const date = new Date(dateString);
     return date.toLocaleDateString("sv-SE", {
       year: "numeric",
-      month: "short",
-      day: "numeric",
+      month: "2-digit",
+      day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -115,24 +115,24 @@ export default function ContactList() {
               />
             </div>
             <div className="col-md-6">
-              <div className="btn-group w-100" role="group">
+              <div className="btn-group w-100 d-flex" role="group">
                 <button
                   type="button"
-                  className={`btn ${filterStatus === "all" ? "btn-primary" : "btn-outline-secondary"}`}
+                  className={`btn flex-fill ${filterStatus === "all" ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => setFilterStatus("all")}
                 >
                   Alla ({contacts.length})
                 </button>
                 <button
                   type="button"
-                  className={`btn ${filterStatus === "unread" ? "btn-primary" : "btn-outline-secondary"}`}
+                  className={`btn flex-fill ${filterStatus === "unread" ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => setFilterStatus("unread")}
                 >
                   Olästa ({contacts.filter(c => c.status === "unread").length})
                 </button>
                 <button
                   type="button"
-                  className={`btn ${filterStatus === "read" ? "btn-primary" : "btn-outline-secondary"}`}
+                  className={`btn flex-fill ${filterStatus === "read" ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => setFilterStatus("read")}
                 >
                   Lästa ({contacts.filter(c => c.status === "read").length})
@@ -146,7 +146,7 @@ export default function ContactList() {
             <p className="text-muted text-center py-5">Inga meddelanden hittades</p>
           ) : (
             <div className="table-responsive">
-              <table className="table table-dark table-hover">
+              <table className="table table-dark table-hover align-middle">
                 <thead>
                   <tr>
                     <th>Status</th>
@@ -180,6 +180,7 @@ export default function ContactList() {
                         <td>
                           <button
                             className="btn btn-sm btn-outline-light me-2"
+                            style={{ minWidth: "140px" }}
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleStatus(contact.id, contact.status);
