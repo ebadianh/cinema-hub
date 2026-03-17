@@ -74,12 +74,16 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 10% 20%,
+    radial-gradient(
+      1200px 600px at 10% 20%,
       rgba(42, 64, 115, 0.3),
-      transparent 70%),
-    radial-gradient(1000px 500px at 90% 80%,
+      transparent 70%
+    ),
+    radial-gradient(
+      1000px 500px at 90% 80%,
       rgba(42, 64, 115, 0.3),
-      transparent 70%),
+      transparent 70%
+    ),
     var(--ch-bg);
   color: var(--ch-text);
   margin: 0;
@@ -160,7 +164,6 @@ body {
 }
 
 @media (max-width: 991.98px) {
-
   .ch-navbar .ch-btn-primary,
   .ch-navbar .ch-btn-outline {
     width: 100%;
@@ -288,9 +291,11 @@ body {
 .ch-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
   z-index: 1;
 }
 
@@ -477,10 +482,12 @@ body {
   top: 50%;
   width: 200px;
   height: 2px;
-  background: linear-gradient(90deg,
-      transparent,
-      var(--ch-border),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ch-border),
+    transparent
+  );
 }
 
 .section-title::before {
@@ -537,9 +544,11 @@ body {
   height: 2.5rem;
   border-radius: 10px !important;
   border: 1px solid var(--ch-border) !important;
-  background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0.03)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.03)
+  ) !important;
   color: var(--ch-text) !important;
   font-weight: 700;
   display: inline-flex;
@@ -556,9 +565,11 @@ body {
 .ch-page-link:hover {
   transform: translateY(-1px);
   border-color: rgba(117, 167, 231, 0.6) !important;
-  background: linear-gradient(180deg,
-      rgba(42, 64, 115, 0.5),
-      rgba(22, 33, 62, 0.45)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(42, 64, 115, 0.5),
+    rgba(22, 33, 62, 0.45)
+  ) !important;
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
   color: #ffffff !important;
 }
@@ -569,9 +580,11 @@ body {
 
 .ch-page-item.active .ch-page-link {
   border-color: var(--ch-accent) !important;
-  background: linear-gradient(180deg,
-      var(--ch-accent),
-      var(--ch-accent-hover)) !important;
+  background: linear-gradient(
+    180deg,
+    var(--ch-accent),
+    var(--ch-accent-hover)
+  ) !important;
   color: #ffffff !important;
   box-shadow: 0 10px 22px rgba(22, 33, 62, 0.5);
 }
@@ -697,9 +710,11 @@ body {
 .ch-screen {
   width: 80%;
   height: 12px;
-  background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0.4) 0%,
-      rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
   border-radius: 4px 4px 0 0;
   box-shadow: 0 -4px 20px rgba(255, 255, 255, 0.15);
   margin-bottom: 2rem;
@@ -1583,7 +1598,6 @@ body {
 }
 
 @media (max-width: 768px) {
-
   table td,
   table th {
     font-size: 12px;
