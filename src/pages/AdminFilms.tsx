@@ -95,7 +95,7 @@ export default function AdminFilms() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container py-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="mb-0"
