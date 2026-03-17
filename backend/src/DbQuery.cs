@@ -27,61 +27,31 @@ public static class DbQuery
         var db = new MySqlConnection(connectionString);
         db.Open();
 
-        // Create tables if they don't exist
-        if (config.createTablesIfNotExist == true)
-        {
-            // drop db
-            DropTablesIfExist(db);
-            CreateTablesIfNotExist(db);
-        }
-
-        // Seed data if tables are empty
-        if (config.seedDataIfEmpty == true)
-        {
-            SeedDataIfEmpty(db);
-
-            // Create stored procedures
-            CreateStoredProcedures(db);
-
-            // Create views
-            CreateViews(db);
-        }
+        // DISABLED: createTablesIfNotExist and seedDataIfEmpty are now ALWAYS false
+        // to prevent accidental data loss on cloud databases.
+        // 
+        // To initialize schema and seed data:
+        // 1. Run backend/migrations/001_schema.sql in your database client
+        // 2. Run backend/migrations/002_views_and_procedures.sql
+        // 3. Run backend/migrations/003_seed_data.sql
+        //
+        // This ensures controlled initialization on shared/teacher-provided databases.
+        
+        // Legacy safety checks disabled
+        bool _unused1 = config.createTablesIfNotExist;
+        bool _unused2 = config.seedDataIfEmpty;
 
         db.Close();
     }
 
     public static void DropTablesIfExist(MySqlConnection db)
     {
-        var dropTablesSQL = @"
-        USE cinema_hub;
-        -- Drop tables if they exist (in reverse dependency order)
-        SET FOREIGN_KEY_CHECKS = 0;
-        DROP TABLE IF EXISTS Booked_Seats;
-        DROP TABLE IF EXISTS Bookings;
-        DROP TABLE IF EXISTS Showings;
-        DROP TABLE IF EXISTS Seats;
-        DROP TABLE IF EXISTS Salongs;
-        DROP TABLE IF EXISTS Films;
-        DROP TABLE IF EXISTS Users;
-        DROP TABLE IF EXISTS Ticket_Type;
-        DROP TABLE IF EXISTS Directors;
-        DROP TABLE IF EXISTS Actors;
-        DROP TABLE IF EXISTS Reviews;
-        DROP TABLE IF EXISTS Contacts;
-        SET FOREIGN_KEY_CHECKS = 1; 
-        ";
-
-        // Execute each statement separately
-        foreach (var sql in dropTablesSQL.Split(';'))
-        {
-            var trimmed = sql.Trim();
-            if (!string.IsNullOrEmpty(trimmed))
-            {
-                var command = db.CreateCommand();
-                command.CommandText = trimmed;
-                command.ExecuteNonQuery();
-            }
-        }
+        // DISABLED: Dropping tables is never called anymore to prevent accidental data loss.
+        // This method is kept for future reference only and is not used in production.
+        throw new InvalidOperationException(
+            "Table dropping is disabled for safety. " +
+            "To reset schema, manually run: backend/migrations/001_schema.sql"
+        );
     }
 
     private static void CreateTablesIfNotExist(MySqlConnection db)

@@ -1,0 +1,129 @@
+-- 001_schema.sql
+-- Creates all cinema tables. Safe to run multiple times (uses IF NOT EXISTS).
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id VARCHAR(255) PRIMARY KEY NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    modified DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    data JSON
+);
+
+CREATE TABLE IF NOT EXISTS acl (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    userRoles VARCHAR(255) NOT NULL,
+    method VARCHAR(50) NOT NULL DEFAULT 'GET',
+    allow ENUM('allow', 'disallow') NOT NULL DEFAULT 'allow',
+    route VARCHAR(255) NOT NULL,
+    `match` ENUM('true', 'false') NOT NULL DEFAULT 'true',
+    comment VARCHAR(500) NOT NULL DEFAULT '',
+    UNIQUE KEY unique_acl (userRoles, method, route)
+);
+
+CREATE TABLE IF NOT EXISTS Users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    firstName VARCHAR(100) NOT NULL,
+    lastName VARCHAR(100) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'user',
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Films (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration_minutes INT NOT NULL,
+    age_rating VARCHAR(10),
+    genre VARCHAR(100),
+    images JSON,
+    trailers JSON
+);
+
+CREATE TABLE IF NOT EXISTS Directors (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    film_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Actors (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    film_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    role_order INT NULL,
+    FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Reviews (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    film_id INT NOT NULL,
+    source VARCHAR(100) NOT NULL,
+    quote VARCHAR(255) NOT NULL,
+    stars INT NOT NULL,
+    max_stars INT NOT NULL,
+    FOREIGN KEY (film_id) REFERENCES Films(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Salongs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Seats (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    salong_id INT NOT NULL,
+    row_num INT NOT NULL,
+    seat_number INT NOT NULL,
+    UNIQUE KEY (salong_id, row_num, seat_number),
+    FOREIGN KEY (salong_id) REFERENCES Salongs(id)
+);
+
+CREATE TABLE IF NOT EXISTS Ticket_Type (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Showings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    film_id INT NOT NULL,
+    salong_id INT NOT NULL,
+    start_time DATETIME NOT NULL,
+    language VARCHAR(50),
+    subtitle VARCHAR(50),
+    FOREIGN KEY (film_id) REFERENCES Films(id),
+    FOREIGN KEY (salong_id) REFERENCES Salongs(id)
+);
+
+CREATE TABLE IF NOT EXISTS Bookings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    booking_reference VARCHAR(10) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
+    showing_id INT NOT NULL,
+    booked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (showing_id) REFERENCES Showings(id)
+);
+
+CREATE TABLE IF NOT EXISTS Booked_Seats (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    seat_id INT NOT NULL,
+    showing_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    ticket_type_id INT NOT NULL,
+    UNIQUE KEY (seat_id, showing_id),
+    FOREIGN KEY (seat_id) REFERENCES Seats(id),
+    FOREIGN KEY (showing_id) REFERENCES Showings(id),
+    FOREIGN KEY (booking_id) REFERENCES Bookings(id),
+    FOREIGN KEY (ticket_type_id) REFERENCES Ticket_Type(id)
+);
+
+CREATE TABLE IF NOT EXISTS Contacts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('unread', 'read') DEFAULT 'unread' NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,6 +1,30 @@
 namespace WebApp;
 public static class RestApi
 {
+    private static readonly Dictionary<string, string> TableNameMap =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["users"] = "Users",
+            ["films"] = "Films",
+            ["directors"] = "Directors",
+            ["actors"] = "Actors",
+            ["reviews"] = "Reviews",
+            ["salongs"] = "Salongs",
+            ["seats"] = "Seats",
+            ["ticket_type"] = "Ticket_Type",
+            ["showings"] = "Showings",
+            ["showings_detail"] = "showings_detail",
+            ["bookings"] = "Bookings",
+            ["booking_details"] = "booking_details",
+            ["booked_seats"] = "Booked_Seats",
+            ["contacts"] = "Contacts",
+            ["sessions"] = "sessions",
+            ["acl"] = "acl"
+        };
+
+    private static bool TryResolveTableName(string table, out string sqlTable)
+        => TableNameMap.TryGetValue(table, out sqlTable!);
+
     public static void Start()
     {
 
@@ -8,23 +32,29 @@ public static class RestApi
             HttpContext context, string table, JsonElement bodyJson
         ) =>
         {
-            if (table == "bookings")
+            if (table.Equals("bookings", StringComparison.OrdinalIgnoreCase))
             {
                 return await PostBooking(context, bodyJson);
             }
+
+            if (!TryResolveTableName(table, out var sqlTable))
+            {
+                return RestResult.Parse(context, Obj(new { error = "Unknown table." }));
+            }
+
             var body = JSON.Parse(bodyJson.ToString());
             body.Delete("id");
-            var parsed = ReqBodyParse(table, body);
+            var parsed = ReqBodyParse(table.ToLowerInvariant(), body);
             var columns = parsed.insertColumns;
             var values = parsed.insertValues;
-            var sql = $"INSERT INTO {table}({columns}) VALUES({values})";
+            var sql = $"INSERT INTO {sqlTable}({columns}) VALUES({values})";
             var result = SQLQueryOne(sql, parsed.body, context);
             if (!result.HasKey("error"))
             {
                 // Get the insert id and add to our result
                 result.insertId = SQLQueryOne(
                     @$"SELECT id AS __insertId 
-                       FROM {table} ORDER BY id DESC LIMIT 1"
+                       FROM {sqlTable} ORDER BY id DESC LIMIT 1"
                 ).__insertId;
             }
             return RestResult.Parse(context, result);
@@ -34,34 +64,50 @@ public static class RestApi
             HttpContext context, string table
         ) =>
         {
+            if (!TryResolveTableName(table, out var sqlTable))
+            {
+                return RestResult.Parse(context, Arr(Obj(new { error = "Unknown table." })));
+            }
+
             var query = RestQuery.Parse(context.Request.Query);
             if (query.error != null)
             {
                 return RestResult.Parse(context, Arr(Obj(new { error = query.error })));
             }
-            var sql = $"SELECT * FROM {table}" + query.sql;
+            var sql = $"SELECT * FROM {sqlTable}" + query.sql;
             return RestResult.Parse(context, SQLQuery(sql, query.parameters, context));
         });
 
         App.MapGet("/api/{table}/{id}", (
             HttpContext context, string table, string id
         ) =>
-            RestResult.Parse(context, SQLQueryOne(
-                $"SELECT * FROM {table} WHERE id = @id",
-                ReqBodyParse(table, Obj(new { id })).body,
+        {
+            if (!TryResolveTableName(table, out var sqlTable))
+            {
+                return RestResult.Parse(context, Obj(new { error = "Unknown table." }));
+            }
+
+            return RestResult.Parse(context, SQLQueryOne(
+                $"SELECT * FROM {sqlTable} WHERE id = @id",
+                ReqBodyParse(table.ToLowerInvariant(), Obj(new { id })).body,
                 context
-            ))
-        );
+            ));
+        });
 
         App.MapPut("/api/{table}/{id}", (
             HttpContext context, string table, string id, JsonElement bodyJson
         ) =>
         {
+            if (!TryResolveTableName(table, out var sqlTable))
+            {
+                return RestResult.Parse(context, Obj(new { error = "Unknown table." }));
+            }
+
             var body = JSON.Parse(bodyJson.ToString());
             body.id = id;
-            var parsed = ReqBodyParse(table, body);
+            var parsed = ReqBodyParse(table.ToLowerInvariant(), body);
             var update = parsed.update;
-            var sql = $"UPDATE {table} SET {update} WHERE id = @id";
+            var sql = $"UPDATE {sqlTable} SET {update} WHERE id = @id";
             var result = SQLQueryOne(sql, parsed.body, context);
             return RestResult.Parse(context, result);
         });
@@ -69,9 +115,14 @@ public static class RestApi
         App.MapDelete("/api/{table}/{id}", (
             HttpContext context, string table, string id
         ) => {
-            if (table == "bookings")
+            if (!TryResolveTableName(table, out var sqlTable))
             {
-                RestResult.Parse(context, SQLQueryOne(
+                return RestResult.Parse(context, Obj(new { error = "Unknown table." }));
+            }
+
+            if (table.Equals("bookings", StringComparison.OrdinalIgnoreCase))
+            {
+                return RestResult.Parse(context, SQLQueryOne(
                     "CALL DeleteBooking(@id)",
                     Obj(new { id }),
                     context
@@ -79,8 +130,8 @@ public static class RestApi
             }
             else
             {
-                RestResult.Parse(context, SQLQueryOne(
-                    $"DELETE FROM {table} WHERE id = @id",
+                return RestResult.Parse(context, SQLQueryOne(
+                    $"DELETE FROM {sqlTable} WHERE id = @id",
                     ReqBodyParse(table, Obj(new { id })).body,
                     context
                 ));
