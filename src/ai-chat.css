@@ -63,12 +63,32 @@
 }
 
 .ai-chat__markdown-list {
-  margin: 0 0 8px 18px;
-  padding: 0;
+  margin: 0 0 8px 0;
 }
 
-.ai-chat__bubble.is-assistant li {
-  margin: 0 0 4px 0;
+.ai-chat__markdown-list--unordered {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.ai-chat__markdown-list--ordered {
+  list-style-position: outside;
+  margin-left: 0;
+  padding-left: 20px;
+}
+
+.ai-chat__markdown-item {
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.ai-chat__markdown-item > p {
+  margin: 0;
+}
+
+.ai-chat__markdown-item:empty {
+  display: none;
 }
 
 .ai-chat__markdown-code {

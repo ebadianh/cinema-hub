@@ -35,6 +35,21 @@ const CHAT_INTERNAL_ROUTE_PREFIXES = [
   "profile",
 ] as const;
 
+function normalizeAssistantMarkdown(rawContent: string): string {
+  // Clean up inconsistent markdown spacing from model output so list markers
+  // and list item text stay visually connected in the rendered chat bubble.
+  return rawContent
+    .replace(/\r\n/g, "\n")
+    // Remove standalone unicode bullet lines that often create empty-looking rows.
+    .replace(/^[ \t]*[•·]\s*$/gm, "")
+    // Remove standalone markdown marker lines that do not contain content.
+    .replace(/^[ \t]*[-*+]\s*$/gm, "")
+    .replace(/^([ \t]*[-*+]\s*)\n+(?=\S)/gm, "$1")
+    .replace(/^([ \t]*\d+\.\s*)\n+(?=\S)/gm, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function resolveInternalChatPath(rawHref?: string): string | null {
   if (!rawHref) return null;
 
@@ -62,8 +77,10 @@ function resolveInternalChatPath(rawHref?: string): string | null {
     }
   }
 
-  const hasInternalPrefix = CHAT_INTERNAL_ROUTE_PREFIXES.some((routePrefix) =>
-    normalizedHref.startsWith(`${routePrefix}/`) || normalizedHref === routePrefix,
+  const hasInternalPrefix = CHAT_INTERNAL_ROUTE_PREFIXES.some(
+    (routePrefix) =>
+      normalizedHref.startsWith(`${routePrefix}/`) ||
+      normalizedHref === routePrefix,
   );
 
   if (hasInternalPrefix) {
@@ -229,17 +246,26 @@ export default function AiChat({ messages, setMessages, onClear }: Props) {
                       );
                     },
                     ul: ({ node: _node, ...props }) => (
-                      <ul {...props} className="ai-chat__markdown-list" />
+                      <ul
+                        {...props}
+                        className="ai-chat__markdown-list ai-chat__markdown-list--unordered"
+                      />
                     ),
                     ol: ({ node: _node, ...props }) => (
-                      <ol {...props} className="ai-chat__markdown-list" />
+                      <ol
+                        {...props}
+                        className="ai-chat__markdown-list ai-chat__markdown-list--ordered"
+                      />
+                    ),
+                    li: ({ node: _node, ...props }) => (
+                      <li {...props} className="ai-chat__markdown-item" />
                     ),
                     code: ({ node: _node, ...props }) => (
                       <code {...props} className="ai-chat__markdown-code" />
                     ),
                   }}
                 >
-                  {chatMessage.content}
+                  {normalizeAssistantMarkdown(chatMessage.content)}
                 </ReactMarkdown>
               ) : (
                 chatMessage.content
