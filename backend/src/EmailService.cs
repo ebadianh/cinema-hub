@@ -40,13 +40,13 @@ public static class EmailService
         var showtimeText = startTime;
         if (DateTime.TryParse(startTime, out var parsed))
         {
-                        showtimeText = parsed.ToString("dddd d MMMM yyyy, HH:mm", CultureInfo.GetCultureInfo("sv-SE"));
+            showtimeText = parsed.ToString("dddd d MMMM yyyy, HH:mm", CultureInfo.GetCultureInfo("sv-SE"));
         }
 
-                var seatData = BuildSeatRowsAndTotal(booking.seats);
-                var subject = $"Bokningsbekräftelse | {bookingReference}";
-                var totalPriceText = seatData.Item2.ToString("0.##", CultureInfo.GetCultureInfo("sv-SE"));
-                var body = $@"
+        var seatData = BuildSeatRowsAndTotal(booking.seats);
+        var subject = $"Bokningsbekräftelse | {bookingReference}";
+        var totalPriceText = seatData.Item2.ToString("0.##", CultureInfo.GetCultureInfo("sv-SE"));
+        var body = $@"
                 <!doctype html>
                 <html lang=""sv"">
                 <head>
@@ -61,7 +61,7 @@ public static class EmailService
                 <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" style=""max-width:640px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;"">
                     <tr>
                         <td style=""padding:26px 28px;background:#0f172a;color:#ffffff;"">
-                            <div style=""font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#cbd5e1;"">Cinema Hub</div>
+                            <div style=""font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#cbd5e1;"">CinemaMob</div>
                             <h1 style=""margin:8px 0 6px 0;font-size:26px;line-height:1.2;font-weight:700;"">Tack för din bokning</h1>
                             <p style=""margin:0;font-size:15px;line-height:1.5;color:#e2e8f0;"">Din bokning är bekräftad. Här är allt du behöver inför besöket.</p>
                         </td>
@@ -139,29 +139,29 @@ public static class EmailService
         SendEmail(to, subject, body);
     }
 
-        private static (string RowsHtml, decimal TotalPrice, int SeatCount) BuildSeatRowsAndTotal(dynamic seats)
+    private static (string RowsHtml, decimal TotalPrice, int SeatCount) BuildSeatRowsAndTotal(dynamic seats)
     {
         if (seats == null)
         {
-                        return ("<tr><td colspan=\"3\" style=\"padding:12px;color:#64748b;font-size:14px;\">Inga platsdetaljer tillgängliga</td></tr>", 0m, 0);
+            return ("<tr><td colspan=\"3\" style=\"padding:12px;color:#64748b;font-size:14px;\">Inga platsdetaljer tillgängliga</td></tr>", 0m, 0);
         }
 
-                var rowsHtml = new StringBuilder();
-                decimal totalPrice = 0m;
-                int seatCount = 0;
+        var rowsHtml = new StringBuilder();
+        decimal totalPrice = 0m;
+        int seatCount = 0;
 
         foreach (var seat in seats)
         {
             var rowNum = seat.row_num;
             var seatNumber = seat.seat_number;
-                        var ticketType = seat.ticket_type != null ? (string)seat.ticket_type : "Biljett";
+            var ticketType = seat.ticket_type != null ? (string)seat.ticket_type : "Biljett";
 
-                        decimal seatPrice = 0m;
-                        decimal.TryParse(Convert.ToString(seat.ticket_price, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out seatPrice);
-                        totalPrice += seatPrice;
-                        seatCount++;
+            decimal seatPrice = 0m;
+            decimal.TryParse(Convert.ToString(seat.ticket_price, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out seatPrice);
+            totalPrice += seatPrice;
+            seatCount++;
 
-                        rowsHtml.Append($@"
+            rowsHtml.Append($@"
                                 <tr>
                                     <td style=""padding:10px 12px;border-top:1px solid #e2e8f0;color:#0f172a;font-size:14px;"">Rad {WebUtility.HtmlEncode(Convert.ToString(rowNum))}, Plats {WebUtility.HtmlEncode(Convert.ToString(seatNumber))}</td>
                                     <td style=""padding:10px 12px;border-top:1px solid #e2e8f0;color:#334155;font-size:14px;"">{WebUtility.HtmlEncode(ticketType)}</td>
@@ -169,12 +169,12 @@ public static class EmailService
                                 </tr>");
         }
 
-                if (seatCount == 0)
-                {
-                        return ("<tr><td colspan=\"3\" style=\"padding:12px;color:#64748b;font-size:14px;\">Inga platsdetaljer tillgängliga</td></tr>", 0m, 0);
-                }
+        if (seatCount == 0)
+        {
+            return ("<tr><td colspan=\"3\" style=\"padding:12px;color:#64748b;font-size:14px;\">Inga platsdetaljer tillgängliga</td></tr>", 0m, 0);
+        }
 
-                return (rowsHtml.ToString(), totalPrice, seatCount);
+        return (rowsHtml.ToString(), totalPrice, seatCount);
     }
 
     public static void SendEmail(string to, string subject, string body)

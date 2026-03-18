@@ -55,7 +55,7 @@ export default function Hero() {
           <div className="ch-hero position-relative overflow-hidden">
             <div className="ch-hero__overlay" />
             <div className="position-relative text-center py-5 px-3 px-md-5">
-              <h1 className="display-5 fw-bold mb-2">CinemaHub</h1>
+              <h1 className="display-5 fw-bold mb-2">CinemaMob</h1>
               <p className="lead mb-0 ch-muted">
                 Upptäck nya filmer, boka dina platser och upplev bio som aldrig förr.
               </p>
