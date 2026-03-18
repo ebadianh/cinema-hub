@@ -8,22 +8,58 @@
   "concept": "CinemaMob är en modern biograf där teknik möter filmupplevelse.",
   "snacks": {
     "classics": [
-      { "name": "Smörpopcorn", "price": 55 },
-      { "name": "Salt popcorn", "price": 55 },
-      { "name": "Godis & choklad", "price": 35 },
-      { "name": "Nachos med ostsås", "price": 65 }
+      {
+        "name": "Smörpopcorn",
+        "price": 55
+      },
+      {
+        "name": "Salt popcorn",
+        "price": 55
+      },
+      {
+        "name": "Godis & choklad",
+        "price": 35
+      },
+      {
+        "name": "Nachos med ostsås",
+        "price": 65
+      }
     ],
     "drinks": [
-      { "name": "Läsk & mineralvatten", "price": 30 },
-      { "name": "Juice", "price": 28 },
-      { "name": "Kaffe & te", "price": 25 },
-      { "name": "Energidrycker", "price": 35 }
+      {
+        "name": "Läsk & mineralvatten",
+        "price": 30
+      },
+      {
+        "name": "Juice",
+        "price": 28
+      },
+      {
+        "name": "Kaffe & te",
+        "price": 25
+      },
+      {
+        "name": "Energidrycker",
+        "price": 35
+      }
     ],
     "premium": [
-      { "name": "Gourmetpopcorn", "price": 69 },
-      { "name": "Chokladpraliner", "price": 49 },
-      { "name": "Glass & desserter", "price": 45 },
-      { "name": "Säsongsbaserade snacks", "price": 59 }
+      {
+        "name": "Gourmetpopcorn",
+        "price": 69
+      },
+      {
+        "name": "Chokladpraliner",
+        "price": 49
+      },
+      {
+        "name": "Glass & desserter",
+        "price": 45
+      },
+      {
+        "name": "Säsongsbaserade snacks",
+        "price": 59
+      }
     ]
   }
 }

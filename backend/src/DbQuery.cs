@@ -358,7 +358,7 @@ public static class DbQuery
         // -------------------------
         command.Parameters.Clear();
         command.CommandText = "SELECT COUNT(*) FROM Users WHERE email = @email";
-        command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+        command.Parameters.AddWithValue("@email", "admin@cinemamob.com");
 
         if (Convert.ToInt32(command.ExecuteScalar()) == 0)
         {
@@ -370,7 +370,7 @@ public static class DbQuery
             ";
 
             command.Parameters.Clear();
-            command.Parameters.AddWithValue("@email", "admin@cinemahub.com");
+            command.Parameters.AddWithValue("@email", "admin@cinemamob.com");
             command.Parameters.AddWithValue("@firstName", "Admin");
             command.Parameters.AddWithValue("@lastName", "User");
             command.Parameters.AddWithValue("@role", "admin");
