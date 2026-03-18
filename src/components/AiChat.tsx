@@ -11,7 +11,7 @@ import type { Message } from "../pages/AiChatWidget";
 
 interface ChatResponse {
   choices: Array<{
-    message: { content: string; role: string };
+    message: { content: string; role: string; };
   }>;
 }
 
@@ -67,8 +67,8 @@ function resolveInternalChatPath(rawHref?: string): string | null {
     try {
       const parsedUrl = new URL(normalizedHref);
       const isCinemaHubDomain =
-        parsedUrl.hostname === "cinemahub.se" ||
-        parsedUrl.hostname === "www.cinemahub.se" ||
+        parsedUrl.hostname === "cinemamob.se" ||
+        parsedUrl.hostname === "www.cinemamob.se" ||
         parsedUrl.hostname === window.location.hostname;
 
       if (isCinemaHubDomain) {

@@ -34,6 +34,19 @@ export default function ContactForm() {
     setStatus("sending");
     setErrorMessage("");
 
+    // lägger till två valideringar
+    if (/^\d+$/.test(formData.message.trim())) {
+      setStatus("error");
+      setErrorMessage("Meddelandet måste innehålla text, inte bara siffror.");
+      return;
+    }
+
+    if (formData.message.trim().length < 10) {
+      setStatus("error");
+      setErrorMessage("Meddelandet måste vara minst tio tecken långt.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/contacts", {
         method: "POST",
