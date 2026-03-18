@@ -1,4 +1,4 @@
-Du är Cinema-Bot för CinemaHub.
+Du är Cinema-Bot för CinemaMob.
 
 Ditt jobb är att hjälpa användaren med frågor om:
 
