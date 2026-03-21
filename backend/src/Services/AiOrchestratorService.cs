@@ -118,10 +118,7 @@ public static class AiOrchestratorService
 
                 if (hasAgeFilter || LooksLikeAgeSensitivePrompt(latestUserPrompt))
                 {
-                    return BuildAssistantResponse(
-                        "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
-                        "Vill du att jag visar alla visningar på den dagen så kan vi jämföra åldersgränserna tillsammans?"
-                    );
+                    return BuildAssistantResponse(BuildAgeSensitiveNoResultsResponse(groundedFacts));
                 }
 
                 return BuildAssistantResponse($"{noResultsMessage}\n\n{followUpSuggestion}");
@@ -131,10 +128,32 @@ public static class AiOrchestratorService
         if (intent.intent == "snacks.price")
         {
             bool snackItemFound = false;
-            string snackItemRequested = "produkten";
+            string snackItemRequested = "";
+            dynamic matchedItem = null;
 
             try { snackItemFound = groundedFacts.data.snack_item_found == true; } catch { }
-            try { snackItemRequested = (string)groundedFacts.data.snack_item_requested ?? snackItemRequested; } catch { }
+            try { snackItemRequested = (string)groundedFacts.data.snack_item_requested ?? ""; } catch { }
+            try { matchedItem = groundedFacts.data.matched_item; } catch { }
+
+            if (string.IsNullOrWhiteSpace(snackItemRequested))
+                return BuildAssistantResponse(BuildSnackMenuResponseText(groundedFacts));
+
+            if (snackItemFound)
+            {
+                var matchedName = snackItemRequested;
+                var matchedPrice = "";
+
+                try { matchedName = (string)matchedItem.name ?? matchedName; } catch { }
+                try { matchedPrice = FormatPrice(matchedItem.price); } catch { }
+
+                if (!string.IsNullOrWhiteSpace(matchedPrice))
+                {
+                    return BuildAssistantResponse(
+                        $"{matchedName} kostar {matchedPrice} kr i vår kiosk.\n\n" +
+                        "Vill du även se resten av snacksmenyn med priser?"
+                    );
+                }
+            }
 
             if (!snackItemFound)
             {
@@ -143,6 +162,29 @@ public static class AiOrchestratorService
                     "Jag kan däremot visa de snacks och drycker som finns i menyn om du vill."
                 );
             }
+        }
+
+        if (intent.intent == "snacks.menu")
+            return BuildAssistantResponse(BuildSnackMenuResponseText(groundedFacts));
+
+        if (intent.intent == "booking.help")
+            return BuildAssistantResponse(BuildBookingHelpResponseText(groundedFacts, latestUserPrompt));
+
+        if (intent.intent == "general.capabilities")
+        {
+            if (LooksLikeComprehensiveInfoPrompt(latestUserPrompt))
+                return BuildAssistantResponse(BuildComprehensiveInfoResponseText(groundedFacts));
+
+            return BuildAssistantResponse(
+                "Jag kan hjälpa dig med:\n" +
+                "- öppettider\n" +
+                "- biljettpriser\n" +
+                "- kiosk/snacks\n" +
+                "- hur man bokar biljett\n" +
+                "- salongernas storlek\n" +
+                "- vilka filmer som visas och när\n\n" +
+                "Säg gärna vad du vill veta först."
+            );
         }
 
         return null;
@@ -185,6 +227,422 @@ public static class AiOrchestratorService
                normalizedPrompt.Contains("för barn") ||
                normalizedPrompt.Contains("min son") ||
                normalizedPrompt.Contains("min dotter");
+    }
+
+    private static string BuildAgeSensitiveNoResultsResponse(dynamic groundedFacts)
+    {
+        var hasExplicitDateScope = false;
+
+        try
+        {
+            var dateMode = ((string)groundedFacts.filters.date_mode ?? "").Trim().ToLowerInvariant();
+            hasExplicitDateScope =
+                dateMode == "today" ||
+                dateMode == "tomorrow" ||
+                dateMode == "tonight" ||
+                dateMode == "specific_date" ||
+                dateMode == "range";
+        }
+        catch
+        {
+        }
+
+        if (hasExplicitDateScope)
+        {
+            return "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
+                   "Vill du att jag visar alla visningar för den tiden så kan vi jämföra åldersgränserna tillsammans?";
+        }
+
+        return "Jag hittar tyvärr inga barnvänliga visningar i det aktuella utbudet just nu.\n\n" +
+               "Vill du att jag visar alla kommande visningar så kan vi jämföra åldersgränserna tillsammans?";
+    }
+
+    private static bool LooksLikeComprehensiveInfoPrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var normalizedPrompt = prompt.ToLowerInvariant();
+
+        var explicitSummaryAsk = normalizedPrompt.Contains("all denna info") ||
+                                 normalizedPrompt.Contains("all den här infon") ||
+                                 normalizedPrompt.Contains("all den har infon") ||
+                                 normalizedPrompt.Contains("sammanställ") ||
+                                 normalizedPrompt.Contains("sammanfatta") ||
+                                 normalizedPrompt.Contains("ge mig all") ||
+                                 normalizedPrompt.Contains("som användare vill jag kunna prata med en ai-assistent");
+
+        var topicSignals = 0;
+        if (normalizedPrompt.Contains("öppettid") || normalizedPrompt.Contains("öppet")) topicSignals++;
+        if (normalizedPrompt.Contains("biljett") || normalizedPrompt.Contains("pris")) topicSignals++;
+        if (normalizedPrompt.Contains("snack") || normalizedPrompt.Contains("kiosk") || normalizedPrompt.Contains("popcorn")) topicSignals++;
+        if (normalizedPrompt.Contains("boka") || normalizedPrompt.Contains("bokning")) topicSignals++;
+        if (normalizedPrompt.Contains("salong") || normalizedPrompt.Contains("storlek")) topicSignals++;
+        if (normalizedPrompt.Contains("filmer") || normalizedPrompt.Contains("visningar")) topicSignals++;
+        if (normalizedPrompt.Contains("vad står") || normalizedPrompt.Contains("inriktning") || normalizedPrompt.Contains("koncept")) topicSignals++;
+
+        return explicitSummaryAsk || topicSignals >= 4;
+    }
+
+    private static string BuildSnackMenuResponseText(dynamic groundedFacts)
+    {
+        dynamic snackMenu = null;
+        try { snackMenu = groundedFacts.data.snack_menu; } catch { }
+
+        var lines = new List<string>
+        {
+            "Vår kiosk har följande snacks och drycker med priser:"
+        };
+
+        AppendSnackGroupLines(lines, snackMenu, "classics", "Snacks");
+        AppendSnackGroupLines(lines, snackMenu, "drinks", "Drycker");
+        AppendSnackGroupLines(lines, snackMenu, "premium", "Premium");
+
+        lines.Add("Vill du att jag rekommenderar något till en specifik film?");
+
+        return string.Join("\n", lines);
+    }
+
+    private static string BuildBookingHelpResponseText(dynamic groundedFacts, string latestUserPrompt)
+    {
+        var lines = new List<string>();
+        var normalizedPrompt = (latestUserPrompt ?? "").ToLowerInvariant();
+        var wantsStepByStep = normalizedPrompt.Contains("steg för steg") || normalizedPrompt.Contains("steg-for-steg");
+
+        lines.Add(wantsStepByStep
+            ? "Här är bokningsprocessen steg för steg:"
+            : "Du bokar en biljett på följande sätt:");
+        lines.Add("");
+
+        var hasSteps = false;
+
+        try
+        {
+            var stepNumber = 1;
+            foreach (var step in groundedFacts.data.booking.steps)
+            {
+                var stepText = step?.ToString() ?? "";
+                if (string.IsNullOrWhiteSpace(stepText))
+                    continue;
+
+                lines.Add($"{stepNumber}. {stepText}");
+                stepNumber++;
+                hasSteps = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasSteps)
+            lines.Add("Information saknas just nu.");
+
+        lines.Add("");
+        lines.Add("Säg till om du också vill ha hjälp att hitta en film eller visning att boka.");
+
+        return string.Join("\n", lines);
+    }
+
+    private static void AppendSnackGroupLines(List<string> lines, dynamic snackMenu, string groupName, string heading)
+    {
+        lines.Add("");
+        lines.Add($"**{heading}**");
+
+        var foundInGroup = false;
+
+        try
+        {
+            var items = snackMenu[groupName];
+
+            foreach (var item in items)
+            {
+                string name = "";
+                string priceText = "";
+
+                try { name = (string)item.name ?? ""; } catch { }
+                try { priceText = FormatPrice(item.price); } catch { }
+
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(priceText))
+                    lines.Add($"- {name}");
+                else
+                    lines.Add($"- {name}: {priceText} kr");
+
+                foundInGroup = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!foundInGroup)
+            lines.Add("- Information saknas just nu.");
+    }
+
+    private static string BuildComprehensiveInfoResponseText(dynamic groundedFacts)
+    {
+        var lines = new List<string>
+        {
+            "Absolut! Här är en sammanställning av CinemaMob:",
+            ""
+        };
+
+        AppendOpeningHoursSection(lines, groundedFacts);
+        AppendTicketPricesSection(lines, groundedFacts);
+        AppendSnackSection(lines, groundedFacts);
+        AppendConceptSection(lines, groundedFacts);
+        AppendBookingSection(lines, groundedFacts);
+        AppendSalongsSection(lines, groundedFacts);
+        AppendShowingsSection(lines, groundedFacts);
+
+        lines.Add("");
+        lines.Add("Vill du att jag också filtrerar visningarna till en specifik dag, till exempel imorgon?");
+
+        return string.Join("\n", lines);
+    }
+
+    private static void AppendOpeningHoursSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Öppettider**");
+
+        dynamic openingHours = null;
+        try { openingHours = groundedFacts.data.opening_hours; } catch { }
+
+        if (openingHours == null)
+        {
+            lines.Add("- Information saknas just nu.");
+            lines.Add("");
+            return;
+        }
+
+        var monThu = "";
+        var fri = "";
+        var sat = "";
+        var sun = "";
+
+        try { monThu = (string)openingHours.monThu ?? ""; } catch { }
+        try { fri = (string)openingHours.fri ?? ""; } catch { }
+        try { sat = (string)openingHours.sat ?? ""; } catch { }
+        try { sun = (string)openingHours.sun ?? ""; } catch { }
+
+        if (!string.IsNullOrWhiteSpace(monThu)) lines.Add($"- Mån–Tors: {monThu}");
+        if (!string.IsNullOrWhiteSpace(fri)) lines.Add($"- Fredag: {fri}");
+        if (!string.IsNullOrWhiteSpace(sat)) lines.Add($"- Lördag: {sat}");
+        if (!string.IsNullOrWhiteSpace(sun)) lines.Add($"- Söndag: {sun}");
+
+        lines.Add("");
+    }
+
+    private static void AppendTicketPricesSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Biljettpriser**");
+
+        var hasRows = false;
+        try
+        {
+            foreach (var ticket in groundedFacts.data.ticket_prices)
+            {
+                var name = "";
+                var priceText = "";
+                try { name = (string)ticket.name ?? ""; } catch { }
+                try { priceText = FormatPrice(ticket.price); } catch { }
+
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(priceText))
+                    lines.Add($"- {name}");
+                else
+                    lines.Add($"- {name}: {priceText} kr");
+
+                hasRows = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasRows)
+            lines.Add("- Information saknas just nu.");
+
+        lines.Add("");
+    }
+
+    private static void AppendSnackSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Kiosk / snacks**");
+
+        dynamic snackMenu = null;
+        try { snackMenu = groundedFacts.data.snack_menu; } catch { }
+
+        AppendSnackGroupLines(lines, snackMenu, "classics", "Snacks");
+        AppendSnackGroupLines(lines, snackMenu, "drinks", "Drycker");
+        AppendSnackGroupLines(lines, snackMenu, "premium", "Premium");
+        lines.Add("");
+    }
+
+    private static void AppendConceptSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Vad bio:n står för**");
+
+        var concept = "";
+        try { concept = (string)groundedFacts.data.concept ?? ""; } catch { }
+
+        if (string.IsNullOrWhiteSpace(concept))
+            lines.Add("- Information saknas just nu.");
+        else
+            lines.Add($"- {concept}");
+
+        lines.Add("");
+    }
+
+    private static void AppendBookingSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Hur man bokar biljett**");
+
+        var hasSteps = false;
+        try
+        {
+            var stepNumber = 1;
+            foreach (var step in groundedFacts.data.booking.steps)
+            {
+                var stepText = step?.ToString() ?? "";
+                if (string.IsNullOrWhiteSpace(stepText))
+                    continue;
+
+                lines.Add($"{stepNumber}. {stepText}");
+                stepNumber++;
+                hasSteps = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasSteps)
+            lines.Add("- Information saknas just nu.");
+
+        lines.Add("");
+    }
+
+    private static void AppendSalongsSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Salongernas storlek**");
+
+        var hasRows = false;
+        try
+        {
+            foreach (var salong in groundedFacts.data.salongs)
+            {
+                var name = "";
+                var seats = "";
+
+                try { name = (string)salong.name ?? ""; } catch { }
+                try { seats = salong.seats?.ToString() ?? ""; } catch { }
+
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(seats))
+                    lines.Add($"- {name}");
+                else
+                    lines.Add($"- {name}: {seats} platser");
+
+                hasRows = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasRows)
+            lines.Add("- Information saknas just nu.");
+
+        lines.Add("");
+    }
+
+    private static void AppendShowingsSection(List<string> lines, dynamic groundedFacts)
+    {
+        lines.Add("**Filmer som visas när (kommande)**");
+
+        var hasRows = false;
+        var shownCount = 0;
+
+        try
+        {
+            foreach (var showing in groundedFacts.data.upcoming_showings)
+            {
+                if (shownCount >= 10)
+                    break;
+
+                var title = "";
+                var startRaw = "";
+                var language = "";
+                var subtitle = "";
+                var ageRating = "";
+                var filmUrl = "";
+                var bookingUrl = "";
+
+                try { title = (string)showing.film_title ?? ""; } catch { }
+                try { startRaw = showing.start_time?.ToString() ?? ""; } catch { }
+                try { language = (string)showing.language ?? ""; } catch { }
+                try { subtitle = (string)showing.subtitle ?? ""; } catch { }
+                try { ageRating = showing.age_rating?.ToString() ?? ""; } catch { }
+                try { filmUrl = (string)showing.film_url ?? ""; } catch { }
+                try { bookingUrl = (string)showing.booking_url ?? ""; } catch { }
+
+                if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(startRaw))
+                    continue;
+
+                var whenText = startRaw;
+                if (DateTime.TryParse(startRaw, out var parsedStart))
+                    whenText = parsedStart.ToString("yyyy-MM-dd HH:mm");
+
+                var details = new List<string>();
+                if (!string.IsNullOrWhiteSpace(language)) details.Add(language);
+                if (!string.IsNullOrWhiteSpace(subtitle)) details.Add($"med {subtitle} undertexter");
+                if (!string.IsNullOrWhiteSpace(ageRating)) details.Add($"ålder {ageRating} år");
+
+                var detailsText = details.Count > 0 ? $" – {string.Join(", ", details)}" : "";
+
+                var links = new List<string>();
+                if (!string.IsNullOrWhiteSpace(filmUrl)) links.Add($"[Läs mer]({filmUrl})");
+                if (!string.IsNullOrWhiteSpace(bookingUrl)) links.Add($"[Boka]({bookingUrl})");
+                var linksText = links.Count > 0 ? $" ({string.Join(" | ", links)})" : "";
+
+                lines.Add($"- {whenText}: {title}{detailsText}{linksText}");
+                hasRows = true;
+                shownCount++;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasRows)
+            lines.Add("- Information saknas just nu.");
+    }
+
+    private static string FormatPrice(dynamic rawPrice)
+    {
+        if (rawPrice == null)
+            return "";
+
+        string text = rawPrice.ToString();
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+
+        decimal parsedInvariant;
+        if (decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedInvariant))
+            return parsedInvariant % 1 == 0 ? ((int)parsedInvariant).ToString() : parsedInvariant.ToString("0.##");
+
+        decimal parsedCurrent;
+        if (decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedCurrent))
+            return parsedCurrent % 1 == 0 ? ((int)parsedCurrent).ToString() : parsedCurrent.ToString("0.##");
+
+        return text;
     }
 
     private static dynamic BuildAssistantResponse(string assistantContent)
@@ -302,7 +760,15 @@ public static class AiOrchestratorService
                         "hur man bokar biljett",
                         "salongernas storlek",
                         "aktuella visningar"
-                    )
+                    ),
+                    concept = AiCinemaInfoService.GetConcept(),
+                    opening_hours = AiCinemaInfoService.GetOpeningHours(),
+                    ticket_prices = AiPricingService.GetTicketPrices(context),
+                    snack_menu = AiSnackService.GetSnackMenu(),
+                    booking = AiBookingService.GetBookingHelp(),
+                    salongs = AiCinemaInfoService.GetSalongs(context),
+                    upcoming_showings = AiShowingsService.GetUpcoming(context),
+                    summary_note = "Använd dessa fakta för att ge en komplett sammanställning när användaren ber om all info."
                 });
                 break;
 
