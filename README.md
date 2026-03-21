@@ -1,151 +1,82 @@
-# 🎬 CinemaHub
+# Cinema Mob
 
-A modern fullstack cinema application for browsing movies, booking tickets, and managing users — built with a **React (Vite + TypeScript)** frontend and a **.NET backend**.
+## Vilka har arbetat i projektet?
 
----
+Git-användare:
 
-## 🚀 Features
-
-- 🎥 Browse movies and showings
-- 🎟️ Seat selection & booking system
-- 🔐 Authentication & user roles (visitor / user / admin)
-- 🧠 AI chat integration (cinema assistant)
-- ⚙️ Admin panel (manage movies, showings, users)
-- 📡 Real-time seat locking system
-- 🎨 Modern UI with custom theme
+- EbadianH - Havash Ebadian
+- Mezea11 - Christian Meza
+- LukWen-Ill - Lukas Wennström
+- mannilowman - Emmanuel Lowman
+- Mo - Mohamed Adam
 
 ---
 
-## 🏗️ Tech Stack
+## Kortfattad projektbeskrivning
 
-### Frontend
+Cinema Mob är en webbapplikation för en biograf med gangster-tema. Användaren kan se filmer och visningar, läsa filminformation, registrera konto, logga in, boka platser och få bokningsbekräftelse.
 
-- React (Vite)
-- TypeScript
-- Tailwind CSS
-- Context API
-- React Router
-
-### Backend
-
-- .NET (C#)
-- REST API
-- ACL (Access Control Layer)
-- SQL Database
+Projektet innehåller även ett adminläge för filmhantering och kontaktmeddelanden samt en AI-chatt för frågor och svar kring bio, visningar och bokning.
 
 ---
 
-## 📁 Project Structure
+## Installation, inkl. databashantering
 
-```
-cinema-hub-main/
-│
-├── backend/              # .NET backend
-│   ├── src/              # API logic
-│   ├── migrations/       # Database migrations
-│   └── appsettings.json
-│
-├── src/                  # Frontend (React)
-│   ├── components/
-│   ├── pages/
-│   ├── context/
-│   ├── hooks/
-│   └── utils/
-│
-├── public/               # Static assets
-└── index.html
-```
+### Krav
 
----
+- Node.js och npm
+- .NET SDK 10.0
+- MySQL-klient, till exempel DBeaver eller MySQL Workbench
 
-## ⚙️ Getting Started
+### Start av projektet
 
-### 1. Clone repo
+1. Kör `npm install` i projektroten.
+2. Kontrollera att databasanslutningen i `backend/db-config.json` pekar mot rätt MySQL-databas.
+3. Initiera databasen med SQL-filerna i `backend/migrations/`.
+4. Starta projektet med `npm run dev`.
 
-```bash
-git clone https://github.com/your-username/cinema-hub.git
-cd cinema-hub
-```
+### Databas
+
+1. Kör `001_schema.sql` för att skapa tabeller.
+2. Kör `002_views_and_procedures.sql` för vyer och lagrade procedurer.
+3. Kör `003_seed_data.sql` endast om ni vill lägga in eller återställa exempeldata.
 
 ---
 
-### 2. Run Application (Frontend + Backend)
+## Viktigt att veta
 
-```bash
-npm install
-npm run dev
-```
-
-App runs on:
-
-```
-http://localhost:5173
-```
-
-👉 Backend starts automatically via concurrent setup when running the dev script.
+- Frontend är byggd i React/Vite och backend är en separat .NET Minimal API-lösning.
+- `npm run dev` startar frontend och startar/proxar backend via `backend/index.js`.
+- Projektet använder sessionshantering och ACL-regler i backend för inloggning och behörighet.
+- Platsbokning använder seat locking och strömmad status för att minska dubbelbokningar.
+- `003_seed_data.sql` tömmer flera tabeller innan den fyller på data. Den ska därför inte köras mot en delad databas utan att gruppen är överens.
+- Känsliga uppgifter som databas-, e-post- och AI-inställningar ligger i `backend/db-config.json` och bör egentligen flyttas till miljövariabler.
 
 ---
 
-## 🔐 Authentication & Roles
+## Teknisk skuld
 
-| Role    | Permissions                     |
-| ------- | ------------------------------- |
-| Visitor | Browse movies                   |
-| User    | Book tickets                    |
-| Admin   | Full access (CRUD + management) |
-
-ACL is enforced via backend rules.
+- Konfiguration med hemligheter ligger i versionshanterad fil istället för i miljövariabler.
+- Databasinstallation och migreringar är manuella och delvis beroende av att man kör rätt SQL-filer i rätt ordning.
+- Seed-scriptet är destruktivt och mindre lämpligt i en delad molndatabas.
+- Projektet har begränsad automatiserad testning, vilket gör regressionsrisk högre vid vidareutveckling.
+- Frontend och backend startas via en speciallösning där Node startar .NET-processen, vilket fungerar i utveckling men är mindre tydligt för deployment.
 
 ---
 
-## 🧠 AI Chat
+## Lösningsarkitektur
 
-CinemaHub includes an AI assistant that helps users:
-
-- Find movies
-- Get information about services
-- Navigate the platform
-
----
-
-## 🎟️ Booking System
-
-- Real-time seat locking
-- Prevents double booking
-- Interactive seat selection UI
+- **Frontend:** React 19, TypeScript, Vite och React Router
+- **Backend:** C# .NET Minimal API med route-baserad logik för bland annat inloggning, bokningar, admin och AI-chatt
+- **Databas:** MySQL med schema, vyer, procedurer och seed-data via SQL-migreringar
+- **Integration:** Frontend anropar backend via `/api`, och utvecklingsservern proxar trafiken vidare
+- **Realtid:** Platsstatus uppdateras löpande för bokningsflödet
 
 ---
 
-## 🧪 Future Improvements
+## Planerat men ej genomfört arbete
 
-- Payments integration (Stripe)
-- Forgotten password
-- Analytics for admin dashboard
-- Further enhanced mobile optimization
-- Performance optimizations (image loading)
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👤 Authors
-
-- Christian Meza
-- Havash Ebadian
-- Lukas Wennström
-- Mohammed Adam
-- Emmanuel Lowman
-
----
-
-## 💡 Notes
-
-This project was built as part of a fullstack development journey and focuses on:
-
-- Solid architecture
-- Real-world booking logic
-- Scalable frontend structure
+- Bredare automatiserad testning för frontend, backend och bokningsflöde
+- Säkrare hantering av hemligheter och tydligare deploy/process för produktion
+- Mer komplett adminstöd, till exempel fler verktyg för drift, uppföljning och innehållshantering
+- Vidareutveckling av AI-chatten med bättre felhantering, observability och tydligare begränsningar
