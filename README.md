@@ -134,11 +134,11 @@ This project is licensed under the MIT License.
 
 ## 👤 Authors
 
-Christian Meza
-Havash Ebadian
-Lukas Wennström
-Mohammed Adam
-Emmanuel Lowman
+- Christian Meza
+- Havash Ebadian
+- Lukas Wennström
+- Mohammed Adam
+- Emmanuel Lowman
 
 ---
 
