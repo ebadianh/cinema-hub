@@ -307,23 +307,40 @@ Conversation:
         }
 
         var requestedAge = TryExtractRequestedAge(latestLower);
+        var childFriendlyQuery = LooksLikeChildFriendlyQuery(latestLower);
+        var explicitDateScope = HasExplicitDateScope(latestLower);
+        var explicitTimeOfDayScope = HasExplicitTimeOfDayScope(latestLower);
+        var ageFilteredShowingsQuery = requestedAge != null || childFriendlyQuery;
+
         if (requestedAge != null)
         {
-            if (result.intent == "unknown")
-                result.intent = "showings.search";
-
+            result.intent = "showings.search";
             result.filters.age_rating_max = requestedAge.Value;
             result.filters.child_friendly = requestedAge.Value <= 11;
         }
 
-        if (LooksLikeChildFriendlyQuery(latestLower))
+        if (childFriendlyQuery)
         {
-            if (result.intent == "unknown")
-                result.intent = "showings.search";
-
+            result.intent = "showings.search";
             result.filters.child_friendly = true;
             if (result.filters.age_rating_max == null)
                 result.filters.age_rating_max = 11;
+        }
+
+        if (ageFilteredShowingsQuery)
+        {
+            result.intent = "showings.search";
+
+            if (!explicitDateScope)
+            {
+                result.filters.date_mode = "upcoming";
+                result.filters.specific_date = "";
+                result.filters.range_start = "";
+                result.filters.range_end = "";
+            }
+
+            if (!explicitTimeOfDayScope)
+                result.filters.time_of_day = "";
         }
 
         // Fallback: obvious showings prompts should still search showings
@@ -681,7 +698,47 @@ Conversation:
                prompt.Contains("barnvänliga") ||
                prompt.Contains("barntillåten") ||
                prompt.Contains("för barn") ||
+               prompt.Contains("barnfilm") ||
+               prompt.Contains("barnfilmer") ||
+               prompt.Contains("familjefilm") ||
+               prompt.Contains("familjefilmer") ||
                prompt.Contains("min son") ||
                prompt.Contains("min dotter");
+    }
+
+    private static bool HasExplicitDateScope(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        return ContainsAny(prompt,
+            "idag",
+            "imorgon",
+            "imorn",
+            "ikväll",
+            "överimorgon",
+            "i helgen",
+            "nästa vecka",
+            "måndag",
+            "tisdag",
+            "onsdag",
+            "torsdag",
+            "fredag",
+            "lördag",
+            "söndag");
+    }
+
+    private static bool HasExplicitTimeOfDayScope(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        return ContainsAny(prompt,
+            "morgon",
+            "förmiddag",
+            "eftermiddag",
+            "kväll",
+            "ikväll",
+            "natt");
     }
 }

@@ -118,10 +118,7 @@ public static class AiOrchestratorService
 
                 if (hasAgeFilter || LooksLikeAgeSensitivePrompt(latestUserPrompt))
                 {
-                    return BuildAssistantResponse(
-                        "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
-                        "Vill du att jag visar alla visningar på den dagen så kan vi jämföra åldersgränserna tillsammans?"
-                    );
+                    return BuildAssistantResponse(BuildAgeSensitiveNoResultsResponse(groundedFacts));
                 }
 
                 return BuildAssistantResponse($"{noResultsMessage}\n\n{followUpSuggestion}");
@@ -169,6 +166,9 @@ public static class AiOrchestratorService
 
         if (intent.intent == "snacks.menu")
             return BuildAssistantResponse(BuildSnackMenuResponseText(groundedFacts));
+
+        if (intent.intent == "booking.help")
+            return BuildAssistantResponse(BuildBookingHelpResponseText(groundedFacts, latestUserPrompt));
 
         if (intent.intent == "general.capabilities")
         {
@@ -229,6 +229,34 @@ public static class AiOrchestratorService
                normalizedPrompt.Contains("min dotter");
     }
 
+    private static string BuildAgeSensitiveNoResultsResponse(dynamic groundedFacts)
+    {
+        var hasExplicitDateScope = false;
+
+        try
+        {
+            var dateMode = ((string)groundedFacts.filters.date_mode ?? "").Trim().ToLowerInvariant();
+            hasExplicitDateScope =
+                dateMode == "today" ||
+                dateMode == "tomorrow" ||
+                dateMode == "tonight" ||
+                dateMode == "specific_date" ||
+                dateMode == "range";
+        }
+        catch
+        {
+        }
+
+        if (hasExplicitDateScope)
+        {
+            return "Jag hittar tyvärr inga visningar som matchar åldersgränsen i din fråga just nu.\n\n" +
+                   "Vill du att jag visar alla visningar för den tiden så kan vi jämföra åldersgränserna tillsammans?";
+        }
+
+        return "Jag hittar tyvärr inga barnvänliga visningar i det aktuella utbudet just nu.\n\n" +
+               "Vill du att jag visar alla kommande visningar så kan vi jämföra åldersgränserna tillsammans?";
+    }
+
     private static bool LooksLikeComprehensiveInfoPrompt(string prompt)
     {
         if (string.IsNullOrWhiteSpace(prompt))
@@ -271,6 +299,46 @@ public static class AiOrchestratorService
         AppendSnackGroupLines(lines, snackMenu, "premium", "Premium");
 
         lines.Add("Vill du att jag rekommenderar något till en specifik film?");
+
+        return string.Join("\n", lines);
+    }
+
+    private static string BuildBookingHelpResponseText(dynamic groundedFacts, string latestUserPrompt)
+    {
+        var lines = new List<string>();
+        var normalizedPrompt = (latestUserPrompt ?? "").ToLowerInvariant();
+        var wantsStepByStep = normalizedPrompt.Contains("steg för steg") || normalizedPrompt.Contains("steg-for-steg");
+
+        lines.Add(wantsStepByStep
+            ? "Här är bokningsprocessen steg för steg:"
+            : "Du bokar en biljett på följande sätt:");
+        lines.Add("");
+
+        var hasSteps = false;
+
+        try
+        {
+            var stepNumber = 1;
+            foreach (var step in groundedFacts.data.booking.steps)
+            {
+                var stepText = step?.ToString() ?? "";
+                if (string.IsNullOrWhiteSpace(stepText))
+                    continue;
+
+                lines.Add($"{stepNumber}. {stepText}");
+                stepNumber++;
+                hasSteps = true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!hasSteps)
+            lines.Add("Information saknas just nu.");
+
+        lines.Add("");
+        lines.Add("Säg till om du också vill ha hjälp att hitta en film eller visning att boka.");
 
         return string.Join("\n", lines);
     }
