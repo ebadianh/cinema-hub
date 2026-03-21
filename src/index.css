@@ -1,8 +1,25 @@
 /* ===============================
+   FONT IMPORTS
+================================ */
+@import url("https://fonts.googleapis.com/css2?family=Russo+One&family=Crimson+Text:wght@700&display=swap&family=Montserrat:wght@400;500;600;700&display=swap");
+
+@font-face {
+  font-family: "The Godfather";
+  src: url("/fonts/TheGodfather-v2.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ===============================
    CINEMAMOB GLOBAL THEME
 ================================ */
 
 :root {
+  /* === FONTS === */
+  --font-brand: "The Godfather", serif;
+  --font-display: "Crimson Text", serif;
+  --font-body: "Montserrat", sans-serif;
+
   /* === PRIMÄRFÄRG === */
   --primary-color: #2a4073;
   --primary-hover: #16213e;
@@ -87,11 +104,56 @@ body {
     var(--ch-bg);
   color: var(--ch-text);
   margin: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: var(--font-body);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* === GLOBAL HEADINGS === */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.75px;
+}
+
+h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+h5 {
+  font-family: var(--font-body);
+  font-size: 1.95rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 /* ===============================
@@ -101,6 +163,20 @@ body {
 .ch-navbar {
   background: var(--ch-bg);
   border-bottom: 1px solid var(--ch-border);
+}
+
+.navbar-brand {
+  font-family: var(--font-brand);
+  font-size: 35px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--ch-text) !important;
+  transition: text-shadow 0.3s ease;
+  text-shadow: 0 2px 8px rgba(42, 64, 115, 0.4);
+}
+
+.navbar-brand:hover {
+  text-shadow: 0 4px 16px rgba(42, 64, 115, 0.6);
 }
 
 .ch-navbar .nav-link {
@@ -169,6 +245,17 @@ body {
     width: 100%;
     display: block;
     margin: 2px 0;
+  }
+
+  .navbar {
+    position: sticky;
+    overflow: hidden;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .nav-item {
+    text-align: center;
   }
 }
 

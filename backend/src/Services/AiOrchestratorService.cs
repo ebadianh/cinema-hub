@@ -30,7 +30,7 @@ public static class AiOrchestratorService
             role = "system",
             content =
                 """
-                Du är Cinema-Bot för CinemaHub.
+                Du är Cinema-Bot för CinemaMob.
                                 Personlighet: varm, tydlig, professionell och hjälpsam.
                                 Ton: naturlig svenska, konkret, kort när det går men komplett när det behövs.
 
@@ -52,7 +52,7 @@ public static class AiOrchestratorService
                 - Om needs_clarification är true och clarification_question finns:
                   ställ den frågan kort istället för att gissa.
                                 - Om showings har film_url eller booking_url: inkludera klickbara markdown-länkar i svaret.
-                                - När du länkar internt i CinemaHub: använd endast relativa länkar som börjar med "/".
+                                - När du länkar internt i CinemaMob: använd endast relativa länkar som börjar med "/".
 
                                 Svarsmall:
                                 - Vid listor: använd tydliga punktlistor.
@@ -318,7 +318,7 @@ public static class AiOrchestratorService
                         "aktuella visningar"
                     ),
                     scope_note = "Cinema-Bot hjälper främst till med biografens information och funktioner.",
-                    out_of_scope_reply = "Jag hjälper främst till med visningar, priser, öppettider, snacks, salonger och bokning på CinemaHub."
+                    out_of_scope_reply = "Jag hjälper främst till med visningar, priser, öppettider, snacks, salonger och bokning på CinemaMob."
                 });
                 break;
         }

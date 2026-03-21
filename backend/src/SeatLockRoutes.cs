@@ -62,9 +62,9 @@ public static class SeatLockRoutes
 
             // Validate that seat_ids belong to the showing's salong
             var validSeats = SQLQuery(
-                @"SELECT s.id FROM seats s
-                  JOIN salongs sa ON s.salong_id = sa.id
-                  JOIN showings sh ON sh.salong_id = sa.id
+                                @"SELECT s.id FROM Seats s
+                                    JOIN Salongs sa ON s.salong_id = sa.id
+                                    JOIN Showings sh ON sh.salong_id = sa.id
                   WHERE sh.id = @showingId AND s.id IN (" + string.Join(",", seatIds) + ")",
                 new { showingId }
             );
@@ -83,7 +83,7 @@ public static class SeatLockRoutes
 
             // Check DB for already booked seats
             var booked = SQLQuery(
-                "SELECT seat_id FROM booked_seats WHERE showing_id = @showingId",
+                "SELECT seat_id FROM Booked_Seats WHERE showing_id = @showingId",
                 new { showingId }
             );
             var bookedIds = new HashSet<int>();

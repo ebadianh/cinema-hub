@@ -22,12 +22,16 @@ public static class LoginRoutes
 
             // Find the user in the DB
             var dbUser = SQLQueryOne(
-                "SELECT * FROM users WHERE email = @email",
+                "SELECT * FROM Users WHERE email = @email",
                 new { body.email }
             );
             if (dbUser == null)
             {
                 return RestResult.Parse(context, new { error = "No such user." });
+            }
+            if (dbUser.HasKey("error"))
+            {
+                return RestResult.Parse(context, dbUser);
             }
 
             // If the password doesn't match
@@ -48,12 +52,17 @@ public static class LoginRoutes
             return RestResult.Parse(context, dbUser!);
         });
 
-        App.MapGet("/api/login", (HttpContext context) =>
+        App.MapGet("/api/login", (Func<HttpContext, IResult>)(context =>
         {
             var user = GetUser(context);
-            return RestResult.Parse(context, user != null ?
-                user : new { error = "No user is logged in." });
-        });
+            var payload = user != null ? user : Obj(new { error = "No user is logged in." });
+            return Results.Text(
+                JSON.Stringify(payload),
+                "application/json; charset=utf-8",
+                null,
+                200
+            );
+        }));
 
         App.MapDelete("/api/login", (HttpContext context) =>
         {

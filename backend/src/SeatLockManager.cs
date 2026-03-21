@@ -71,7 +71,7 @@ public static class SeatLockManager
 
         // Also add booked seats from DB
         var booked = SQLQuery(
-            "SELECT seat_id FROM booked_seats WHERE showing_id = @showingId",
+            "SELECT seat_id FROM Booked_Seats WHERE showing_id = @showingId",
             new { showingId }
         );
         foreach (var row in booked)

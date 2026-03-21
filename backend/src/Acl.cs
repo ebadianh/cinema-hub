@@ -4,11 +4,35 @@ public static class Acl
 {
     private static Arr rules = Arr();
 
+    private static void EnsureMinimumRules()
+    {
+        SQLQuery(@"
+            INSERT IGNORE INTO acl (userRoles, method, allow, route, `match`, comment) VALUES
+            ('visitor,user,admin', 'GET',  'allow', '/api/films', 'true', 'Allow all to read films'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/films/{id}', 'true', 'Allow all to read single film'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings', 'true', 'Allow all to read showings'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{id}', 'true', 'Allow all to read single showing'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail', 'true', 'Allow all to read showing details view'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings_detail/{id}', 'true', 'Allow all to read single showing detail'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/seats', 'true', 'Allow all to read seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/ticket_type', 'true', 'Allow all to read ticket types'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/directors', 'true', 'Allow all to read directors'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/actors', 'true', 'Allow all to read actors'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/bookings', 'true', 'Allow all to create bookings'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/lock', 'true', 'Allow all to lock seats'),
+            ('visitor,user,admin', 'POST', 'allow', '/api/showings/{showingId}/seats/release', 'true', 'Allow all to release seats'),
+            ('visitor,user,admin', 'GET',  'allow', '/api/showings/{showingId}/seats/stream', 'true', 'Allow all to stream seat locks')
+        ");
+    }
+
     public static async void Start()
     {
+        EnsureMinimumRules();
+
         // Read rules from db once a minute
         while (true)
         {
+            EnsureMinimumRules();
             UnpackRules(SQLQuery("SELECT * FROM acl ORDER BY allow"));
             await Task.Delay(60000);
         }
