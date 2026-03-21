@@ -182,6 +182,24 @@ Conversation:
             return result;
         }
 
+        if (LooksLikeFullInfoRequest(latestLower))
+        {
+            result.intent = "general.capabilities";
+            result.needs_clarification = false;
+            result.clarification_question = "";
+            result.filters = new AiIntentFilters();
+            return result;
+        }
+
+        if (LooksLikeGenericSnackPricePrompt(latestLower))
+        {
+            result.intent = "snacks.menu";
+            result.needs_clarification = false;
+            result.clarification_question = "";
+            result.filters.snack_item = "";
+            return result;
+        }
+
     bool looksLikeBroadShowingsPrompt =
      latestLower.Contains("vilka filmer") ||
      latestLower.Contains("film visas") ||
@@ -328,7 +346,63 @@ Conversation:
                 result.filters.date_mode = "upcoming";
         }
 
+        if (result.intent == "unknown")
+            ApplyDomainFallbackIntent(result, latestLower);
+
         return result;
+    }
+
+    private static void ApplyDomainFallbackIntent(AiIntentResult result, string prompt)
+    {
+        if (LooksLikeGenericSnackPricePrompt(prompt))
+        {
+            result.intent = "snacks.menu";
+            result.filters.snack_item = "";
+            return;
+        }
+
+        if (LooksLikeSnackPrompt(prompt))
+        {
+            var extractedSnackItem = ExtractSnackItemFromPrompt(prompt);
+            var asksForPrice = prompt.Contains("pris") || prompt.Contains("kostar");
+
+            result.intent = asksForPrice && !string.IsNullOrWhiteSpace(extractedSnackItem)
+                ? "snacks.price"
+                : "snacks.menu";
+
+            result.filters.snack_item = asksForPrice ? extractedSnackItem : "";
+            return;
+        }
+
+        if (LooksLikeTicketPricePrompt(prompt))
+        {
+            result.intent = "pricing.ticket";
+            return;
+        }
+
+        if (LooksLikeHoursPrompt(prompt))
+        {
+            result.intent = "hours.info";
+            return;
+        }
+
+        if (LooksLikeBookingHelpPrompt(prompt))
+        {
+            result.intent = "booking.help";
+            return;
+        }
+
+        if (LooksLikeSalongPrompt(prompt))
+        {
+            result.intent = "salongs.info";
+            return;
+        }
+
+        if (LooksLikeCinemaConceptPrompt(prompt))
+        {
+            result.intent = "cinema.info";
+            return;
+        }
     }
 
     private static bool IsGreetingPrompt(string prompt)
@@ -404,6 +478,180 @@ Conversation:
             prompt.Contains("filmer ni har");
 
         return (asksForPluralMoviesOrShowings && asksForDateScope) || isGenericInventoryQuestion;
+    }
+
+    private static bool LooksLikeFullInfoRequest(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return false;
+
+        var explicitAllInfoRequest =
+            ContainsAny(prompt,
+                "all denna info",
+                "all den här infon",
+                "all den har infon",
+                "all info",
+                "sammanställ",
+                "sammanfatta",
+                "ge mig all",
+                "hela infon") ||
+            prompt.Contains("som användare vill jag kunna prata med en ai-assistent");
+
+        var signalCount = 0;
+        if (LooksLikeHoursPrompt(prompt)) signalCount++;
+        if (LooksLikeTicketPricePrompt(prompt)) signalCount++;
+        if (LooksLikeSnackPrompt(prompt)) signalCount++;
+        if (LooksLikeBookingHelpPrompt(prompt)) signalCount++;
+        if (LooksLikeSalongPrompt(prompt)) signalCount++;
+        if (LooksLikeShowingsPrompt(prompt)) signalCount++;
+        if (LooksLikeCinemaConceptPrompt(prompt)) signalCount++;
+
+        return explicitAllInfoRequest || signalCount >= 4;
+    }
+
+    private static bool LooksLikeShowingsPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "film",
+            "filmer",
+            "visning",
+            "visningar",
+            "vad går",
+            "vad visas",
+            "imorgon",
+            "idag",
+            "ikväll",
+            "överimorgon",
+            "i helgen");
+    }
+
+    private static bool LooksLikeTicketPricePrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "biljettpris",
+            "biljettpriser",
+            "vad kostar era biljetter",
+            "vad kostar biljetter",
+            "pris på biljetter",
+            "biljetter kostar");
+    }
+
+    private static bool LooksLikeHoursPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "öppettider",
+            "öppettid",
+            "när öppnar",
+            "när stänger",
+            "hur länge har ni öppet",
+            "öppet");
+    }
+
+    private static bool LooksLikeSnackPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "snack",
+            "kiosk",
+            "popcorn",
+            "godis",
+            "dryck",
+            "läsk",
+            "nachos",
+            "gourmetpopcorn",
+            "energidryck",
+            "juice",
+            "kaffe",
+            "te");
+    }
+
+    private static bool LooksLikeGenericSnackPricePrompt(string prompt)
+    {
+        if (!LooksLikeSnackPrompt(prompt))
+            return false;
+
+        if (!prompt.Contains("pris") && !prompt.Contains("kostar"))
+            return false;
+
+        return string.IsNullOrWhiteSpace(ExtractSnackItemFromPrompt(prompt));
+    }
+
+    private static bool LooksLikeBookingHelpPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "hur bokar",
+            "boka",
+            "bokning",
+            "köpa biljett",
+            "köper biljett",
+            "hjälp med bokning");
+    }
+
+    private static bool LooksLikeSalongPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "salong",
+            "salonger",
+            "hur stor",
+            "storlek",
+            "antal platser",
+            "platser i salongen");
+    }
+
+    private static bool LooksLikeCinemaConceptPrompt(string prompt)
+    {
+        return ContainsAny(prompt,
+            "vad står er bio för",
+            "vad står ni för",
+            "inriktning",
+            "koncept",
+            "om biografen",
+            "vad är cinemamob");
+    }
+
+    private static string ExtractSnackItemFromPrompt(string prompt)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+            return "";
+
+        var knownSnackTerms = new[]
+        {
+            "smörpopcorn",
+            "salt popcorn",
+            "gourmetpopcorn",
+            "popcorn",
+            "nachos",
+            "godis",
+            "choklad",
+            "chokladpraliner",
+            "läsk",
+            "mineralvatten",
+            "juice",
+            "kaffe",
+            "te",
+            "energidryck",
+            "glass",
+            "desserter",
+            "säsongsbaserade snacks"
+        };
+
+        foreach (var term in knownSnackTerms)
+        {
+            if (prompt.Contains(term))
+                return term;
+        }
+
+        return "";
+    }
+
+    private static bool ContainsAny(string prompt, params string[] terms)
+    {
+        foreach (var term in terms)
+        {
+            if (prompt.Contains(term))
+                return true;
+        }
+
+        return false;
     }
 
     private static int? TryExtractRequestedAge(string prompt)
